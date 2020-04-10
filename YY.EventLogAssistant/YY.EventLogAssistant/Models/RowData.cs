@@ -1,13 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using YY.LogReader.Models.EventLog;
 
-namespace YY.LogReader.Models
+namespace YY.EventLogAssistant.Models
 {
     public abstract class RowData
     {

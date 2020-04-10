@@ -1,15 +1,12 @@
-﻿using YY.LogReader.Models.EventLog;
+﻿using YY.EventLogAssistant.Models;
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using YY.LogReader.Services;
+using YY.EventLogAssistant.Services;
 using System.Text.RegularExpressions;
-using System.Data.SQLite;
 
-namespace YY.LogReader.EventLog
+namespace YY.EventLogAssistant
 {
     internal sealed class LogParserLGF
     {

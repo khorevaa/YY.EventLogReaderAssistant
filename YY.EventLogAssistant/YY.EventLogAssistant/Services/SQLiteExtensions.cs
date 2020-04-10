@@ -2,7 +2,7 @@
 using System.Data.SQLite;
 using System.Text;
 
-namespace YY.LogReader.Services
+namespace YY.EventLogAssistant.Services
 {
     internal static class SQLiteExtensions
     {

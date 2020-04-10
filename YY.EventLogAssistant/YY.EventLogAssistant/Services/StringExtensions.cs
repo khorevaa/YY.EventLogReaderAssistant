@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace YY.LogReader.Services
+namespace YY.EventLogAssistant.Services
 {
     internal static class StringExtensions
     {

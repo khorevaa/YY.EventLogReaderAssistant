@@ -1,14 +1,11 @@
-﻿using YY.LogReader.Models.EventLog;
+﻿using YY.EventLogAssistant.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO;
 
-namespace YY.LogReader.EventLog
+namespace YY.EventLogAssistant
 {
-    public abstract class EventLogReader : IEventLogReader, IDisposable
+    public abstract partial class EventLogReader : IEventLogReader, IDisposable
     {
         public static EventLogReader CreateReader(string pathLogFile)
         {
@@ -169,66 +166,6 @@ namespace YY.LogReader.EventLog
             _secondaryPorts.Clear();
             _users.Clear();
             _workServers.Clear();
-        }
-
-        public sealed class BeforeReadFileEventArgs : EventArgs
-        {
-            public BeforeReadFileEventArgs(string fileName)
-            {
-                FileName = fileName;
-                Cancel = false;
-            }
-
-            public string FileName { get; }
-            public bool Cancel { get; set; }
-        }
-
-        public sealed class AfterReadFileEventArgs : EventArgs
-        {
-            public AfterReadFileEventArgs(string fileName)
-            {
-                FileName = fileName;
-            }
-
-            public string FileName { get; }
-        }
-
-        public sealed class BeforeReadEventArgs : EventArgs
-        {
-            public BeforeReadEventArgs(string sourceData, long eventNumber)
-            {
-                SourceData = sourceData;
-                EventNumber = eventNumber;
-            }
-
-            public string SourceData { get; }
-            public long EventNumber { get; }
-        }
-
-        public sealed class AfterReadEventArgs : EventArgs
-        {
-            public AfterReadEventArgs(EventLogRowData rowData, long eventNumber)
-            {
-                RowData = rowData;
-                EventNumber = eventNumber;
-            }
-
-            public EventLogRowData RowData { get; }
-            public long EventNumber { get; }
-        }
-
-        public sealed class OnErrorEventArgs : EventArgs
-        {
-            public OnErrorEventArgs(Exception excepton, string sourceData, bool critical)
-            {
-                Exception = excepton;
-                SourceData = sourceData;
-                Critical = critical;
-            }
-
-            public Exception Exception { get; }
-            public string SourceData { get; }
-            public bool Critical { get; }
         }
     }
 }

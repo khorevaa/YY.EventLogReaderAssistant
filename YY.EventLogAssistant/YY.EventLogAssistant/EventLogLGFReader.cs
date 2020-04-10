@@ -5,12 +5,10 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using YY.LogReader.Models;
-using YY.LogReader.Models.EventLog;
-using YY.LogReader.Services;
+using YY.EventLogAssistant.Models;
+using YY.EventLogAssistant.Services;
 
-namespace YY.LogReader.EventLog
+namespace YY.EventLogAssistant
 {
     internal sealed class EventLogLGFReader : EventLogReader
     {

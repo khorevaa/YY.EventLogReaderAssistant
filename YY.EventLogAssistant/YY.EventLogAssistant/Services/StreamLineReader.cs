@@ -2,7 +2,7 @@
 using System.IO;
 using System.Text;
 
-namespace YY.LogReader.Services
+namespace YY.EventLogAssistant.Services
 {
     internal class StreamLineReader : IDisposable
     {

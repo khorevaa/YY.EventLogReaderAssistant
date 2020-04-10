@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace YY.LogReader.Services
+namespace YY.EventLogAssistant.Services
 {
     internal static class IntExtensions
     {

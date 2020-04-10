@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using YY.LogReader.Models.EventLog;
+﻿using YY.EventLogAssistant.Models;
 
-namespace YY.LogReader.EventLog
+namespace YY.EventLogAssistant
 {
     internal interface IEventLogReader
     {

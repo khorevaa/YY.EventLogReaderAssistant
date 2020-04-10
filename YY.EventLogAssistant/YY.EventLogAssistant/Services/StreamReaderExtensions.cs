@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Reflection;
 
-namespace YY.LogReader.Services
+namespace YY.EventLogAssistant.Services
 {
     internal static class StreamReaderExtensions
     {

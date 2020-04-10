@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Data.SqlTypes;
 
-namespace YY.LogReader.Services
+namespace YY.EventLogAssistant.Services
 {
     internal static class DateTimeExtensions
     {

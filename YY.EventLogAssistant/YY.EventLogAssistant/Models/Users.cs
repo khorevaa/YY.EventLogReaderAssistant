@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace YY.LogReader.Models.EventLog
+namespace YY.EventLogAssistant.Models
 {
     public class Users
     {

@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Data.SQLite;
-using YY.LogReader.Models;
-using YY.LogReader.Services;
-using YY.LogReader.Models.EventLog;
+using YY.EventLogAssistant.Models;
+using YY.EventLogAssistant.Services;
 
-namespace YY.LogReader.EventLog
+namespace YY.EventLogAssistant
 {
     internal sealed class EventLogLGDReader : EventLogReader    
     {
