@@ -617,9 +617,15 @@ namespace YY.EventLogAssistant
 
                 foreach (var logFile in _reader._logFilesWithData)
                 {
-                    eventCount += File.ReadLines(logFile)
-                        .Where(lineInt => Regex.IsMatch(lineInt, @"^{\d{4}\d{2}\d{2}\d+,"))
-                        .LongCount();
+                    using (StreamReader logFileStream = new StreamReader(File.Open(logFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                    {
+                        do
+                        {
+                            string logFileCurrentString = logFileStream.ReadLine();
+                            if (Regex.IsMatch(logFileCurrentString, @"^{\d{4}\d{2}\d{2}\d+,"))
+                                eventCount++;
+                        } while (!logFileStream.EndOfStream);
+                    }
                 }
 
                 return eventCount;
