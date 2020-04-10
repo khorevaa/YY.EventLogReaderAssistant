@@ -54,7 +54,7 @@ namespace YY.EventLogAssistant
             _eventSource = new StringBuilder();            
         }
 
-        public override bool Read(out EventLogRowData rowData)
+        public override bool Read()
         {
             try
             {
@@ -62,7 +62,7 @@ namespace YY.EventLogAssistant
                 {
                     if (_logFilesWithData.Length <= _indexCurrentFile)
                     {
-                        rowData = null;
+                        _currentRow = null;
                         return false;
                     }
                     
@@ -78,7 +78,7 @@ namespace YY.EventLogAssistant
                 if (beforeReadFileArgs.Cancel)
                 {
                     NextFile();
-                    return Read(out rowData);
+                    return Read();
                 }
 
                 string sourceData;
@@ -92,7 +92,7 @@ namespace YY.EventLogAssistant
                     if (sourceData == null)
                     {
                         NextFile();
-                        return Read(out rowData);
+                        return Read();
                     }
 
                     if (newLine)
@@ -115,16 +115,16 @@ namespace YY.EventLogAssistant
 
                         try
                         {
-                            EventLogRowData eventData = LogParser.Parse(prepearedSourceData);
-                            rowData = eventData;
+                            RowData eventData = LogParser.Parse(prepearedSourceData);
+                            _currentRow = eventData;
                         }
                         catch (Exception ex)
                         {
                             RaiseOnError(new OnErrorEventArgs(ex, prepearedSourceData, false));
-                            rowData = null;
+                            _currentRow = null;
                         }
 
-                        RaiseAfterRead(new AfterReadEventArgs(rowData, _currentFileEventNumber));
+                        RaiseAfterRead(new AfterReadEventArgs(_currentRow, _currentFileEventNumber));
 
                         return true;
                     }
@@ -137,7 +137,7 @@ namespace YY.EventLogAssistant
             catch (Exception ex)
             {
                 RaiseOnError(new OnErrorEventArgs(ex, null, true));
-                rowData = null;
+                _currentRow = null;
                 return false;
             }
         }
@@ -393,13 +393,13 @@ namespace YY.EventLogAssistant
                 _reader = reader;
             }
 
-            public EventLogRowData Parse(string eventSource)
+            public RowData Parse(string eventSource)
             {
                 var parseResult = ParseEventLogString(eventSource);
 
                 DateTime eventDate = DateTime.ParseExact(parseResult[0], "yyyyMMddHHmmss", CultureInfo.InvariantCulture);
 
-                EventLogRowData eventData = new EventLogRowData();
+                RowData eventData = new RowData();
                 eventData.RowID = _reader.CurrentFileEventNumber;
                 eventData.Period = eventDate;
 

@@ -19,13 +19,13 @@ namespace YY.EventLogAssistant
             regexDataUUID = new Regex(@"[\d]+:[\dA-Za-zА-Яа-я]{32}}");
         }
 
-        public EventLogRowData Parse(string eventSource)
+        public RowData Parse(string eventSource)
         {
             var parseResult = ParseEventLogString(eventSource);
 
             DateTime eventDate = DateTime.ParseExact(parseResult[0], "yyyyMMddHHmmss", CultureInfo.InvariantCulture);
 
-            EventLogRowData eventData = new EventLogRowData();
+            RowData eventData = new RowData();
             eventData.RowID = _reader.CurrentFileEventNumber;
             eventData.Period = eventDate;
 

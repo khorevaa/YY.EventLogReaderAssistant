@@ -58,6 +58,7 @@ namespace YY.EventLogAssistant
         protected List<SecondaryPorts> _secondaryPorts;
         protected List<Users> _users;
         protected List<WorkServers> _workServers;
+        protected RowData _currentRow;
 
         public delegate void BeforeReadFileHandler(EventLogReader sender, BeforeReadFileEventArgs args);
         public delegate void AfterReadFileHandler(EventLogReader sender, AfterReadFileEventArgs args);
@@ -118,10 +119,11 @@ namespace YY.EventLogAssistant
         public IReadOnlyList<SecondaryPorts> SecondaryPorts { get { return _secondaryPorts; } }
         public IReadOnlyList<Users> Users { get { return _users; } }
         public IReadOnlyList<WorkServers> WorkServers { get { return _workServers; } }
+        public RowData Row { get { return _currentRow; } }
 
         protected virtual void ReadEventLogReferences() { }
 
-        public virtual bool Read(out EventLogRowData rowData)
+        public virtual bool Read()
         {
             throw new NotImplementedException();
         }
@@ -166,6 +168,7 @@ namespace YY.EventLogAssistant
             _secondaryPorts.Clear();
             _users.Clear();
             _workServers.Clear();
+            _currentRow = null;
         }
     }
 }

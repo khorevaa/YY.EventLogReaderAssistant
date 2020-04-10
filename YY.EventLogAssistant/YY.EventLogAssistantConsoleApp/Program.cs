@@ -11,63 +11,54 @@ namespace YY.EventLogAssistantConsoleApp
 
         static void Main(string[] args)
         {
-            string testDataDirectoryPath = $"{ Environment.CurrentDirectory}{Path.DirectorySeparatorChar}TestData\\1Cv8.lgf";
+            if (args.Length == 0)
+                return;
 
-            EventLogReader reader = EventLogReader.CreateReader(testDataDirectoryPath);
+            string dataDirectoryPath = args[0];
+            Console.WriteLine($"{DateTime.Now}: Инициализация чтения логов ({dataDirectoryPath})...");
+
+            EventLogReader reader = EventLogReader.CreateReader(dataDirectoryPath);
             reader.AfterReadEvent += Reader_AfterReadEvent;
             reader.AfterReadFile += Reader_AfterReadFile;
             reader.BeforeReadEvent += Reader_BeforeReadEvent;
             reader.BeforeReadFile += Reader_BeforeReadFile;
             reader.OnErrorEvent += Reader_OnErrorEvent;
 
-            // Пример задания точного положения для чтения в файле. Для формата *.lgf
-            //reader.SetCurrentPosition(new EventLogPosition(
-            //    5,
-            //    reader.LogFilePath,
-            //    reader.LogFilePath,
-            //    436));
+            Console.WriteLine($"{DateTime.Now}: Всего событий к обработке: ({reader.Count()})...");
 
-            Console.WriteLine($"Всего событий: {reader.Count()}");
+            while (reader.Read())           
+                _eventNumber += 1;
 
-            long totalEvents = 0;
-            EventLogRowData rowData;
-            while (reader.Read(out rowData))
-                totalEvents += 1;
-
-            Console.WriteLine("Для выхода нажмите любую клавишу...");
+            Console.WriteLine($"{DateTime.Now}: Для выхода нажмите любую клавишу...");
             Console.ReadKey();
         }
 
         private static void Reader_BeforeReadFile(EventLogReader sender, BeforeReadFileEventArgs args)
         {
-            // Пример получения текущей позиции чтения
-            var positionBeforeReadFile = sender.GetCurrentPosition();
-
-            Console.WriteLine("Reader_BeforeReadFile");
+            Console.WriteLine($"{DateTime.Now}: Начало чтения файла \"{args.FileName}\"");
+            Console.WriteLine($"{DateTime.Now}: {_eventNumber}");
         }
 
         private static void Reader_AfterReadFile(EventLogReader sender, AfterReadFileEventArgs args)
         {
-            // Пример получения текущей позиции чтения
-            var positionAfterReadFile = sender.GetCurrentPosition();
-
-            Console.WriteLine("Reader_AfterReadFile");
+            Console.WriteLine($"{DateTime.Now}: Окончание чтения файла \"{args.FileName}\"");
         }
 
         private static void Reader_BeforeReadEvent(EventLogReader sender, BeforeReadEventArgs args)
         {
-            _eventNumber += 1;
-            Console.WriteLine($"Reader_BeforeReadEvent: {_eventNumber}");
+            Console.SetCursorPosition(0, Console.CursorTop - 1);
+            Console.WriteLine($"{DateTime.Now}: (+){_eventNumber}");
         }
 
         private static void Reader_AfterReadEvent(EventLogReader sender, AfterReadEventArgs args)
         {
-            Console.WriteLine($"Reader_AfterReadEvent {_eventNumber}");
+            Console.SetCursorPosition(0, Console.CursorTop - 1);
+            Console.WriteLine($"{DateTime.Now}: [+]{_eventNumber}");
         }
 
         private static void Reader_OnErrorEvent(EventLogReader sender, OnErrorEventArgs args)
         {
-            Console.WriteLine("Reader_OnErrorEvent");
+            Console.WriteLine($"{DateTime.Now}: Ошибка чтения логов \"{args.Exception}\"");
         }
     }
 }

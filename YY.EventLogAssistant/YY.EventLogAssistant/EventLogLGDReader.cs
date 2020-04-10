@@ -20,7 +20,7 @@ namespace YY.EventLogAssistant
             } 
         }
         private SQLiteConnection _connection;
-        private List<EventLogRowData> _readBuffer;
+        private List<RowData> _readBuffer;
         private long _lastRowId;
         private const int _readBufferSize = 10000;
         private long _lastRowNumberFromBuffer;
@@ -29,12 +29,12 @@ namespace YY.EventLogAssistant
         internal  EventLogLGDReader() : base() { }
         internal EventLogLGDReader(string logFilePath) : base(logFilePath) 
         {            
-            _readBuffer = new List<EventLogRowData>();
+            _readBuffer = new List<RowData>();
             _lastRowId = 0;
             _lastRowNumberFromBuffer = 0;
         }
 
-        public override bool Read(out EventLogRowData rowData)
+        public override bool Read()
         {
             try
             {
@@ -44,7 +44,7 @@ namespace YY.EventLogAssistant
 
                 if (beforeReadFileArgs.Cancel)
                 {
-                    rowData = null;
+                    _currentRow = null;
                     return false;
                 }
 
@@ -97,7 +97,7 @@ namespace YY.EventLogAssistant
                                 {
                                     try
                                     {
-                                        EventLogRowData bufferRowData = new EventLogRowData();
+                                        RowData bufferRowData = new RowData();
                                         bufferRowData.RowID = reader.GetInt64OrDefault(0);
                                         bufferRowData.Period = reader.GetInt64OrDefault(1).ToDateTimeFormat();
                                         bufferRowData.ConnectId = reader.GetInt64OrDefault(2);
@@ -123,7 +123,7 @@ namespace YY.EventLogAssistant
                                     catch (Exception ex)
                                     {
                                         RaiseOnError(new OnErrorEventArgs(ex, reader.GetRowAsString(), false));
-                                        rowData = null;
+                                        _currentRow = null;
                                     }
                                 }
                             }
@@ -136,26 +136,26 @@ namespace YY.EventLogAssistant
                 if (_lastRowNumberFromBuffer >= _readBuffer.Count)
                 {
                     RaiseAfterReadFile(new AfterReadFileEventArgs(_logFilePath));
-                    rowData = null;
+                    _currentRow = null;
                     return false;
                 }
 
                 RaiseBeforeRead(new BeforeReadEventArgs(null, _eventCount));
 
-                rowData = _readBuffer
+                _currentRow = _readBuffer
                     .Where(bufRow => bufRow.RowID > _lastRowId)
                     .First();
                 _lastRowNumberFromBuffer = _lastRowNumberFromBuffer + 1;
-                _lastRowId = rowData.RowID;
+                _lastRowId = _currentRow.RowID;
 
-                RaiseAfterRead(new AfterReadEventArgs(rowData, _eventCount));
+                RaiseAfterRead(new AfterReadEventArgs(_currentRow, _eventCount));
 
                 return true;
             }
             catch(Exception ex)
             {
                 RaiseOnError(new OnErrorEventArgs(ex, null, true));
-                rowData = null;
+                _currentRow = null;
                 return false;
             }
         }

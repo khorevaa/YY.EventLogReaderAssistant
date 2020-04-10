@@ -5,13 +5,13 @@ namespace YY.EventLogAssistant
 {
     public sealed class AfterReadEventArgs : EventArgs
     {
-        public AfterReadEventArgs(EventLogRowData rowData, long eventNumber)
+        public AfterReadEventArgs(RowData rowData, long eventNumber)
         {
             RowData = rowData;
             EventNumber = eventNumber;
         }
 
-        public EventLogRowData RowData { get; }
+        public RowData RowData { get; }
         public long EventNumber { get; }
     }    
 }
