@@ -1,6 +1,8 @@
 ﻿using System.IO;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
+[assembly: InternalsVisibleTo("YY.EventLogAssistant.Tests")]
 namespace YY.EventLogAssistant.Services
 {
     internal static class StreamReaderExtensions

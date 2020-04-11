@@ -1,7 +1,9 @@
 ﻿using System;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text;
 
+[assembly: InternalsVisibleTo("YY.EventLogAssistant.Tests")]
 namespace YY.EventLogAssistant.Services
 {
     internal class StreamLineReader : IDisposable
