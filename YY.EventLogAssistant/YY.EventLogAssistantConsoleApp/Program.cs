@@ -25,6 +25,8 @@ namespace YY.EventLogAssistantConsoleApp
             reader.OnErrorEvent += Reader_OnErrorEvent;
 
             Console.WriteLine($"{DateTime.Now}: Всего событий к обработке: ({reader.Count()})...");
+            Console.WriteLine();
+            Console.WriteLine();
 
             while (reader.Read())           
                 _eventNumber += 1;
