@@ -5,236 +5,374 @@ using System.Linq;
 using System.Text;
 using YY.EventLogAssistant.Services;
 using System.Text.RegularExpressions;
+using System.IO;
+using System.Collections.Generic;
 
 namespace YY.EventLogAssistant
 {
     internal sealed class LogParserLGF
     {
-        private EventLogLGFReader _reader;
-        private Regex regexDataUUID;
+        #region Static Methods
 
-        public LogParserLGF(EventLogLGFReader reader)
+        public static bool ItsBeginOfEvent(string sourceString)
         {
-            _reader = reader;
-            regexDataUUID = new Regex(@"[\d]+:[\dA-Za-zА-Яа-я]{32}}");
+            return Regex.IsMatch(sourceString, @"^{\d{4}\d{2}\d{2}\d+,");
         }
 
-        public RowData Parse(string eventSource)
+        public static bool ItsEndOfEvent(string sourceString, ref int count, ref bool textBlockOpen)
         {
-            var parseResult = ParseEventLogString(eventSource);
-
-            DateTime eventDate = DateTime.ParseExact(parseResult[0], "yyyyMMddHHmmss", CultureInfo.InvariantCulture);
-
-            RowData eventData = new RowData();
-            eventData.RowID = _reader.CurrentFileEventNumber;
-            eventData.Period = eventDate;
-
-            string TransStr = parseResult[2].ToString().Replace("}", "").Replace("{", "");
-            long TransDate = TransStr.Substring(0, TransStr.IndexOf(",")).From16To10();
-            try
-            {
-                if (!(TransDate == 0))
-                    eventData.TransactionDate = new System.DateTime().AddSeconds((double)TransDate / 10000);
-            }
-            catch
-            {
-                eventData.TransactionDate = null;
-            }
-
-            eventData.TransactionId = TransStr.Substring(TransStr.IndexOf(",") + 1).From16To10();
-            if (parseResult[1] == "R")
-                eventData.TransactionStatus = TransactionStatus.Unfinished;
-            else if (parseResult[1] == "N")
-                eventData.TransactionStatus = TransactionStatus.NotApplicable;
-            else if (parseResult[1] == "U")
-                eventData.TransactionStatus = TransactionStatus.Committed;
-            else if (parseResult[1] == "C")
-                eventData.TransactionStatus = TransactionStatus.RolledBack;
-            else
-                eventData.TransactionStatus = TransactionStatus.Unknown;
-
-            eventData.Comment = parseResult[9].RemoveQuotes();
-            eventData.Session = Convert.ToInt32(parseResult[16]);
-            eventData.ConnectId = Convert.ToInt32(parseResult[6]);
-
-            eventData.DataPresentation = parseResult[12].RemoveQuotes();
-            eventData.Data = parseResult[11];
-
-            MatchCollection matches = regexDataUUID.Matches(eventData.Data);
-            if (matches.Count > 0)
-            {
-                string[] dataPartsUUID = eventData.Data.Split(':');
-                if (dataPartsUUID.Length == 2)
-                {
-                    string dataUUID = dataPartsUUID[1].Replace("}", string.Empty);
-                    eventData.DataUUID = dataUUID;
-                }
-            }
-
-            long userID = Convert.ToInt64(parseResult[3]);
-            eventData.User = _reader.Users.Where(i => i.Code == userID).FirstOrDefault();
-
-            long computerID = Convert.ToInt64(parseResult[4]);
-            eventData.Computer = _reader.Computers.Where(i => i.Code == computerID).FirstOrDefault();
-
-            long appID = Convert.ToInt64(parseResult[5]);
-            eventData.Application = _reader.Applications.Where(i => i.Code == appID).FirstOrDefault();
-
-            long eventID = Convert.ToInt64(parseResult[7]);
-            eventData.Event = _reader.Events.Where(i => i.Code == eventID).FirstOrDefault();
-
-            long metadataID = Convert.ToInt64(parseResult[10]);
-            eventData.Metadata = _reader.Metadata.Where(i => i.Code == metadataID).FirstOrDefault();
-
-            long workServerID = Convert.ToInt64(parseResult[13]);
-            eventData.WorkServer = _reader.WorkServers.Where(i => i.Code == workServerID).FirstOrDefault();
-
-            long pimaryPortID = Convert.ToInt64(parseResult[14]);
-            eventData.PrimaryPort = _reader.PrimaryPorts.Where(i => i.Code == pimaryPortID).FirstOrDefault();
-
-            long secondaryPortID = Convert.ToInt64(parseResult[15]);
-            eventData.SecondaryPort = _reader.SecondaryPorts.Where(i => i.Code == secondaryPortID).FirstOrDefault();
-
-            if (eventData.Data == "{\"U\"}") // 'empty reference
-                eventData.Data = string.Empty;
-            else if (eventData.Data.StartsWith("{"))
-            {
-                //'internal representation for different objects.
-                var ParsedObject = ParseEventLogString(eventData.Data);
-                if (ParsedObject.Length == 2)
-                {
-                    if (ParsedObject[0] == "\"S\"" || ParsedObject[0] == "\"R\"")
-                    {
-                        //'this is string or reference
-                        eventData.Data = ParsedObject[1].RemoveQuotes(); // 'string value
-                    }
-                }
-            }
-
-            switch (parseResult[8].Trim())
-            {
-                case "I":
-                    eventData.Severity = Severity.Information;
-                    break;
-                case "W":
-                    eventData.Severity = Severity.Warning;
-                    break;
-                case "E":
-                    eventData.Severity = Severity.Error;
-                    break;
-                case "N":
-                    eventData.Severity = Severity.Note;
-                    break;
-                default:
-                    eventData.Severity = Severity.Unknown;
-                    break;
-            }
-
-            return eventData;
-        }
-
-        internal bool ItsEndOfEvent(string Str, ref int Count, ref bool TextBlockOpen)
-        {
-            string TempStr = Str;
+            string TempStr = sourceString;
 
             for (int i = 0; i <= TempStr.Length - 1; i++)
             {
                 string Simb = TempStr.Substring(i, 1);
                 if (Simb == "\"")
                 {
-                    TextBlockOpen = !TextBlockOpen;
+                    textBlockOpen = !textBlockOpen;
                 }
-                else if (Simb == "}" & !TextBlockOpen)
+                else if (Simb == "}" & !textBlockOpen)
                 {
-                    Count = Count - 1;
+                    count = count - 1;
                 }
-                else if (Simb == "{" & !TextBlockOpen)
+                else if (Simb == "{" & !textBlockOpen)
                 {
-                    Count = Count + 1;
+                    count = count + 1;
                 }
             }
 
-            return (Count == 0);
+            return (count == 0);
         }
 
-        internal string[] ParseEventLogString(string Text)
+        #endregion
+
+        #region Private Member Variables
+
+        private EventLogLGFReader _reader;
+        private Regex _regexDataUUID;
+
+        #endregion
+
+        #region Constructor
+
+        public LogParserLGF(EventLogLGFReader reader)
         {
-            string[] ArrayLines = null;
+            _reader = reader;
+            _regexDataUUID = new Regex(@"[\d]+:[\dA-Za-zА-Яа-я]{32}}");
+        }
 
-            string Text2 = Text.Substring(1, (Text.EndsWith(",") ? Text.Length - 3 : Text.Length - 2)) + ",";
+        #endregion
 
-            string Str = "";
+        #region Public Methods
 
-            int Delim = Text2.IndexOf(",");
+        public void ReadEventLogReferences(
+                IList<Users> users, 
+                IList<Computers> computers, 
+                IList<Applications> applications,
+                IList<Events> events,
+                IList<Metadata> metadata,
+                IList<WorkServers> workServers,
+                IList<PrimaryPorts> primaryPorts,
+                IList<SecondaryPorts> secondaryPorts)
+        {
+            string empty = string.Empty;
+            string textReferencesData = empty;
+
+            using (FileStream FS = new FileStream(_reader.LogFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (StreamReader SR = new StreamReader(FS))
+                textReferencesData = SR.ReadToEnd();
+
+            int beginBlockIndex = textReferencesData.IndexOf("{");
+            if (beginBlockIndex < 0)
+                return;
+
+            textReferencesData = textReferencesData.Substring(beginBlockIndex);
+            string[] objectTexts = ParseEventLogString("{" + textReferencesData + "}");
+            string lastProcessedObjectForDebug;
+            foreach (string TextObject in objectTexts)
+            {
+                lastProcessedObjectForDebug = TextObject;
+                string[] parsedEventData = ParseEventLogString(TextObject);
+
+                if ((parsedEventData != null))
+                {
+                    switch (parsedEventData[0])
+                    {
+                        case "1":
+                            users.Add(new Users()
+                            {
+                                Code = parsedEventData[3].ToInt64(),
+                                Uuid = parsedEventData[1].ToGuid(),
+                                Name = parsedEventData[2]
+                            });
+                            break;
+                        case "2":
+                            computers.Add(new Computers()
+                            {
+                                Code = parsedEventData[2].ToInt64(),
+                                Name = parsedEventData[1]
+                            });
+                            break;
+                        case "3":
+                            applications.Add(new Applications()
+                            {
+                                Code = parsedEventData[2].ToInt64(),
+                                Name = parsedEventData[1]
+                            });
+                            break;
+                        case "4":
+                            events.Add(new Events()
+                            {
+                                Code = parsedEventData[2].ToInt64(),
+                                Name = parsedEventData[1]
+                            });
+                            break;
+                        case "5":
+                            metadata.Add(new Metadata()
+                            {
+                                Code = parsedEventData[3].ToInt64(),
+                                Uuid = parsedEventData[1].ToGuid(),
+                                Name = parsedEventData[2]
+                            });
+                            break;
+                        case "6":
+                            workServers.Add(new WorkServers()
+                            {
+                                Code = parsedEventData[2].ToInt64(),
+                                Name = parsedEventData[1]
+                            });
+                            break;
+                        case "7":
+                            primaryPorts.Add(new PrimaryPorts()
+                            {
+                                Code = parsedEventData[2].ToInt64(),
+                                Name = parsedEventData[1]
+                            });
+                            break;
+                        case "8":
+                            secondaryPorts.Add(new SecondaryPorts()
+                            {
+                                Code = parsedEventData[2].ToInt64(),
+                                Name = parsedEventData[1]
+                            });
+                            break;
+                        //Case "9" - неизвестные значения, возможно связаны с разделением данных
+                        //Case "10"
+                        case "11":
+                            break;
+                        case "12":
+                            break;
+                        case "13":
+                            break;
+                        //  Последние значения хранят статус транзакции и уровень события                        
+                        default:
+                            break;
+                    }
+                }
+            }
+        }
+
+        public RowData Parse(string eventSource)
+        {
+            string[] parseResult = ParseEventLogString(eventSource);
+            string transactionSourceString = parseResult[2].RemoveBraces();
+
+            RowData eventData = new RowData();
+            eventData.RowID = _reader.CurrentFileEventNumber;
+            eventData.Period = DateTime.ParseExact(parseResult[0], "yyyyMMddHHmmss", CultureInfo.InvariantCulture);
+            eventData.TransactionStatus = GetTransactionStatus(parseResult[1]);
+            eventData.TransactionDate = GetTransactionDate(transactionSourceString);
+            eventData.TransactionId = GetTransactionId(transactionSourceString);
+            eventData.User = _reader.GetUserByCode(parseResult[3]);
+            eventData.Computer = _reader.GetComputerByCode(parseResult[4]);
+            eventData.Application = _reader.GetApplicationByCode(parseResult[5]);
+            eventData.ConnectId = parseResult[6].ToInt32();
+            eventData.Event = _reader.GetEventByCode(parseResult[7]);
+            eventData.Severity = _reader.GetSeverityByCode(parseResult[8]);
+            eventData.Comment = parseResult[9].RemoveQuotes();
+            eventData.Metadata = _reader.GetMetadataByCode(parseResult[10]);
+            eventData.Data = GetData(parseResult[11]);
+            eventData.DataUUID = GetDataUUID(eventData.Data);
+            eventData.DataPresentation = parseResult[12].RemoveQuotes();
+            eventData.WorkServer = _reader.GetWorkServerByCode(parseResult[13]);
+            eventData.PrimaryPort = _reader.GetPrimaryPortByCode(parseResult[14]);
+            eventData.SecondaryPort = _reader.GetSecondaryPortByCode(parseResult[15]);
+            eventData.Session = parseResult[16].ToInt64();
+
+            return eventData;
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        private string GetData(string sourceString)
+        {
+            string data = sourceString;
+
+            if (data == "{\"U\"}")
+                data = string.Empty;
+            else if (data.StartsWith("{"))
+            {
+                string[] parsedObjects = ParseEventLogString(data);
+                if (parsedObjects.Length == 2)
+                {
+                    if (parsedObjects[0] == "\"S\"" || parsedObjects[0] == "\"R\"")
+                    {
+                        data = parsedObjects[1].RemoveQuotes();
+                    }
+                }
+            }
+
+            return data;
+        }
+
+        private string GetDataUUID(string sourceData)
+        {
+            string dataUUID;
+
+            MatchCollection matches = _regexDataUUID.Matches(sourceData);
+            if (matches.Count > 0)
+            {
+                string[] dataPartsUUID = sourceData.Split(':');
+                if (dataPartsUUID.Length == 2)
+                {
+                    dataUUID = dataPartsUUID[1].Replace("}", string.Empty);
+                } else
+                    dataUUID = string.Empty;
+            }
+            else
+                dataUUID = string.Empty;
+
+            return dataUUID;
+        }
+
+        private TransactionStatus GetTransactionStatus(string sourceString)
+        {
+            TransactionStatus transactionStatus;
+
+            if (sourceString == "R")
+                transactionStatus = TransactionStatus.Unfinished;
+            else if (sourceString == "N")
+                transactionStatus = TransactionStatus.NotApplicable;
+            else if (sourceString == "U")
+                transactionStatus = TransactionStatus.Committed;
+            else if (sourceString == "C")
+                transactionStatus = TransactionStatus.RolledBack;
+            else
+                transactionStatus = TransactionStatus.Unknown;
+
+            return transactionStatus;
+        }
+
+        private DateTime? GetTransactionDate(string sourceString)
+        {
+            DateTime? transactionDate;
+
+            long TransDate = sourceString.Substring(0, sourceString.IndexOf(",")).From16To10();
+            try
+            {
+                if (!(TransDate == 0))
+                    transactionDate = new System.DateTime().AddSeconds((double)TransDate / 10000);
+                else
+                    transactionDate = null;
+            }
+            catch
+            {
+                transactionDate = null;
+            }
+
+            return transactionDate;
+        }
+
+        private long? GetTransactionId(string sourceString)
+        {
+            long? transactionId;
+
+            transactionId = sourceString.Substring(sourceString.IndexOf(",") + 1).From16To10();
+
+            return transactionId;
+        }
+
+        private int CountSubstring(string sourceString, string sourceSubstring)
+        {
+            int countSubstring = (sourceString.Length - sourceString.Replace(sourceSubstring, "").Length) / sourceSubstring.Length;
+
+            return countSubstring;
+        }
+
+        private string[] ParseEventLogString(string sourceString)
+        {
+            string[] resultStrings = null;
+            string preparedString = sourceString.Substring(1, (sourceString.EndsWith(",") ? sourceString.Length - 3 : sourceString.Length - 2)) + ",";
+            string bufferString = string.Empty;
+
+            int delimIndex = preparedString.IndexOf(",");
             int i = 0;
             int partNumber = 0;
             bool isSpecialString = false;
 
-            while (Delim > 0)
+            while (delimIndex > 0)
             {
-
-                Str = Str + Text2.Substring(0, Delim).Trim();
+                bufferString = bufferString + preparedString.Substring(0, delimIndex).Trim();
                 partNumber += 1;
-                Text2 = Text2.Substring(Delim + 1);
-                if (partNumber == 1 && !String.IsNullOrEmpty(Str) && Str[0] == '\"')
+                preparedString = preparedString.Substring(delimIndex + 1);
+                if (partNumber == 1 && !String.IsNullOrEmpty(bufferString) && bufferString[0] == '\"')
                     isSpecialString = true;
 
-                int count1;
-                int count2;
+                int counter1, counter2;
                 if (isSpecialString)
                 {
-                    count1 = 0;
-                    count2 = 0;
+                    counter1 = 0;
+                    counter2 = 0;
                 }
                 else
                 {
-                    count1 = CountSubstringInString(Str, "{");
-                    count2 = CountSubstringInString(Str, "}");
+                    counter1 = CountSubstring(bufferString, "{");
+                    counter2 = CountSubstring(bufferString, "}");
                 }
-                int count3 = CountSubstringInString(Str, "\"") % 2; // Math.IEEERemainder(CountSubstringInString(Str, "\""), 2);
-                if (count1 == count2 & count3 == 0)
+
+                int counter3 = CountSubstring(bufferString, "\"") % 2;
+                if (counter1 == counter2 & counter3 == 0)
                 {
-                    Array.Resize(ref ArrayLines, i + 1);
-                    if (Str.StartsWith("\"") && Str.EndsWith("\""))
+                    Array.Resize(ref resultStrings, i + 1);
+                    if (bufferString.StartsWith("\"") && bufferString.EndsWith("\""))
                     {
-                        Str = Str.Substring(1, Str.Length - 2);
+                        bufferString = bufferString.Substring(1, bufferString.Length - 2);
                     }
+
                     if (isSpecialString)
                     {
                         char[] denied = new[] { '\n', '\t', '\r' };
                         StringBuilder newString = new StringBuilder();
-                        foreach (var ch in Str)
+                        foreach (var ch in bufferString)
                             if (!denied.Contains(ch))
                                 newString.Append(ch);
-                        Str = newString.ToString();
+
+                        bufferString = newString.ToString();
                     }
-                    ArrayLines[i] = Str;
-                    i = i + 1;
-                    Str = "";
+
+                    resultStrings[i] = bufferString;
+                    i += 1;
+                    bufferString = string.Empty;
                     partNumber = 0;
                     isSpecialString = false;
                 }
                 else
-                {
-                    Str = Str + ",";
-                }
+                    bufferString += ",";
 
-                if (isSpecialString) // Особая обработка для поля "DataPresentation"
+                if (isSpecialString)
                 {
-                    Delim = Text2.IndexOf("\",") + 1;
+                    delimIndex = preparedString.IndexOf("\",") + 1;
                 }
                 else
                 {
-                    Delim = Text2.IndexOf(",");
+                    delimIndex = preparedString.IndexOf(",");
                 }
 
             }
-            return ArrayLines;
+            return resultStrings;
         }
 
-        private int CountSubstringInString(string Str, string SubStr)
-        {
-            return (Str.Length - Str.Replace(SubStr, "").Length) / SubStr.Length;
-        }
+        #endregion
     }
 }

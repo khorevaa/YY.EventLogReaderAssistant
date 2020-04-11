@@ -15,7 +15,7 @@ namespace YY.EventLogAssistantConsoleApp
                 return;
 
             string dataDirectoryPath = args[0];
-            Console.WriteLine($"{DateTime.Now}: Инициализация чтения логов ({dataDirectoryPath})...");
+            Console.WriteLine($"{DateTime.Now}: Инициализация чтения логов \"{dataDirectoryPath}\"...");
 
             EventLogReader reader = EventLogReader.CreateReader(dataDirectoryPath);
             reader.AfterReadEvent += Reader_AfterReadEvent;

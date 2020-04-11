@@ -2,22 +2,25 @@
 {
     public sealed class EventLogPosition
     {
-        private readonly long _eventNumber;
-        private readonly string _currentFileReferences;
-        private readonly string _currentFileData;
-        private readonly long? _streamPosition;
+        #region Constructor
 
         public EventLogPosition(long EventNumber, string CurrentFileReferences, string CurrentFileData, long? StreamPosition)
         {
-            _eventNumber = EventNumber;
-            _currentFileReferences = CurrentFileReferences;
-            _currentFileData = CurrentFileData;
-            _streamPosition = StreamPosition;
+            this.EventNumber = EventNumber;
+            this.CurrentFileReferences = CurrentFileReferences;
+            this.CurrentFileData = CurrentFileData;
+            this.StreamPosition = StreamPosition;
         }
 
-        public long EventNumber { get { return _eventNumber; } }
-        public string CurrentFileReferences { get { return _currentFileReferences; } }
-        public string CurrentFileData { get { return _currentFileData; } }
-        public long? StreamPosition { get { return _streamPosition; } }
+        #endregion
+
+        #region Public Properties
+
+        public long EventNumber { get; }
+        public string CurrentFileReferences { get; }
+        public string CurrentFileData { get; }
+        public long? StreamPosition { get; }
+
+        #endregion
     }
 }

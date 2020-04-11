@@ -9,6 +9,8 @@ namespace YY.EventLogAssistant
 {
     internal sealed class EventLogLGDReader : EventLogReader    
     {
+        #region Private Member Variables
+
         private string _connectionString;
         private string ConnectionString 
         { 
@@ -26,13 +28,21 @@ namespace YY.EventLogAssistant
         private long _lastRowNumberFromBuffer;
         private long _eventCount = -1;
 
-        internal  EventLogLGDReader() : base() { }
+        #endregion
+
+        #region Constructor
+
+        internal EventLogLGDReader() : base() { }
         internal EventLogLGDReader(string logFilePath) : base(logFilePath) 
         {            
             _readBuffer = new List<RowData>();
             _lastRowId = 0;
             _lastRowNumberFromBuffer = 0;
         }
+
+        #endregion
+
+        #region Public Methods
 
         public override bool Read()
         {
@@ -159,7 +169,6 @@ namespace YY.EventLogAssistant
                 return false;
             }
         }
-
         public override bool GoToEvent(long eventNumber)
         {
             Reset();
@@ -196,7 +205,6 @@ namespace YY.EventLogAssistant
 
             return false;
         }
-
         public override EventLogPosition GetCurrentPosition()
         {
             return new EventLogPosition(
@@ -205,7 +213,6 @@ namespace YY.EventLogAssistant
                 _logFilePath,
                 null);
         }
-
         public override void SetCurrentPosition(EventLogPosition newPosition)
         {
             if (newPosition.CurrentFileReferences != _logFilePath)
@@ -216,7 +223,6 @@ namespace YY.EventLogAssistant
 
             GoToEvent(newPosition.EventNumber);
         }
-
         public override long Count()
         {
             if (_eventCount < 0)
@@ -244,7 +250,6 @@ namespace YY.EventLogAssistant
 
             return _eventCount;
         }
-
         public override void Reset()
         {
             System.Data.SQLite.SQLiteConnection.ClearAllPools();
@@ -257,7 +262,6 @@ namespace YY.EventLogAssistant
             _lastRowNumberFromBuffer = 0;
             _readBuffer.Clear();
         }
-
         public override void Dispose()
         {
             base.Dispose();
@@ -269,6 +273,10 @@ namespace YY.EventLogAssistant
             }
             _readBuffer.Clear();
         }
+
+        #endregion
+
+        #region Private Methods
 
         protected override void ReadEventLogReferences()
         {
@@ -383,5 +391,7 @@ namespace YY.EventLogAssistant
                 }
             }
         }
+
+        #endregion
     }
 }
