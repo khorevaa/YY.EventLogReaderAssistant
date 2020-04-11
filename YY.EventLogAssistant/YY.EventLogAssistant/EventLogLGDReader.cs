@@ -24,7 +24,7 @@ namespace YY.EventLogAssistant
         private SQLiteConnection _connection;
         private List<RowData> _readBuffer;
         private long _lastRowId;
-        private const int _readBufferSize = 10000;
+        private const int _readBufferSize = 1000;
         private long _lastRowNumberFromBuffer;
         private long _eventCount = -1;
 
@@ -117,7 +117,7 @@ namespace YY.EventLogAssistant
                                         bufferRowData.TransactionId = reader.GetInt64OrDefault(6);
                                         bufferRowData.Severity = (Severity)reader.GetInt64OrDefault(15);
                                         bufferRowData.Comment = reader.GetStringOrDefault(16);
-                                        bufferRowData.Data = reader.GetStringOrDefault(17).FromWIN1251ToUTF8();
+                                        bufferRowData.Data = reader.GetStringOrDefault(17).FromWin1251ToUTF8();
                                         bufferRowData.DataPresentation = reader.GetStringOrDefault(18);
                                         bufferRowData.User = _users.Where(i => i.Code == reader.GetInt64OrDefault(7)).FirstOrDefault();
                                         bufferRowData.Computer = _computers.Where(i => i.Code == reader.GetInt64OrDefault(8)).FirstOrDefault();
