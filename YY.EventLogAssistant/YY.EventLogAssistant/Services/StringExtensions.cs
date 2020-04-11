@@ -29,6 +29,21 @@ namespace YY.EventLogAssistant.Services
             return functionReturnValue;
         }
 
+        public static string RemoveBraces(this string sourceString)
+        {
+            return sourceString.Replace("}", "").Replace("{", "");
+        }
+
+        public static int ToInt32(this string sourceString)
+        {
+            return Convert.ToInt32(sourceString);
+        }
+
+        public static long ToInt64(this string sourceString)
+        {
+            return Convert.ToInt64(sourceString);
+        }
+
         public static string ConvertEncoding(this string s, Encoding source, Encoding result)
         {
             byte[] souceBytes = source.GetBytes(s);
