@@ -2,7 +2,7 @@
   "profiles": {
     "YY.EventLogAssistantConsoleApp": {
       "commandName": "Project",
-      "commandLineArgs": "\"\\\\Srv-1c-01-vm\\жр lgf (генератор событий)\""
+      "commandLineArgs": "\"E:\\Dev\\YY\\YY.EventLogAssistant\\YY.EventLogAssistant\\YY.EventLogAssistantConsoleApp\\bin\\Debug\\netcoreapp3.1\\TestData\\1Cv8.lgd\" \"\\\\Srv-1c-01-vm\\жр lgf (генератор событий)\""
     }
   }
 }
