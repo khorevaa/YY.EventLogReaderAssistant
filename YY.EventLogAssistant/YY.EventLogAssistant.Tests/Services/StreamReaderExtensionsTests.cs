@@ -8,8 +8,8 @@ namespace YY.EventLogAssistant.Services.Tests
     {
         #region Private Member Variables
 
-        private string sampleDataDirectory;
-        private string sampleDatabaseFile;
+        private readonly string sampleDataDirectory;
+        private readonly string sampleDatabaseFile;
 
         #endregion
 

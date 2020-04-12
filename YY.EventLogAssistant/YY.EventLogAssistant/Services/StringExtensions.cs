@@ -9,39 +9,6 @@ namespace YY.EventLogAssistant.Services
 {
     internal static class StringExtensions
     {
-        #region Private Member Variables
-
-        private static readonly Dictionary<int, char> CharactersToMap = new Dictionary<int, char>
-        {
-            {130, '‚'},
-            {131, 'ƒ'},
-            {132, '„'},
-            {133, '…'},
-            {134, '†'},
-            {135, '‡'},
-            {136, 'ˆ'},
-            {137, '‰'},
-            {138, 'Š'},
-            {139, '‹'},
-            {140, 'Œ'},
-            {145, '‘'},
-            {146, '’'},
-            {147, '“'},
-            {148, '”'},
-            {149, '•'},
-            {150, '–'},
-            {151, '—'},
-            {152, '˜'},
-            {153, '™'},
-            {154, 'š'},
-            {155, '›'},
-            {156, 'œ'},
-            {159, 'Ÿ'},
-            {173, '-'}
-        };
-
-        #endregion
-
         #region Public Methods
 
         public static long From16To10(this string sourceValue)
@@ -92,8 +59,7 @@ namespace YY.EventLogAssistant.Services
 
         public static Guid ToGuid(this string sourceValue)
         {
-            Guid guidFromString = Guid.Empty;
-            Guid.TryParse(sourceValue, out guidFromString);
+            Guid.TryParse(sourceValue, out Guid guidFromString);
             return guidFromString;
         }
 
@@ -107,28 +73,6 @@ namespace YY.EventLogAssistant.Services
             byte[] resultBytes = Encoding.Convert(result, source, souceBytes);
 
             return source.GetString(resultBytes);
-        }
-
-        private static HashSet<char> CharListToSet(string charList)
-        {
-            HashSet<char> set = new HashSet<char>();
-
-            for (int i = 0; i < charList.Length; i++)
-            {
-                if ((i + 1) < charList.Length && charList[i + 1] == '-')
-                {
-                    // Character range
-                    char startChar = charList[i++];
-                    i++; // Hyphen
-                    char endChar = (char)0;
-                    if (i < charList.Length)
-                        endChar = charList[i++];
-                    for (int j = startChar; j <= endChar; j++)
-                        set.Add((char)j);
-                }
-                else set.Add(charList[i]);
-            }
-            return set;
         }
 
         #endregion

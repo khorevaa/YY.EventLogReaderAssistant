@@ -32,11 +32,11 @@ namespace YY.EventLogAssistant
                 }
                 else if (Simb == "}" & !textBlockOpen)
                 {
-                    count = count - 1;
+                    count -= 1;
                 }
                 else if (Simb == "{" & !textBlockOpen)
                 {
-                    count = count + 1;
+                    count += 1;
                 }
             }
 
@@ -47,8 +47,8 @@ namespace YY.EventLogAssistant
 
         #region Private Member Variables
 
-        private EventLogLGFReader _reader;
-        private Regex _regexDataUUID;
+        private readonly EventLogLGFReader _reader;
+        private readonly Regex _regexDataUUID;
 
         #endregion
 
@@ -176,29 +176,31 @@ namespace YY.EventLogAssistant
             string[] parseResult = ParseEventLogString(eventSource);
             string transactionSourceString = parseResult[2].RemoveBraces();
 
-            RowData eventData = new RowData();
-            eventData.RowID = _reader.CurrentFileEventNumber;
-            eventData.Period = DateTime.ParseExact(parseResult[0], "yyyyMMddHHmmss", CultureInfo.InvariantCulture);
-            eventData.TransactionStatus = GetTransactionStatus(parseResult[1]);
-            eventData.TransactionDate = GetTransactionDate(transactionSourceString);
-            eventData.TransactionId = GetTransactionId(transactionSourceString);
-            eventData.User = _reader.GetUserByCode(parseResult[3]);
-            eventData.Computer = _reader.GetComputerByCode(parseResult[4]);
-            eventData.Application = _reader.GetApplicationByCode(parseResult[5]);
-            eventData.ConnectId = parseResult[6].ToInt32();
-            eventData.Event = _reader.GetEventByCode(parseResult[7]);
-            eventData.Severity = _reader.GetSeverityByCode(parseResult[8]);
-            eventData.Comment = parseResult[9].RemoveQuotes();
-            eventData.Metadata = _reader.GetMetadataByCode(parseResult[10]);
-            eventData.Data = GetData(parseResult[11]);
-            eventData.DataUUID = GetDataUUID(eventData.Data);
-            eventData.DataPresentation = parseResult[12].RemoveQuotes();
-            eventData.WorkServer = _reader.GetWorkServerByCode(parseResult[13]);
-            eventData.PrimaryPort = _reader.GetPrimaryPortByCode(parseResult[14]);
-            eventData.SecondaryPort = _reader.GetSecondaryPortByCode(parseResult[15]);
-            eventData.Session = parseResult[16].ToInt64();
+            RowData dataRow  =new RowData()
+            {
+                RowID = _reader.CurrentFileEventNumber,
+                Period = DateTime.ParseExact(parseResult[0], "yyyyMMddHHmmss", CultureInfo.InvariantCulture),
+                TransactionStatus = _reader.GetTransactionStatus(parseResult[1]),
+                TransactionDate = GetTransactionDate(transactionSourceString),
+                TransactionId = GetTransactionId(transactionSourceString),
+                User = _reader.GetUserByCode(parseResult[3]),
+                Computer = _reader.GetComputerByCode(parseResult[4]),
+                Application = _reader.GetApplicationByCode(parseResult[5]),
+                ConnectId = parseResult[6].ToInt32(),
+                Event = _reader.GetEventByCode(parseResult[7]),
+                Severity = _reader.GetSeverityByCode(parseResult[8]),
+                Comment = parseResult[9].RemoveQuotes(),
+                Metadata = _reader.GetMetadataByCode(parseResult[10]),
+                Data = GetData(parseResult[11]),                
+                DataPresentation = parseResult[12].RemoveQuotes(),
+                WorkServer = _reader.GetWorkServerByCode(parseResult[13]),
+                PrimaryPort = _reader.GetPrimaryPortByCode(parseResult[14]),
+                SecondaryPort = _reader.GetSecondaryPortByCode(parseResult[15]),
+                Session = parseResult[16].ToInt64()
+            };
+            dataRow.DataUUID = GetDataUUID(dataRow.Data);
 
-            return eventData;
+            return dataRow;
         }
 
         #endregion
@@ -244,24 +246,6 @@ namespace YY.EventLogAssistant
                 dataUUID = string.Empty;
 
             return dataUUID;
-        }
-
-        private TransactionStatus GetTransactionStatus(string sourceString)
-        {
-            TransactionStatus transactionStatus;
-
-            if (sourceString == "R")
-                transactionStatus = TransactionStatus.Unfinished;
-            else if (sourceString == "N")
-                transactionStatus = TransactionStatus.NotApplicable;
-            else if (sourceString == "U")
-                transactionStatus = TransactionStatus.Committed;
-            else if (sourceString == "C")
-                transactionStatus = TransactionStatus.RolledBack;
-            else
-                transactionStatus = TransactionStatus.Unknown;
-
-            return transactionStatus;
         }
 
         private DateTime? GetTransactionDate(string sourceString)
@@ -313,7 +297,7 @@ namespace YY.EventLogAssistant
 
             while (delimIndex > 0)
             {
-                bufferString = bufferString + preparedString.Substring(0, delimIndex).Trim();
+                bufferString += preparedString.Substring(0, delimIndex).Trim();
                 partNumber += 1;
                 preparedString = preparedString.Substring(delimIndex + 1);
                 if (partNumber == 1 && !String.IsNullOrEmpty(bufferString) && bufferString[0] == '\"')

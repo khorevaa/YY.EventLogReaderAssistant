@@ -10,9 +10,9 @@ namespace YY.EventLogAssistant.Services.Tests
     {
         #region Private Member Variables
 
-        private string sampleDataDirectory;
-        private string sampleDatabaseFile;
-        private string[] sampleFilesLGP;
+        private readonly string sampleDataDirectory;
+        private readonly string sampleDatabaseFile;
+        private readonly string[] sampleFilesLGP;
 
         #endregion
 
@@ -38,17 +38,13 @@ namespace YY.EventLogAssistant.Services.Tests
             string lineContent = string.Empty;
             using (StreamReader reader = new StreamReader(sampleDatabaseFile))
             {
-                using(StreamLineReader lineReader = new StreamLineReader(reader.BaseStream, reader.CurrentEncoding))
+                using StreamLineReader lineReader = new StreamLineReader(reader.BaseStream, reader.CurrentEncoding);
+                if (lineReader.GoToLine(1))
                 {
-                    if(lineReader.GoToLine(1))
-                    {
-                        lineContent = lineReader.ReadLine();
-                    }
+                    lineContent = lineReader.ReadLine();
                 }
             }
-
-            Guid eventLogGuid = Guid.Empty;
-            Guid.TryParse(lineContent, out eventLogGuid);
+            Guid.TryParse(lineContent, out Guid eventLogGuid);
 
             Assert.NotEqual(Guid.Empty, eventLogGuid);
         }
@@ -68,10 +64,8 @@ namespace YY.EventLogAssistant.Services.Tests
             long lineCounterLibrary = 0;
             using (StreamReader reader = new StreamReader(sampleDatabaseFile))
             {
-                using (StreamLineReader lineReader = new StreamLineReader(reader.BaseStream, reader.CurrentEncoding))
-                {
-                    lineCounterLibrary = lineReader.GetCount();
-                }
+                using StreamLineReader lineReader = new StreamLineReader(reader.BaseStream, reader.CurrentEncoding);
+                lineCounterLibrary = lineReader.GetCount();
             }
 
             Assert.Equal(lineCounterNative, lineCounterLibrary);
@@ -97,15 +91,13 @@ namespace YY.EventLogAssistant.Services.Tests
             List<string> resultLines = new List<string>();
             using (StreamReader reader = new StreamReader(sampleDatabaseFile, utf8))
             {
-                using (StreamLineReader lineReader = new StreamLineReader(reader.BaseStream, reader.CurrentEncoding))
+                using StreamLineReader lineReader = new StreamLineReader(reader.BaseStream, reader.CurrentEncoding);
+                string currentLine = lineReader.ReadLine();
+                do
                 {
-                    string currentLine = lineReader.ReadLine();
-                    do
-                    {
-                        resultLines.Add(currentLine);
-                        currentLine = lineReader.ReadLine();
-                    } while (currentLine != null);
-                }
+                    resultLines.Add(currentLine);
+                    currentLine = lineReader.ReadLine();
+                } while (currentLine != null);
             }
 
             Assert.Equal(correctLines, resultLines);
@@ -134,35 +126,15 @@ namespace YY.EventLogAssistant.Services.Tests
                 
                 using (StreamReader reader = new StreamReader(fileLGP, utf8))
                 {
-                    using (StreamLineReader lineReader = new StreamLineReader(reader.BaseStream, reader.CurrentEncoding))
+                    using StreamLineReader lineReader = new StreamLineReader(reader.BaseStream, reader.CurrentEncoding);
+                    string currentLine = lineReader.ReadLine();
+                    while (currentLine != null)
                     {
-                        string currentLine = lineReader.ReadLine();
-                        while (currentLine != null)
-                        {
-                            resultLines.Add(currentLine);
-
-                            int cnt = resultLines.Count - 1;
-                            if (correctLines[cnt] != resultLines[cnt])
-                            {
-                                int fff = 1;
-                            } else if(cnt == 173)
-                            {
-                                int sdafdfa = 1;
-                            }
-
-                            currentLine = lineReader.ReadLine();
-                        }
+                        resultLines.Add(currentLine);
+                        currentLine = lineReader.ReadLine();
                     }
                 }
             }
-
-            //for (int i = 0; i < correctLines.Count; i++)
-            //{
-            //    if(correctLines[i] != resultLines[i])
-            //    {
-            //        int fff = 1;
-            //    }
-            //}
 
             Assert.Equal(correctLines, resultLines);
         }

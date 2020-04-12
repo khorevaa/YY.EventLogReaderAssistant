@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
-using System.Text.RegularExpressions;
 
 [assembly: InternalsVisibleTo("YY.EventLogAssistant.Tests")]
 namespace YY.EventLogAssistant.Services
@@ -13,11 +12,11 @@ namespace YY.EventLogAssistant.Services
         #region Private Member Variables
 
         private const int _bufferLength = 1024;
-        private byte[] _utf8Preamble = Encoding.UTF8.GetPreamble();
+        private readonly byte[] _utf8Preamble = Encoding.UTF8.GetPreamble();
         private Stream _base;
-        private Encoding _encoding;
+        private readonly Encoding _encoding;
         private int _read = 0, _index = 0;
-        private byte[] _readBuffer = new byte[_bufferLength];
+        private readonly byte[] _readBuffer = new byte[_bufferLength];
 
         #endregion
 
@@ -150,7 +149,7 @@ namespace YY.EventLogAssistant.Services
             Array.Copy(bufferString, 0, readyConvertData, 0, bufferSizeCopy);
 
             string prepearedString;
-            if (_encoding == Encoding.UTF8 && byteArrayStartsWith(readyConvertData, 0, _utf8Preamble))
+            if (_encoding == Encoding.UTF8 && ByteArrayStartsWith(readyConvertData, 0, _utf8Preamble))
             {
                 prepearedString = _encoding.GetString(readyConvertData, _utf8Preamble.Length, readyConvertData.Length - _utf8Preamble.Length);
             }
@@ -160,7 +159,7 @@ namespace YY.EventLogAssistant.Services
             return prepearedString;
         }
 
-        private bool byteArrayStartsWith(byte[] source, int offset, byte[] match)
+        private bool ByteArrayStartsWith(byte[] source, int offset, byte[] match)
         {
             if (match.Length > (source.Length - offset))
             {

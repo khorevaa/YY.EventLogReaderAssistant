@@ -14,11 +14,11 @@ namespace YY.EventLogAssistant
 
         private const long _defaultBeginLineForLGF = 3;
         private int _indexCurrentFile;
-        private string[] _logFilesWithData;
+        private readonly string[] _logFilesWithData;
         private long _eventCount = -1;
 
         StreamReader _stream;
-        StringBuilder _eventSource;
+        readonly StringBuilder _eventSource;
 
         private LogParserLGF _logParser;
         private LogParserLGF LogParser

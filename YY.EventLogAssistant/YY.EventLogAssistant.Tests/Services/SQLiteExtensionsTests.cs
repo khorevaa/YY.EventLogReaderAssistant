@@ -10,8 +10,8 @@ namespace YY.EventLogAssistant.Services.Tests
     {
         #region Private Member Variables
 
-        private string sampleDataDirectory;
-        private string sampleDatabaseFile;
+        private readonly string sampleDataDirectory;
+        private readonly string sampleDatabaseFile;
 
         #endregion
 
@@ -48,14 +48,12 @@ namespace YY.EventLogAssistant.Services.Tests
             using (SQLiteConnection connection = new SQLiteConnection(connectionString))
             {
                 connection.Open();
-                using (SQLiteCommand command = new SQLiteCommand(queryText, connection))
+                using SQLiteCommand command = new SQLiteCommand(queryText, connection);
+                SQLiteDataReader reader = command.ExecuteReader();
+                if (reader.Read())
                 {
-                    SQLiteDataReader reader = command.ExecuteReader();
-                    if (reader.Read())
-                    {
-                        DataPresentation = SQLiteExtensions.GetStringOrDefault(reader, 0);
-                        DataPresentationEmpty = SQLiteExtensions.GetStringOrDefault(reader, 1);
-                    }
+                    DataPresentation = SQLiteExtensions.GetStringOrDefault(reader, 0);
+                    DataPresentationEmpty = SQLiteExtensions.GetStringOrDefault(reader, 1);
                 }
             }
 
@@ -83,14 +81,12 @@ namespace YY.EventLogAssistant.Services.Tests
             using (SQLiteConnection connection = new SQLiteConnection(connectionString))
             {
                 connection.Open();
-                using (SQLiteCommand command = new SQLiteCommand(queryText, connection))
+                using SQLiteCommand command = new SQLiteCommand(queryText, connection);
+                SQLiteDataReader reader = command.ExecuteReader();
+                if (reader.Read())
                 {
-                    SQLiteDataReader reader = command.ExecuteReader();
-                    if (reader.Read())
-                    {
-                        connectionId = SQLiteExtensions.GetInt64OrDefault(reader, 0);
-                        sessionId = SQLiteExtensions.GetInt64OrDefault(reader, 1);
-                    }
+                    connectionId = SQLiteExtensions.GetInt64OrDefault(reader, 0);
+                    sessionId = SQLiteExtensions.GetInt64OrDefault(reader, 1);
                 }
             }
 
@@ -119,13 +115,11 @@ namespace YY.EventLogAssistant.Services.Tests
             using (SQLiteConnection connection = new SQLiteConnection(connectionString))
             {
                 connection.Open();
-                using (SQLiteCommand command = new SQLiteCommand(queryText, connection))
+                using SQLiteCommand command = new SQLiteCommand(queryText, connection);
+                SQLiteDataReader reader = command.ExecuteReader();
+                if (reader.Read())
                 {
-                    SQLiteDataReader reader = command.ExecuteReader();
-                    if (reader.Read())
-                    {
-                        rowAsString = reader.GetRowAsString();
-                    }
+                    rowAsString = reader.GetRowAsString();
                 }
             }
             int countLines = rowAsString.Split('\n').Where(str => str != string.Empty).Count();
@@ -153,16 +147,14 @@ namespace YY.EventLogAssistant.Services.Tests
             using (SQLiteConnection connection = new SQLiteConnection(connectionString))
             {
                 connection.Open();
-                using (SQLiteCommand command = new SQLiteCommand(queryText, connection))
+                using SQLiteCommand command = new SQLiteCommand(queryText, connection);
+                SQLiteDataReader reader = command.ExecuteReader();
+                if (reader.Read())
                 {
-                    SQLiteDataReader reader = command.ExecuteReader();
-                    if (reader.Read())
+                    object rowsCountObject = reader.GetValue(0);
+                    if (rowsCountObject is long)
                     {
-                        object rowsCountObject = reader.GetValue(0);
-                        if (rowsCountObject is long)
-                        {
-                            rowsCount = Convert.ToInt64(rowsCountObject);
-                        }
+                        rowsCount = Convert.ToInt64(rowsCountObject);
                     }
                 }
             }

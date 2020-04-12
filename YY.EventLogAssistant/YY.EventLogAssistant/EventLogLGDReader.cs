@@ -22,7 +22,7 @@ namespace YY.EventLogAssistant
             } 
         }
         private SQLiteConnection _connection;
-        private List<RowData> _readBuffer;
+        private readonly List<RowData> _readBuffer;
         private long _lastRowId;
         private const int _readBufferSize = 1000;
         private long _lastRowNumberFromBuffer;
@@ -107,28 +107,28 @@ namespace YY.EventLogAssistant
                                 {
                                     try
                                     {
-                                        RowData bufferRowData = new RowData();
-                                        bufferRowData.RowID = reader.GetInt64OrDefault(0);
-                                        bufferRowData.Period = reader.GetInt64OrDefault(1).ToDateTimeFormat();
-                                        bufferRowData.ConnectId = reader.GetInt64OrDefault(2);
-                                        bufferRowData.Session = reader.GetInt64OrDefault(3);
-                                        bufferRowData.TransactionStatus = (TransactionStatus)reader.GetInt64OrDefault(4);
-                                        bufferRowData.TransactionDate = reader.GetInt64OrDefault(5).ToNullableDateTimeELFormat();
-                                        bufferRowData.TransactionId = reader.GetInt64OrDefault(6);
-                                        bufferRowData.Severity = (Severity)reader.GetInt64OrDefault(15);
-                                        bufferRowData.Comment = reader.GetStringOrDefault(16);
-                                        bufferRowData.Data = reader.GetStringOrDefault(17).FromWin1251ToUTF8();
-                                        bufferRowData.DataPresentation = reader.GetStringOrDefault(18);
-                                        bufferRowData.User = _users.Where(i => i.Code == reader.GetInt64OrDefault(7)).FirstOrDefault();
-                                        bufferRowData.Computer = _computers.Where(i => i.Code == reader.GetInt64OrDefault(8)).FirstOrDefault();
-                                        bufferRowData.Application = _applications.Where(i => i.Code == reader.GetInt64OrDefault(9)).FirstOrDefault();
-                                        bufferRowData.Event = _events.Where(i => i.Code == reader.GetInt64OrDefault(10)).FirstOrDefault();
-                                        bufferRowData.PrimaryPort = _primaryPorts.Where(i => i.Code == reader.GetInt64OrDefault(11)).FirstOrDefault();
-                                        bufferRowData.SecondaryPort = _secondaryPorts.Where(i => i.Code == reader.GetInt64OrDefault(12)).FirstOrDefault();
-                                        bufferRowData.WorkServer = _workServers.Where(i => i.Code == reader.GetInt64OrDefault(13)).FirstOrDefault();
-                                        bufferRowData.Metadata = _metadata.Where(i => i.Code == reader.GetInt64OrDefault(18)).FirstOrDefault();
-
-                                        _readBuffer.Add(bufferRowData);
+                                        _readBuffer.Add(new RowData
+                                        {
+                                            RowID = reader.GetInt64OrDefault(0),
+                                            Period = reader.GetInt64OrDefault(1).ToDateTimeFormat(),
+                                            ConnectId = reader.GetInt64OrDefault(2),
+                                            Session = reader.GetInt64OrDefault(3),
+                                            TransactionStatus = GetTransactionStatus(reader.GetInt64OrDefault(4)),
+                                            TransactionDate = reader.GetInt64OrDefault(5).ToNullableDateTimeELFormat(),
+                                            TransactionId = reader.GetInt64OrDefault(6),
+                                            User = GetUserByCode(reader.GetInt64OrDefault(7)),
+                                            Computer = GetComputerByCode(reader.GetInt64OrDefault(8)),
+                                            Application = GetApplicationByCode(reader.GetInt64OrDefault(9)),
+                                            Event = GetEventByCode(reader.GetInt64OrDefault(10)),
+                                            PrimaryPort = GetPrimaryPortByCode(reader.GetInt64OrDefault(11)),
+                                            SecondaryPort = GetSecondaryPortByCode(reader.GetInt64OrDefault(12)),
+                                            WorkServer = GetWorkServerByCode(reader.GetInt64OrDefault(13)),
+                                            Severity = GetSeverityByCode(reader.GetInt64OrDefault(14)),
+                                            Comment = reader.GetStringOrDefault(15),
+                                            Data = reader.GetStringOrDefault(16).FromWin1251ToUTF8(),
+                                            DataPresentation = reader.GetStringOrDefault(17),
+                                            Metadata = GetMetadataByCode(reader.GetInt64OrDefault(18))
+                                    });
                                     }
                                     catch (Exception ex)
                                     {
@@ -155,7 +155,7 @@ namespace YY.EventLogAssistant
                 _currentRow = _readBuffer
                     .Where(bufRow => bufRow.RowID > _lastRowId)
                     .First();
-                _lastRowNumberFromBuffer = _lastRowNumberFromBuffer + 1;
+                _lastRowNumberFromBuffer += 1;
                 _lastRowId = _currentRow.RowID;
 
                 RaiseAfterRead(new AfterReadEventArgs(_currentRow, _eventCount));
@@ -237,9 +237,12 @@ namespace YY.EventLogAssistant
                     "From\n" +
                     "    EventLog el\n");
 
-                    SQLiteCommand cmd = new SQLiteCommand(_connection);
-                    cmd.CommandType = System.Data.CommandType.Text;
-                    cmd.CommandText = queryText;
+                    SQLiteCommand cmd = new SQLiteCommand(_connection)
+                    {
+                        CommandType = System.Data.CommandType.Text,
+                        CommandText = queryText
+                    };
+                    
                     SQLiteDataReader reader = cmd.ExecuteReader();
                     if (reader.Read())
                     {

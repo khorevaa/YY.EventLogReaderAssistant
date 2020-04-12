@@ -62,8 +62,6 @@ namespace YY.EventLogAssistant.Services.Tests
         public void FromWin1251ToUTF8_Test()
         {
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-            Encoding utf8 = Encoding.GetEncoding("UTF-8");
-            Encoding win1251 = Encoding.GetEncoding("windows-1251");
 
             string sourceText = "Р—Р°РєР°Р· Р·РІРѕРЅРєР° С‚РµС…РЅРёС‡РµСЃРєРѕР№ РїРѕРґРґРµСЂР¶РєРё";
             string checkValue = "Заказ звонка технической поддержки";

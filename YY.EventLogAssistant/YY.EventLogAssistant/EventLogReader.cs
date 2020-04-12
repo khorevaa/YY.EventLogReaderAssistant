@@ -16,17 +16,15 @@ namespace YY.EventLogAssistant
             FileAttributes attr = File.GetAttributes(pathLogFile);
 
             FileInfo logFileInfo = null;
-            string currentLogFilesPath;
             string logFileWithReferences;
             if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
             {
-                currentLogFilesPath = pathLogFile;
+                string currentLogFilesPath = pathLogFile;
                 logFileWithReferences = string.Format("{0}{1}{2}", currentLogFilesPath, Path.DirectorySeparatorChar, @"1Cv8.lgf");
             }
             else
             {
                 logFileInfo = new FileInfo(pathLogFile);
-                currentLogFilesPath = logFileInfo.Directory.FullName;
                 logFileWithReferences = logFileInfo.FullName;
             }
                         
@@ -209,6 +207,44 @@ namespace YY.EventLogAssistant
             }
 
             return severity;
+        }
+        public Severity GetSeverityByCode(long code)
+        {
+            try
+            {
+                return (Severity)code;
+            } catch
+            {
+                return Severity.Unknown;
+            }
+        }
+
+        public TransactionStatus GetTransactionStatus(string code)
+        {
+            TransactionStatus transactionStatus;
+
+            if (code == "R")
+                transactionStatus = TransactionStatus.Unfinished;
+            else if (code == "N")
+                transactionStatus = TransactionStatus.NotApplicable;
+            else if (code == "U")
+                transactionStatus = TransactionStatus.Committed;
+            else if (code == "C")
+                transactionStatus = TransactionStatus.RolledBack;
+            else
+                transactionStatus = TransactionStatus.Unknown;
+
+            return transactionStatus;
+        }
+        public TransactionStatus GetTransactionStatus(long code)
+        {
+            try
+            {
+                return (TransactionStatus)code;
+            } catch
+            {
+                return TransactionStatus.Unknown;
+            }
         }
 
         public Metadata GetMetadataByCode(string code)
