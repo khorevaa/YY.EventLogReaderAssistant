@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data.SQLite;
 using System.IO;
-using System.Text;
 using System.Linq;
 using Xunit;
-using YY.EventLogAssistant.Services;
 
 namespace YY.EventLogAssistant.Services.Tests
 {

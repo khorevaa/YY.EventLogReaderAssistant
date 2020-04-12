@@ -29,9 +29,15 @@ namespace YY.EventLogAssistant.Services
 
         public StreamLineReader(Stream stream) { _Base = stream; }
 
-        public bool GoToLine(long goToLine) { return IGetCount(goToLine, true) == goToLine; }
+        public bool GoToLine(long goToLine)
+        { 
+            return IGetCount(goToLine, true) == goToLine;
+        }
 
-        public long GetCount(long goToLine) { return IGetCount(goToLine, false); }
+        public long GetCount(long goToLine = 0) 
+        { 
+            return IGetCount(goToLine, false);
+        }
 
         public string ReadLine()
         {
