@@ -8,6 +8,8 @@ namespace YY.EventLogAssistant.Services
 {
     internal static class SQLiteExtensions
     {
+        #region Public Methods
+
         public static string GetStringOrDefault(this SQLiteDataReader reader, int valueIndex)
         {
             try
@@ -51,5 +53,7 @@ namespace YY.EventLogAssistant.Services
         {
             return String.Format("Data Source={0};Version=3;Read Only=True;", dbFile);
         }
+
+        #endregion
     }
 }

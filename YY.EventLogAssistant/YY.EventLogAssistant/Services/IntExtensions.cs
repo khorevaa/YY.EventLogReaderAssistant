@@ -6,6 +6,8 @@ namespace YY.EventLogAssistant.Services
 {
     internal static class IntExtensions
     {
+        #region #region Public Methods
+
         public static DateTime ToDateTimeFormat(this long s)
         {
             return DateTime.MinValue.AddSeconds((double)s / 10000);
@@ -18,5 +20,7 @@ namespace YY.EventLogAssistant.Services
             else
                 return DateTime.MinValue.AddSeconds((double)s / 10000);
         }
+
+        #endregion
     }
 }

@@ -22,4 +22,10 @@
     <ProjectReference Include="..\YY.EventLogAssistant\YY.EventLogAssistant.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="SampleData\SQLiteFormatEventLog\1Cv8.lgd">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

@@ -7,6 +7,8 @@ namespace YY.EventLogAssistant.Services
 {
     internal static class DateTimeExtensions
     {
+        #region Public Methods
+
         public static DateTime? ToNullIfTooEarlyForDb(this DateTime date)
         {
             return (date >= (DateTime)SqlDateTime.MinValue) ? date : (DateTime?)null;
@@ -28,5 +30,7 @@ namespace YY.EventLogAssistant.Services
                 new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)
                 ).TotalMilliseconds;
         }
+
+        #endregion
     }
 }

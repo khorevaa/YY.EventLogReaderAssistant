@@ -8,6 +8,8 @@ namespace YY.EventLogAssistant.Services.Tests
 {
     public class DateTimeExtensionsTests
     {
+        #region Public Methods
+
         [Fact]
         public void ToNullIfTooEarlyForDb_IsNull_Test()
         {
@@ -45,5 +47,7 @@ namespace YY.EventLogAssistant.Services.Tests
 
             Assert.Equal(correctDate, resultDate);
         }
+
+        #endregion
     }
 }

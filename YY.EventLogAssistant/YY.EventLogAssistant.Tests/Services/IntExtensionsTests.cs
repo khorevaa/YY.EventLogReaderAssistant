@@ -7,6 +7,8 @@ namespace YY.EventLogAssistant.Services.Tests
 {
     public class IntExtensionsTests
     {
+        #region Public Methods
+
         [Fact]
         public void ToDateTimeFormat_Test()
         {
@@ -26,5 +28,7 @@ namespace YY.EventLogAssistant.Services.Tests
 
             Assert.Equal(checkDate, resultDate);
         }
+
+        #endregion
     }
 }

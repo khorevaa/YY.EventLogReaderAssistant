@@ -7,6 +7,8 @@ namespace YY.EventLogAssistant.Services.Tests
 {
     public class StringExtensionsTests
     {
+        #region Public Methods
+
         [Fact]
         public void From16To10_Test()
         {
@@ -91,5 +93,7 @@ namespace YY.EventLogAssistant.Services.Tests
 
             Assert.Equal(checkValue, resultValue);
         }
+
+        #endregion
     }
 }

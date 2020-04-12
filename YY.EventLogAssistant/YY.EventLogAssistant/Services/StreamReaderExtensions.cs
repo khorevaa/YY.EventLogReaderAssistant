@@ -7,9 +7,15 @@ namespace YY.EventLogAssistant.Services
 {
     internal static class StreamReaderExtensions
     {
+        #region Private Member Variables
+
         readonly static FieldInfo charPosField = typeof(StreamReader).GetField("_charPos", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly);
         readonly static FieldInfo byteLenField = typeof(StreamReader).GetField("_byteLen", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly);
         readonly static FieldInfo charBufferField = typeof(StreamReader).GetField("_charBuffer", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+
+        #endregion
+
+        #region Public Methods
 
         public static long GetPosition(this StreamReader reader)
         {
@@ -41,6 +47,7 @@ namespace YY.EventLogAssistant.Services
                 stream.ReadLine();
             }
         }
-    }
 
+        #endregion
+    }
 }

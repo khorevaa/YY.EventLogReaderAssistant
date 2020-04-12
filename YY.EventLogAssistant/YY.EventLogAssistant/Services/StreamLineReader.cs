@@ -8,14 +8,20 @@ namespace YY.EventLogAssistant.Services
 {
     internal class StreamLineReader : IDisposable
     {
-        const int BufferLength = 1024;
+        #region Private Member Variables
 
-        Stream _Base;
-        int _Read = 0, _Index = 0;
-        byte[] _Bff = new byte[BufferLength];
+        private const int BufferLength = 1024;
 
-        long _CurrentPosition = 0;
-        long _CurrentLine = 0;
+        private Stream _Base;
+        private int _Read = 0, _Index = 0;
+        private byte[] _Bff = new byte[BufferLength];
+
+        private long _CurrentPosition = 0;
+        private long _CurrentLine = 0;
+
+        #endregion
+
+        #region Public Methods
 
         public long CurrentPosition { get { return _CurrentPosition; } }
 
@@ -26,34 +32,6 @@ namespace YY.EventLogAssistant.Services
         public bool GoToLine(long goToLine) { return IGetCount(goToLine, true) == goToLine; }
 
         public long GetCount(long goToLine) { return IGetCount(goToLine, false); }
-
-        long IGetCount(long goToLine, bool stopWhenLine)
-        {
-            _Base.Seek(0, SeekOrigin.Begin);
-            _CurrentPosition = 0;
-            _CurrentLine = 0;
-            _Index = 0;
-            _Read = 0;
-
-            long savePosition = _Base.Length;
-
-            do
-            {
-                if (_CurrentLine == goToLine)
-                {
-                    savePosition = _CurrentPosition;
-                    if (stopWhenLine) return _CurrentLine;
-                }
-            }
-            while (ReadLine() != null);
-
-            long count = _CurrentLine;
-
-            _CurrentLine = goToLine;
-            _Base.Seek(savePosition, SeekOrigin.Begin);
-
-            return count;
-        }
 
         public string ReadLine()
         {
@@ -74,7 +52,7 @@ namespace YY.EventLogAssistant.Services
                     }
                 }
 
-                for (int max = _Index + _Read; _Index < max; )
+                for (int max = _Index + _Read; _Index < max;)
                 {
                     char ch = (char)_Bff[_Index];
                     _Read--; _Index++;
@@ -103,5 +81,39 @@ namespace YY.EventLogAssistant.Services
                 _Base = null;
             }
         }
+
+        #endregion
+
+        #region Private Methods
+
+        private long IGetCount(long goToLine, bool stopWhenLine)
+        {
+            _Base.Seek(0, SeekOrigin.Begin);
+            _CurrentPosition = 0;
+            _CurrentLine = 0;
+            _Index = 0;
+            _Read = 0;
+
+            long savePosition = _Base.Length;
+
+            do
+            {
+                if (_CurrentLine == goToLine)
+                {
+                    savePosition = _CurrentPosition;
+                    if (stopWhenLine) return _CurrentLine;
+                }
+            }
+            while (ReadLine() != null);
+
+            long count = _CurrentLine;
+
+            _CurrentLine = goToLine;
+            _Base.Seek(savePosition, SeekOrigin.Begin);
+
+            return count;
+        }
+
+        #endregion
     }
 }
