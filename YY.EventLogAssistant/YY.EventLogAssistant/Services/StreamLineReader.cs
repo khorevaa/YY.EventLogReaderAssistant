@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.RegularExpressions;
 
 [assembly: InternalsVisibleTo("YY.EventLogAssistant.Tests")]
 namespace YY.EventLogAssistant.Services
@@ -10,24 +12,34 @@ namespace YY.EventLogAssistant.Services
     {
         #region Private Member Variables
 
-        private const int BufferLength = 1024;
+        private const int _bufferLength = 1024;
+        private byte[] _utf8Preamble = Encoding.UTF8.GetPreamble();
+        private Stream _base;
+        private Encoding _encoding;
+        private int _read = 0, _index = 0;
+        private byte[] _readBuffer = new byte[_bufferLength];
 
-        private Stream _Base;
-        private int _Read = 0, _Index = 0;
-        private byte[] _Bff = new byte[BufferLength];
+        #endregion
 
-        private long _CurrentPosition = 0;
-        private long _CurrentLine = 0;
+        #region Constructor
+
+        public StreamLineReader(Stream stream) : this(stream, Encoding.UTF8)
+        {
+        }
+
+        public StreamLineReader(Stream stream, Encoding encoding)
+        {
+            _base = stream;
+            _encoding = encoding;
+        }
 
         #endregion
 
         #region Public Methods
 
-        public long CurrentPosition { get { return _CurrentPosition; } }
+        public long CurrentPosition { get; private set; } = 0;
 
-        public long CurrentLine { get { return _CurrentLine; } }
-
-        public StreamLineReader(Stream stream) { _Base = stream; }
+        public long CurrentLine { get; private set; } = 0;
 
         public bool GoToLine(long goToLine)
         { 
@@ -41,50 +53,61 @@ namespace YY.EventLogAssistant.Services
 
         public string ReadLine()
         {
-            bool found = false;
+            bool resultFound = false;
 
-            StringBuilder sb = new StringBuilder();
-            while (!found)
+            List<byte> bufferConvertEncodingCollection = new List<byte>();
+            while (!resultFound)
             {
-                if (_Read <= 0)
+                if (_read <= 0)
                 {
-                    // Read next block
-                    _Index = 0;
-                    _Read = _Base.Read(_Bff, 0, BufferLength);
-                    if (_Read == 0)
+                    _index = 0;
+                    _read = _base.Read(_readBuffer, 0, _bufferLength);
+                    if (_read == 0)
                     {
-                        if (sb.Length > 0) break;
+                        if (bufferConvertEncodingCollection.Count > 0) 
+                            break;
+
                         return null;
                     }
                 }
 
-                for (int max = _Index + _Read; _Index < max;)
+                for (int max = _index + _read; _index < max;)
                 {
-                    char ch = (char)_Bff[_Index];
-                    _Read--; _Index++;
-                    _CurrentPosition++;
+                    char ch = (char)_readBuffer[_index];
+                                        
+                    _read--;
+                    _index++;
+                    CurrentPosition++;
 
                     if (ch == '\0' || ch == '\n')
                     {
-                        found = true;
+                        resultFound = true;
                         break;
                     }
-                    else if (ch == '\r') continue;
-                    else sb.Append(ch);
+                    else if (ch == '\r')
+                    {
+                        continue;
+                    } else
+                    {
+                        bufferConvertEncodingCollection.Add(_readBuffer[_index - 1]);
+                    }
                 }
             }
 
-            _CurrentLine++;
-            return sb.ToString();
+            byte[] bufferConvertEncoding = bufferConvertEncodingCollection.ToArray();
+            string prepearedString = GetStringFromBuffer(bufferConvertEncoding, bufferConvertEncoding.Length);
+            CurrentLine++;
+
+            return prepearedString;
         }
 
         public void Dispose()
         {
-            if (_Base != null)
+            if (_base != null)
             {
-                _Base.Close();
-                _Base.Dispose();
-                _Base = null;
+                _base.Close();
+                _base.Dispose();
+                _base = null;
             }
         }
 
@@ -94,30 +117,64 @@ namespace YY.EventLogAssistant.Services
 
         private long IGetCount(long goToLine, bool stopWhenLine)
         {
-            _Base.Seek(0, SeekOrigin.Begin);
-            _CurrentPosition = 0;
-            _CurrentLine = 0;
-            _Index = 0;
-            _Read = 0;
+            _base.Seek(0, SeekOrigin.Begin);
+            CurrentPosition = 0;
+            CurrentLine = 0;
+            _index = 0;
+            _read = 0;
 
-            long savePosition = _Base.Length;
+            long savePosition = _base.Length;
 
             do
             {
-                if (_CurrentLine == goToLine)
+                if (CurrentLine == goToLine)
                 {
-                    savePosition = _CurrentPosition;
-                    if (stopWhenLine) return _CurrentLine;
+                    savePosition = CurrentPosition;
+                    if (stopWhenLine) return CurrentLine;
                 }
             }
             while (ReadLine() != null);
 
-            long count = _CurrentLine;
+            long count = CurrentLine;
 
-            _CurrentLine = goToLine;
-            _Base.Seek(savePosition, SeekOrigin.Begin);
+            CurrentLine = goToLine;
+            _base.Seek(savePosition, SeekOrigin.Begin);
 
             return count;
+        }
+
+        private string GetStringFromBuffer(byte[] bufferString, int bufferConvertEncodingIndex)
+        {
+            int bufferSizeCopy = bufferConvertEncodingIndex;
+            byte[] readyConvertData = new byte[bufferSizeCopy];
+            Array.Copy(bufferString, 0, readyConvertData, 0, bufferSizeCopy);
+
+            string prepearedString;
+            if (_encoding == Encoding.UTF8 && byteArrayStartsWith(readyConvertData, 0, _utf8Preamble))
+            {
+                prepearedString = _encoding.GetString(readyConvertData, _utf8Preamble.Length, readyConvertData.Length - _utf8Preamble.Length);
+            }
+            else
+                prepearedString = _encoding.GetString(readyConvertData);
+
+            return prepearedString;
+        }
+
+        private bool byteArrayStartsWith(byte[] source, int offset, byte[] match)
+        {
+            if (match.Length > (source.Length - offset))
+            {
+                return false;
+            }
+
+            for (int i = 0; i < match.Length; i++)
+            {
+                if (source[offset + i] != match[i])
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
         #endregion
