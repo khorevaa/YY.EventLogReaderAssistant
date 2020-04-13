@@ -9,7 +9,6 @@ namespace YY.EventLogAssistant.Tests
 
         private readonly string sampleDataDirectory;
         private readonly string sampleDatabaseFileLGF;
-        private readonly string[] sampleFilesLGP;
         private readonly string sampleDatabaseFileLGD;
 
         #endregion
@@ -21,10 +20,6 @@ namespace YY.EventLogAssistant.Tests
             string currentDirectory = Directory.GetCurrentDirectory();
             sampleDataDirectory = Path.Combine(currentDirectory, "SampleData");
             sampleDatabaseFileLGF = Path.Combine(sampleDataDirectory, "LGFFormatEventLog", "1Cv8.lgf");
-
-            string dataDirectoryLGF = Path.Combine(sampleDataDirectory, "LGFFormatEventLog");
-            sampleFilesLGP = Directory.GetFiles(dataDirectoryLGF, "*.lgp");
-
             sampleDatabaseFileLGD = Path.Combine(sampleDataDirectory, "SQLiteFormatEventLog", "1Cv8.lgd");
         }
 
