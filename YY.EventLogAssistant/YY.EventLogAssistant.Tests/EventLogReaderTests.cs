@@ -35,6 +35,8 @@ namespace YY.EventLogAssistant.Tests
             long countRecordsStepByStep = 0;
             long countRecordsStepByStepAfterReset = 0;
             long countRecordsStepByStepAfterSetPosition = 0;
+            string dataAfterGoEvent = string.Empty;
+            string dataAfterSetPosition = string.Empty;
 
             using (EventLogReader reader = EventLogReader.CreateReader(sampleDatabaseFileLGF))
             {
@@ -67,6 +69,16 @@ namespace YY.EventLogAssistant.Tests
                     reader.NextFile();
                     countLogFiles += 1;
                 }
+
+                reader.Reset();
+                reader.GoToEvent(5);
+                EventLogPosition eventPosition = reader.GetCurrentPosition();
+                if (reader.Read())
+                    dataAfterGoEvent = reader.CurrentRow.Data;
+                reader.Reset();
+                reader.SetCurrentPosition(eventPosition);
+                if (reader.Read())
+                    dataAfterSetPosition = reader.CurrentRow.Data;
             }
 
             Assert.NotEqual(0, countLogFiles);
@@ -77,6 +89,7 @@ namespace YY.EventLogAssistant.Tests
             Assert.Equal(countRecords, countRecordsStepByStep);
             Assert.Equal(countRecords, countRecordsStepByStepAfterReset);
             Assert.Equal(countRecords, countRecordsStepByStepAfterSetPosition);
+            Assert.Equal(dataAfterGoEvent, dataAfterSetPosition);
         }
 
         [Fact]
@@ -86,6 +99,8 @@ namespace YY.EventLogAssistant.Tests
             long countRecordsStepByStep = 0;
             long countRecordsStepByStepAfterReset = 0;
             long countRecordsStepByStepAfterSetPosition = 0;
+            string dataAfterGoEvent = string.Empty;
+            string dataAfterSetPosition = string.Empty;
 
             using (EventLogReader reader = EventLogReader.CreateReader(sampleDatabaseFileLGD))
             {
@@ -110,6 +125,16 @@ namespace YY.EventLogAssistant.Tests
                 {
                     countRecordsStepByStepAfterSetPosition += 1;
                 }
+
+                reader.Reset();
+                reader.GoToEvent(5);
+                EventLogPosition eventPosition = reader.GetCurrentPosition();
+                if (reader.Read())
+                    dataAfterGoEvent = reader.CurrentRow.Data;
+                reader.Reset();
+                reader.SetCurrentPosition(eventPosition);
+                if (reader.Read())
+                    dataAfterSetPosition = reader.CurrentRow.Data;
             }
                         
             Assert.NotEqual(0, countRecords);
@@ -119,6 +144,7 @@ namespace YY.EventLogAssistant.Tests
             Assert.Equal(countRecords, countRecordsStepByStep);
             Assert.Equal(countRecords, countRecordsStepByStepAfterReset);
             Assert.Equal(countRecords, countRecordsStepByStepAfterSetPosition);
+            Assert.Equal(dataAfterGoEvent, dataAfterSetPosition);
         }
 
         #endregion
