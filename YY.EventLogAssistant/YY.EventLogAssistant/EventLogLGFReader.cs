@@ -230,9 +230,14 @@ namespace YY.EventLogAssistant
             _currentFileEventNumber = newPosition.EventNumber;
 
             InitializeStream(_defaultBeginLineForLGF, _indexCurrentFile);
+            long beginReadPosition =_stream.GetPosition();
+
+            long newStreamPosition = (long)newPosition.StreamPosition;
+            if(newStreamPosition < beginReadPosition)            
+                newStreamPosition = beginReadPosition;            
 
             if (newPosition.StreamPosition != null)
-                SetCurrentFileStreamPosition((long)newPosition.StreamPosition);
+                SetCurrentFileStreamPosition(newStreamPosition);
         }
 
         public override long Count()
@@ -252,6 +257,8 @@ namespace YY.EventLogAssistant
             }
 
             _indexCurrentFile = 0;
+            _currentFileEventNumber = 0;
+            _currentRow = null;
         }
 
         public override void NextFile()

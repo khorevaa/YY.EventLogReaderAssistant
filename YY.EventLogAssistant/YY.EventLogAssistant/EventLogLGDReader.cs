@@ -178,18 +178,25 @@ namespace YY.EventLogAssistant
             long eventCount = Count();
             if (eventCount >= eventNumber)
             {
+                long eventNumberToSkip = eventNumber - 1;
+                if (eventNumberToSkip <= 0)
+                {
+                    _lastRowId = 0;
+                    return true;
+                }
+
                 using (_connection = new SQLiteConnection(ConnectionString))
                 {
                     _connection.Open();
 
                     string queryText = String.Format(
                          "Select\n" +
-                         "    el.RowId,\n" +
+                         "    el.RowId\n" +
                          "From\n" +
                          "    EventLog el\n" +
                          "Where RowID > {0}\n" +
                          "Order By rowID\n" +
-                         "Limit 1 OFFSET {1}\n", _lastRowId, eventNumber);
+                         "Limit 1 OFFSET {1}\n", _lastRowId, eventNumberToSkip);
 
                     using (SQLiteCommand cmd = new SQLiteCommand(queryText, _connection))
                     {
@@ -266,6 +273,8 @@ namespace YY.EventLogAssistant
             _lastRowId = 0;
             _lastRowNumberFromBuffer = 0;
             _readBuffer.Clear();
+            _currentFileEventNumber = 0;
+            _currentRow = null;
         }
         public override void Dispose()
         {
