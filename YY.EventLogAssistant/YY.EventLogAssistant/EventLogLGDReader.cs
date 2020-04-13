@@ -182,6 +182,7 @@ namespace YY.EventLogAssistant
                 if (eventNumberToSkip <= 0)
                 {
                     _lastRowId = 0;
+                    _currentFileEventNumber = 0;
                     return true;
                 }
 
@@ -205,12 +206,13 @@ namespace YY.EventLogAssistant
                             if (reader.Read())
                             {
                                 _lastRowId = reader.GetInt64OrDefault(0);
+                                _currentFileEventNumber = eventNumber;
                                 return true;
                             }
                         }
                     }
                 }               
-            }
+            }            
 
             return false;
         }

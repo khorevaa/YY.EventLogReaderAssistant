@@ -191,7 +191,7 @@ namespace YY.EventLogAssistant
                     moved = true;
                     break;
                 }
-            }
+            }           
 
             if (moved && fileIndex >= 0 && currentLineNumber >= 0)
             {
