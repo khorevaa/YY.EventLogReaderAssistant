@@ -4,7 +4,9 @@ using System.IO;
 using System.Linq;
 using YY.EventLogAssistant.Services;
 using YY.EventLogAssistant.Models;
+using System.Runtime.CompilerServices;
 
+[assembly: InternalsVisibleTo("YY.EventLogAssistant.Tests")]
 namespace YY.EventLogAssistant
 {
     public abstract partial class EventLogReader : IEventLogReader, IDisposable

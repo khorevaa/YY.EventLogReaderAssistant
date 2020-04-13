@@ -1,4 +1,7 @@
-﻿namespace YY.EventLogAssistant
+﻿using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("YY.EventLogAssistant.Tests")]
+namespace YY.EventLogAssistant
 {
     public sealed class EventLogPosition
     {

@@ -4,7 +4,9 @@ using System.Linq;
 using System.Data.SQLite;
 using YY.EventLogAssistant.Models;
 using YY.EventLogAssistant.Services;
+using System.Runtime.CompilerServices;
 
+[assembly: InternalsVisibleTo("YY.EventLogAssistant.Tests")]
 namespace YY.EventLogAssistant
 {
     internal sealed class EventLogLGDReader : EventLogReader    

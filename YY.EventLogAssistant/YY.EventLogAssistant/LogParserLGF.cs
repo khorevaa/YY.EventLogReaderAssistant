@@ -7,7 +7,9 @@ using YY.EventLogAssistant.Services;
 using System.Text.RegularExpressions;
 using System.IO;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
+[assembly: InternalsVisibleTo("YY.EventLogAssistant.Tests")]
 namespace YY.EventLogAssistant
 {
     internal sealed class LogParserLGF

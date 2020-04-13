@@ -1,5 +1,6 @@
-﻿using YY.EventLogAssistant.Models;
+﻿using System.Runtime.CompilerServices;
 
+[assembly: InternalsVisibleTo("YY.EventLogAssistant.Tests")]
 namespace YY.EventLogAssistant
 {
     internal interface IEventLogReader

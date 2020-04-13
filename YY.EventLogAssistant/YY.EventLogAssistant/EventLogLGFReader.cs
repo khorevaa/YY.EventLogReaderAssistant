@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using YY.EventLogAssistant.Models;
 using YY.EventLogAssistant.Services;
 
+[assembly: InternalsVisibleTo("YY.EventLogAssistant.Tests")]
 namespace YY.EventLogAssistant
 {
     internal sealed class EventLogLGFReader : EventLogReader
