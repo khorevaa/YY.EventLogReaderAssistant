@@ -3,6 +3,10 @@ using Xunit;
 
 namespace YY.EventLogReaderAssistant.Tests
 {
+    [CollectionDefinition("SQLite Event Log Test", DisableParallelization = true)]
+    public class SQLiteEventLogTestDefinition { }
+
+    [Collection("SQLite Event Log Test")]
     public class EventLogReaderTests
     {
         #region Private Member Variables

@@ -6,6 +6,7 @@ using Xunit;
 
 namespace YY.EventLogReaderAssistant.Services.Tests
 {
+    [Collection("SQLite Event Log Test")]
     public class SQLiteExtensionsTests
     {
         #region Private Member Variables
