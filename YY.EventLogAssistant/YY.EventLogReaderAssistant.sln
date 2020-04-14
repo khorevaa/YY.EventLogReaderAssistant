@@ -3,16 +3,16 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30002.166
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YY.EventLogReaderAssistant", "YY.EventLogAssistant\YY.EventLogReaderAssistant.csproj", "{5B2E13F6-9F93-46AA-AB61-7B3A4331840D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YY.EventLogReaderAssistant", "YY.EventLogReaderAssistant\YY.EventLogReaderAssistant.csproj", "{5B2E13F6-9F93-46AA-AB61-7B3A4331840D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YY.EventLogAssistantConsoleApp", "YY.EventLogAssistantConsoleApp\YY.EventLogAssistantConsoleApp.csproj", "{9CF3CC92-F793-4398-896A-353DAACC0DE0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YY.EventLogReaderAssistantConsoleApp", "YY.EventLogReaderAssistantConsoleApp\YY.EventLogReaderAssistantConsoleApp.csproj", "{9CF3CC92-F793-4398-896A-353DAACC0DE0}"
 	ProjectSection(ProjectDependencies) = postProject
 		{5B2E13F6-9F93-46AA-AB61-7B3A4331840D} = {5B2E13F6-9F93-46AA-AB61-7B3A4331840D}
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{B3EA600F-E229-42E8-8FC4-F8097627AF81}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YY.EventLogReaderAssistant.Tests", "YY.EventLogAssistant.Tests\YY.EventLogReaderAssistant.Tests.csproj", "{A4CAB49D-B34A-4299-B0C4-864A874B10D4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YY.EventLogReaderAssistant.Tests", "YY.EventLogReaderAssistant.Tests\YY.EventLogReaderAssistant.Tests.csproj", "{A4CAB49D-B34A-4299-B0C4-864A874B10D4}"
 	ProjectSection(ProjectDependencies) = postProject
 		{5B2E13F6-9F93-46AA-AB61-7B3A4331840D} = {5B2E13F6-9F93-46AA-AB61-7B3A4331840D}
 	EndProjectSection

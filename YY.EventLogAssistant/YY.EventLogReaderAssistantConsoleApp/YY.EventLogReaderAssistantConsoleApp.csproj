@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\YY.EventLogAssistant\YY.EventLogReaderAssistant.csproj" />
+    <ProjectReference Include="..\YY.EventLogReaderAssistant\YY.EventLogReaderAssistant.csproj" />
   </ItemGroup>
 
 </Project>
