@@ -19,8 +19,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YY.EventLogReaderAssistant.
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{759338A0-58EF-43A6-B9D5-E87F82C4B65A}"
 	ProjectSection(SolutionItems) = preProject
+		.travis.yml = .travis.yml
 		LICENSE = LICENSE
 		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{D47D7992-0C16-4EF7-9C0A-258DA628DDC0}"
+	ProjectSection(SolutionItems) = preProject
+		Scripts\build.sh = Scripts\build.sh
+		Scripts\runTests.sh = Scripts\runTests.sh
 	EndProjectSection
 EndProject
 Global
@@ -47,6 +54,7 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{A4CAB49D-B34A-4299-B0C4-864A874B10D4} = {B3EA600F-E229-42E8-8FC4-F8097627AF81}
+		{D47D7992-0C16-4EF7-9C0A-258DA628DDC0} = {759338A0-58EF-43A6-B9D5-E87F82C4B65A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9F628392-F4A2-4E4C-B478-BDB29B256BA4}
