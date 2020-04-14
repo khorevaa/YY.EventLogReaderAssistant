@@ -17,19 +17,24 @@ namespace YY.EventLogReaderAssistantConsoleApp
             string dataDirectoryPath = args[0];
             Console.WriteLine($"{DateTime.Now}: Инициализация чтения логов \"{dataDirectoryPath}\"...");
 
-            EventLogReader reader = EventLogReader.CreateReader(dataDirectoryPath);
-            reader.AfterReadEvent += Reader_AfterReadEvent;
-            reader.AfterReadFile += Reader_AfterReadFile;
-            reader.BeforeReadEvent += Reader_BeforeReadEvent;
-            reader.BeforeReadFile += Reader_BeforeReadFile;
-            reader.OnErrorEvent += Reader_OnErrorEvent;
+            using (EventLogReader reader = EventLogReader.CreateReader(dataDirectoryPath))
+            {
+                reader.AfterReadEvent += Reader_AfterReadEvent;
+                reader.AfterReadFile += Reader_AfterReadFile;
+                reader.BeforeReadEvent += Reader_BeforeReadEvent;
+                reader.BeforeReadFile += Reader_BeforeReadFile;
+                reader.OnErrorEvent += Reader_OnErrorEvent;
 
-            Console.WriteLine($"{DateTime.Now}: Всего событий к обработке: ({reader.Count()})...");
-            Console.WriteLine();
-            Console.WriteLine();
+                Console.WriteLine($"{DateTime.Now}: Всего событий к обработке: ({reader.Count()})...");
+                Console.WriteLine();
+                Console.WriteLine();
 
-            while (reader.Read())           
-                _eventNumber += 1;
+                while (reader.Read())
+                {
+                    // reader.CurrentRow - данные текущего события
+                    _eventNumber += 1;
+                }
+            }
 
             Console.WriteLine($"{DateTime.Now}: Для выхода нажмите любую клавишу...");
             Console.ReadKey();
