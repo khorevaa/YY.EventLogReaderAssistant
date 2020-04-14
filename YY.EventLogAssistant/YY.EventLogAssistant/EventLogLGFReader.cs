@@ -4,11 +4,11 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
-using YY.EventLogAssistant.Models;
-using YY.EventLogAssistant.Services;
+using YY.EventLogReaderAssistant.Models;
+using YY.EventLogReaderAssistant.Services;
 
-[assembly: InternalsVisibleTo("YY.EventLogAssistant.Tests")]
-namespace YY.EventLogAssistant
+[assembly: InternalsVisibleTo("YY.EventLogReaderAssistant.Tests")]
+namespace YY.EventLogReaderAssistant
 {
     internal sealed class EventLogLGFReader : EventLogReader
     {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace YY.EventLogAssistant
+namespace YY.EventLogReaderAssistant
 {
 
     public sealed class BeforeReadEventArgs : EventArgs

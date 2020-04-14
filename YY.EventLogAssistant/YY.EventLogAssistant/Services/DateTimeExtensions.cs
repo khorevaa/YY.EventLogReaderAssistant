@@ -2,8 +2,8 @@
 using System.Data.SqlTypes;
 using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("YY.EventLogAssistant.Tests")]
-namespace YY.EventLogAssistant.Services
+[assembly: InternalsVisibleTo("YY.EventLogReaderAssistant.Tests")]
+namespace YY.EventLogReaderAssistant.Services
 {
     internal static class DateTimeExtensions
     {

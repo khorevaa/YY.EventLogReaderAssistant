@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using YY.EventLogAssistant.Services;
-using YY.EventLogAssistant.Models;
+using YY.EventLogReaderAssistant.Services;
+using YY.EventLogReaderAssistant.Models;
 using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("YY.EventLogAssistant.Tests")]
-namespace YY.EventLogAssistant
+[assembly: InternalsVisibleTo("YY.EventLogReaderAssistant.Tests")]
+namespace YY.EventLogReaderAssistant
 {
     public abstract partial class EventLogReader : IEventLogReader, IDisposable
     {

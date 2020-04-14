@@ -1,4 +1,4 @@
-﻿namespace YY.EventLogAssistant.Models
+﻿namespace YY.EventLogReaderAssistant.Models
 {
     public enum Severity
     {

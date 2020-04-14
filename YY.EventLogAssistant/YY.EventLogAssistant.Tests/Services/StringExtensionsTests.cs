@@ -2,7 +2,7 @@
 using System.Text;
 using Xunit;
 
-namespace YY.EventLogAssistant.Services.Tests
+namespace YY.EventLogReaderAssistant.Services.Tests
 {
     public class StringExtensionsTests
     {

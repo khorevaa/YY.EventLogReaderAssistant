@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace YY.EventLogAssistant.Models
+namespace YY.EventLogReaderAssistant.Models
 {
     public class RowData
     {

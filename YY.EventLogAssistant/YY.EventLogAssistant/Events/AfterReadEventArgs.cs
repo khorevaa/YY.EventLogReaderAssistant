@@ -1,7 +1,7 @@
-﻿using YY.EventLogAssistant.Models;
+﻿using YY.EventLogReaderAssistant.Models;
 using System;
 
-namespace YY.EventLogAssistant
+namespace YY.EventLogReaderAssistant
 {
     public sealed class AfterReadEventArgs : EventArgs
     {

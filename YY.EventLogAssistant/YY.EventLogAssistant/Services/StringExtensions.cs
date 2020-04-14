@@ -4,8 +4,8 @@ using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
 
-[assembly: InternalsVisibleTo("YY.EventLogAssistant.Tests")]
-namespace YY.EventLogAssistant.Services
+[assembly: InternalsVisibleTo("YY.EventLogReaderAssistant.Tests")]
+namespace YY.EventLogReaderAssistant.Services
 {
     internal static class StringExtensions
     {

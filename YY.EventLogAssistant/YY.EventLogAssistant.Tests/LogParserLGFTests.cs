@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using Xunit;
 
-namespace YY.EventLogAssistant.Tests
+namespace YY.EventLogReaderAssistant.Tests
 {
     public class LogParserLGFTests
     {

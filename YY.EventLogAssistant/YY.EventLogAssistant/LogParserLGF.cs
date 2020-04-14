@@ -1,16 +1,16 @@
-﻿using YY.EventLogAssistant.Models;
+﻿using YY.EventLogReaderAssistant.Models;
 using System;
 using System.Globalization;
 using System.Linq;
 using System.Text;
-using YY.EventLogAssistant.Services;
+using YY.EventLogReaderAssistant.Services;
 using System.Text.RegularExpressions;
 using System.IO;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("YY.EventLogAssistant.Tests")]
-namespace YY.EventLogAssistant
+[assembly: InternalsVisibleTo("YY.EventLogReaderAssistant.Tests")]
+namespace YY.EventLogReaderAssistant
 {
     internal sealed class LogParserLGF
     {

@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using Xunit;
 
-namespace YY.EventLogAssistant.Services.Tests
+namespace YY.EventLogReaderAssistant.Services.Tests
 {
     public class SQLiteExtensionsTests
     {

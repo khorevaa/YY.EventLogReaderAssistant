@@ -1,9 +1,9 @@
 ﻿using System;
 using System.IO;
-using YY.EventLogAssistant;
-using YY.EventLogAssistant.Models;
+using YY.EventLogReaderAssistant;
+using YY.EventLogReaderAssistant.Models;
 
-namespace YY.EventLogAssistantConsoleApp
+namespace YY.EventLogReaderAssistantConsoleApp
 {
     class Program
     {

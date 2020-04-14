@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Data.SQLite;
-using YY.EventLogAssistant.Models;
-using YY.EventLogAssistant.Services;
+using YY.EventLogReaderAssistant.Models;
+using YY.EventLogReaderAssistant.Services;
 using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("YY.EventLogAssistant.Tests")]
-namespace YY.EventLogAssistant
+[assembly: InternalsVisibleTo("YY.EventLogReaderAssistant.Tests")]
+namespace YY.EventLogReaderAssistant
 {
     internal sealed class EventLogLGDReader : EventLogReader    
     {
