@@ -28,81 +28,63 @@ namespace YY.EventLogAssistant.Tests
         #region Public Methods
 
         [Fact]
-        public void ReadEventLogEvents_OldFormat_LGF_Test()
+        public void GetCount_NewFormat_LGD_Test()
         {
-            long countLogFiles = 0;
-            long countRecords = 0;
-            long countRecordsStepByStep = 0;
-            long countRecordsStepByStepAfterReset = 0;
-            long countRecordsStepByStepAfterSetPosition = 0;
-            string dataAfterGoEvent = string.Empty;
-            string dataAfterSetPosition = string.Empty;
-
-            using (EventLogReader reader = EventLogReader.CreateReader(sampleDatabaseFileLGF))
-            {
-                countRecords = reader.Count();
-
-                while(reader.Read())
-                {
-                    countRecordsStepByStep += 1;
-                }
-
-                reader.Reset();
-                while (reader.Read())
-                {
-                    countRecordsStepByStepAfterReset += 1;
-                }
-
-                reader.Reset();
-                EventLogPosition position = reader.GetCurrentPosition();
-                while (reader.Read());
-                reader.SetCurrentPosition(position);
-                while (reader.Read())
-                {
-                    countRecordsStepByStepAfterSetPosition += 1;
-                }
-
-                reader.Reset();
-                EventLogLGFReader readerLGF = (EventLogLGFReader)reader;
-                while (readerLGF.CurrentFile != null)
-                {
-                    reader.NextFile();
-                    countLogFiles += 1;
-                }
-
-                reader.Reset();
-                reader.GoToEvent(5);
-                EventLogPosition eventPosition = reader.GetCurrentPosition();
-                if (reader.Read())
-                    dataAfterGoEvent = reader.CurrentRow.Data;
-                reader.Reset();
-                reader.SetCurrentPosition(eventPosition);
-                if (reader.Read())
-                    dataAfterSetPosition = reader.CurrentRow.Data;
-            }
-
-            Assert.NotEqual(0, countLogFiles);
-            Assert.NotEqual(0, countRecords);
-            Assert.NotEqual(0, countRecordsStepByStep);
-            Assert.NotEqual(0, countRecordsStepByStepAfterReset);
-            Assert.NotEqual(0, countRecordsStepByStepAfterSetPosition);
-            Assert.Equal(countRecords, countRecordsStepByStep);
-            Assert.Equal(countRecords, countRecordsStepByStepAfterReset);
-            Assert.Equal(countRecords, countRecordsStepByStepAfterSetPosition);
-            Assert.Equal(dataAfterGoEvent, dataAfterSetPosition);
+            GetCount_Test(sampleDatabaseFileLGD);
         }
 
         [Fact]
-        public void ReadEventLogEvents_NewFormat_LGD_Test()
+        public void GetCount_OldFormat_LGF_Test()
+        {
+            GetCount_Test(sampleDatabaseFileLGF);
+        }
+
+        [Fact]
+        public void GetAndSetPosition_NewFormat_LGD_Test()
+        {
+            GetAndSetPosition_Test(sampleDatabaseFileLGD);
+        }
+
+        [Fact]
+        public void GetAndSetPosition_OldFormat_LGF_Test()
+        {
+            GetAndSetPosition_Test(sampleDatabaseFileLGF);
+        }
+
+        [Fact]
+        public void CountLogFiles_NewFormat_LGD_Test()
+        {
+            GetCountLogFiles_Test(sampleDatabaseFileLGD);
+        }
+
+        [Fact]
+        public void CountLogFiles_OldFormat_LGF_Test()
+        {
+            GetCountLogFiles_Test(sampleDatabaseFileLGF);
+        }
+
+        [Fact]
+        public void GoToEvent_NewFormat_LGD_Test()
+        {
+            GoToEvent_Test(sampleDatabaseFileLGD);
+        }
+
+        [Fact]
+        public void GoToEvent_OldFormat_LGF_Test()
+        {
+            GoToEvent_Test(sampleDatabaseFileLGF);
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        private void GetCount_Test(string eventLogPath)
         {
             long countRecords = 0;
-            long countRecordsStepByStep = 0;
-            long countRecordsStepByStepAfterReset = 0;
-            long countRecordsStepByStepAfterSetPosition = 0;
-            string dataAfterGoEvent = string.Empty;
-            string dataAfterSetPosition = string.Empty;
+            long countRecordsStepByStep = 0;            
 
-            using (EventLogReader reader = EventLogReader.CreateReader(sampleDatabaseFileLGD))
+            using (EventLogReader reader = EventLogReader.CreateReader(eventLogPath))
             {
                 countRecords = reader.Count();
 
@@ -110,11 +92,26 @@ namespace YY.EventLogAssistant.Tests
                 {
                     countRecordsStepByStep += 1;
                 }
+            }
 
-                reader.Reset();
+            Assert.NotEqual(0, countRecords);
+            Assert.NotEqual(0, countRecordsStepByStep);
+            Assert.Equal(countRecords, countRecordsStepByStep);
+        }
+
+        private void GetAndSetPosition_Test(string eventLogPath)
+        {
+            long countRecords = 0;
+            long countRecordsStepByStep = 0;
+            long countRecordsStepByStepAfterSetPosition = 0;
+
+            using (EventLogReader reader = EventLogReader.CreateReader(eventLogPath))
+            {
+                countRecords = reader.Count();
+
                 while (reader.Read())
                 {
-                    countRecordsStepByStepAfterReset += 1;
+                    countRecordsStepByStep += 1;
                 }
 
                 reader.Reset();
@@ -125,25 +122,59 @@ namespace YY.EventLogAssistant.Tests
                 {
                     countRecordsStepByStepAfterSetPosition += 1;
                 }
+            }
 
+            Assert.NotEqual(0, countRecords);
+            Assert.NotEqual(0, countRecordsStepByStep);
+            Assert.NotEqual(0, countRecordsStepByStepAfterSetPosition);
+            Assert.Equal(countRecords, countRecordsStepByStep);
+            Assert.Equal(countRecords, countRecordsStepByStepAfterSetPosition);
+        }
+
+        private void GetCountLogFiles_Test(string eventLogPath)
+        {
+            long countLogFiles = 0;
+
+            using (EventLogReader reader = EventLogReader.CreateReader(eventLogPath))
+            {
                 reader.Reset();
+
+                if (reader is EventLogLGFReader)
+                {
+                    EventLogLGFReader readerLGF = (EventLogLGFReader)reader;
+                    while (readerLGF.CurrentFile != null)
+                    {
+                        reader.NextFile();
+                        countLogFiles += 1;
+                    }
+                } else if(reader is EventLogLGDReader)
+                {
+                    countLogFiles = 1;
+                }               
+            }
+
+            Assert.NotEqual(0, countLogFiles);
+        }
+
+        private void GoToEvent_Test(string eventLogPath)
+        {
+            string dataAfterGoEvent = string.Empty;
+            string dataAfterSetPosition = string.Empty;
+
+            using (EventLogReader reader = EventLogReader.CreateReader(eventLogPath))
+            {
                 reader.GoToEvent(5);
                 EventLogPosition eventPosition = reader.GetCurrentPosition();
                 if (reader.Read())
                     dataAfterGoEvent = reader.CurrentRow.Data;
+
                 reader.Reset();
+
                 reader.SetCurrentPosition(eventPosition);
                 if (reader.Read())
                     dataAfterSetPosition = reader.CurrentRow.Data;
             }
-                        
-            Assert.NotEqual(0, countRecords);
-            Assert.NotEqual(0, countRecordsStepByStep);
-            Assert.NotEqual(0, countRecordsStepByStepAfterReset);
-            Assert.NotEqual(0, countRecordsStepByStepAfterSetPosition);
-            Assert.Equal(countRecords, countRecordsStepByStep);
-            Assert.Equal(countRecords, countRecordsStepByStepAfterReset);
-            Assert.Equal(countRecords, countRecordsStepByStepAfterSetPosition);
+
             Assert.Equal(dataAfterGoEvent, dataAfterSetPosition);
         }
 

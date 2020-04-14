@@ -81,15 +81,18 @@ namespace YY.EventLogAssistant.Services.Tests
             using (SQLiteConnection connection = new SQLiteConnection(connectionString))
             {
                 connection.Open();
-                using SQLiteCommand command = new SQLiteCommand(queryText, connection);
-                SQLiteDataReader reader = command.ExecuteReader();
-                if (reader.Read())
+                using (SQLiteCommand command = new SQLiteCommand(queryText, connection))
                 {
-                    connectionId = SQLiteExtensions.GetInt64OrDefault(reader, 0);
-                    sessionId = SQLiteExtensions.GetInt64OrDefault(reader, 1);
+                    using (SQLiteDataReader reader = command.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            connectionId = SQLiteExtensions.GetInt64OrDefault(reader, 0);
+                            sessionId = SQLiteExtensions.GetInt64OrDefault(reader, 1);
+                        }
+                    }
                 }
             }
-
             Assert.Equal(0, connectionId);
             Assert.Equal(777, sessionId);
         }
