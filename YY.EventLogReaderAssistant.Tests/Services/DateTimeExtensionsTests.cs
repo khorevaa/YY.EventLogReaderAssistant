@@ -39,8 +39,10 @@ namespace YY.EventLogReaderAssistant.Services.Tests
         public void ToMilliseconds_Test()
         {
             DateTime sourceDate = new DateTime(2020, 1, 19);
-            long resultDate = sourceDate.ToMilliseconds();
-            long correctDate = 1579374000000;
+            DateTimeOffset dto = new DateTimeOffset(sourceDate);
+
+            long resultDate = sourceDate.ToMilliseconds();            
+            long correctDate = dto.ToUnixTimeMilliseconds();
 
             Assert.Equal(correctDate, resultDate);
         }
