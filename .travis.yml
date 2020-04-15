@@ -5,5 +5,11 @@ dotnet: 3.1
 install:
   - dotnet restore
 script:
-  - dotnet build
+  - dotnet build --configuration Release
   - dotnet test YY.EventLogReaderAssistant.Tests/YY.EventLogReaderAssistant.Tests.csproj
+deploy:
+  skip_cleanup: true
+  provider: script
+  script: chmod +x ./Scripts/deploy.sh && ./Scripts/deploy.sh $NUGET_API_KEY
+  on:
+    branch: master

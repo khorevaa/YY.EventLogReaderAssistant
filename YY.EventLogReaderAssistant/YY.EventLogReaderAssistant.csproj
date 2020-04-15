@@ -7,8 +7,11 @@
     <Copyright>Copyright (c) 2020 Permitin Yury</Copyright>
     <PackageProjectUrl>https://github.com/YPermitin/YY.EventLogReaderAssistant</PackageProjectUrl>
     <RepositoryUrl>https://github.com/YPermitin/YY.EventLogReaderAssistant</RepositoryUrl>
-    <PackageLicenseExpression>https://github.com/YPermitin/YY.EventLogReaderAssistant/blob/master/LICENSE</PackageLicenseExpression>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryType>GIT</RepositoryType>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageIcon></PackageIcon>
   </PropertyGroup>
 
   <ItemGroup>
