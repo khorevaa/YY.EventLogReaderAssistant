@@ -6,7 +6,7 @@ install:
   - dotnet restore
 script:
   - dotnet build --configuration Release
-  - dotnet test YY.EventLogReaderAssistant.Tests/YY.EventLogReaderAssistant.Tests.csproj
+  - dotnet test Tests/YY.EventLogReaderAssistant.Tests/YY.EventLogReaderAssistant.Tests.csproj
 deploy:
   skip_cleanup: true
   provider: script
