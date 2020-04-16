@@ -5,7 +5,7 @@
 ### Состояние сборки
 | Windows |  Linux |
 |:-------:|:------:|
-|  none | [![Build Status](https://travis-ci.org/YPermitin/YY.EventLogReaderAssistant.svg?branch=master)](https://travis-ci.org/YPermitin/YY.EventLogReaderAssistant) |
+| [![Build status](https://ci.appveyor.com/api/projects/status/github/ypermitin/yy.eventlogreaderassistant?branch=develop&svg=true)](https://ci.appveyor.com/project/YPermitin/yy-eventlogreaderassistant) | [![Build Status](https://travis-ci.org/YPermitin/YY.EventLogReaderAssistant.svg?branch=master)](https://travis-ci.org/YPermitin/YY.EventLogReaderAssistant) |
 
 # Состав репозитория
 
