@@ -1,6 +1,11 @@
-# Помощник чтения данных журнала регистрации 1С:Предприятие 8.x
+# Помощник чтения данных журнала регистрации 1С:Предприятие 8.x [![NuGet version](https://badge.fury.io/nu/YY.EventLogReaderAssistant.svg)](https://badge.fury.io/nu/YY.EventLogReaderAssistant)
 
 Библиотека для чтения файлов журнала регистрации платформы 1С:Предприятие 8.x. Поддерживается как старый текстовый формат (*.lgf, *.lgp), так и новый формат SQLite-базы (*.lgd).
+
+### Состояние сборки
+| Windows |  Linux |
+|:-------:|:------:|
+|  none | [![Build Status](https://travis-ci.org/YPermitin/YY.EventLogReaderAssistant.svg?branch=master)](https://travis-ci.org/YPermitin/YY.EventLogReaderAssistant) |
 
 # Состав репозитория
 
