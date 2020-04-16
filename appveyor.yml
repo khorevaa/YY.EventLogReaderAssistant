@@ -1,6 +1,5 @@
 version: 1.0.0.{build}
 configuration: Release
-platform: x64
 build:
   project: YY.EventLogReaderAssistant.sln
   publish_core_console: true
