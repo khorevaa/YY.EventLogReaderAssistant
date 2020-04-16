@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\YY.EventLogReaderAssistant\YY.EventLogReaderAssistant.csproj" />
+    <ProjectReference Include="..\..\YY.EventLogReaderAssistant\YY.EventLogReaderAssistant.csproj" />
   </ItemGroup>
 
   <ItemGroup>

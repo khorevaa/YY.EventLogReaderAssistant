@@ -12,7 +12,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YY.EventLogReaderAssistantC
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{B3EA600F-E229-42E8-8FC4-F8097627AF81}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YY.EventLogReaderAssistant.Tests", "YY.EventLogReaderAssistant.Tests\YY.EventLogReaderAssistant.Tests.csproj", "{A4CAB49D-B34A-4299-B0C4-864A874B10D4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YY.EventLogReaderAssistant.Tests", "Tests\YY.EventLogReaderAssistant.Tests\YY.EventLogReaderAssistant.Tests.csproj", "{A4CAB49D-B34A-4299-B0C4-864A874B10D4}"
 	ProjectSection(ProjectDependencies) = postProject
 		{5B2E13F6-9F93-46AA-AB61-7B3A4331840D} = {5B2E13F6-9F93-46AA-AB61-7B3A4331840D}
 	EndProjectSection
@@ -22,6 +22,16 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.travis.yml = .travis.yml
 		LICENSE = LICENSE
 		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{31A4A73B-5835-432D-831F-E7EF5D46F527}"
+	ProjectSection(SolutionItems) = preProject
+		Scripts\deploy.sh = Scripts\deploy.sh
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Nuget", "Nuget", "{CE6CDE09-1EDE-4509-AF28-E5343D268CFF}"
+	ProjectSection(SolutionItems) = preProject
+		Nuget\icon.png = Nuget\icon.png
 	EndProjectSection
 EndProject
 Global
@@ -48,6 +58,8 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{A4CAB49D-B34A-4299-B0C4-864A874B10D4} = {B3EA600F-E229-42E8-8FC4-F8097627AF81}
+		{31A4A73B-5835-432D-831F-E7EF5D46F527} = {759338A0-58EF-43A6-B9D5-E87F82C4B65A}
+		{CE6CDE09-1EDE-4509-AF28-E5343D268CFF} = {759338A0-58EF-43A6-B9D5-E87F82C4B65A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9F628392-F4A2-4E4C-B478-BDB29B256BA4}
