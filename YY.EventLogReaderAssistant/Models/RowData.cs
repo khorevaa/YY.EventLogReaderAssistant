@@ -15,7 +15,6 @@ namespace YY.EventLogReaderAssistant.Models
         [Key]
         [Column(Order = 3)]
         public long RowID { get; set; }
-        public long Id { get; set; }
         public Severity Severity { get; set; }
         public long? ConnectId { get; set; }
         public long? Session { get; set; }
