@@ -4,7 +4,6 @@ namespace YY.EventLogReaderAssistant.Models
 {
     public class RowData
     {
-        public InformationSystems InformationSystem { get; set; }
         public DateTimeOffset Period { get; set; }
         public long RowID { get; set; }
         public Severity Severity { get; set; }
