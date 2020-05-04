@@ -230,6 +230,10 @@ namespace YY.EventLogReaderAssistant
         }
         public override void SetCurrentPosition(EventLogPosition newPosition)
         {
+            Reset();
+            if (newPosition == null)
+                return;
+
             if (newPosition.CurrentFileReferences != _logFilePath)
                 throw new Exception("Invalid data file with references");
 
