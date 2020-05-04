@@ -58,6 +58,7 @@ namespace YY.EventLogReaderAssistant
         public string LogFilePath { get { return _logFilePath; } }
         public string LogFileDirectoryPath { get { return _logFileDirectoryPath; } }
 
+        protected DateTime _referencesReadDate;
         protected List<Applications> _applications;
         protected List<Computers> _computers;
         protected List<Metadata> _metadata;
@@ -87,6 +88,7 @@ namespace YY.EventLogReaderAssistant
             _users = new List<Users>();
             _workServers = new List<WorkServers>();
 
+            _referencesReadDate = DateTime.MinValue;
             ReadEventLogReferences();
         }
 
@@ -94,6 +96,7 @@ namespace YY.EventLogReaderAssistant
 
         #region Public Properties
 
+        public DateTime ReferencesReadDate { get { return _referencesReadDate; } }
         public IReadOnlyList<Applications> Applications { get { return _applications; } }
         public IReadOnlyList<Computers> Computers { get { return _computers; } }
         public IReadOnlyList<Metadata> Metadata { get { return _metadata; } }
@@ -289,7 +292,10 @@ namespace YY.EventLogReaderAssistant
 
         #region Private Methods
 
-        protected virtual void ReadEventLogReferences() { }
+        protected virtual void ReadEventLogReferences() 
+        { 
+
+        }
 
         #endregion
 

@@ -109,10 +109,14 @@ namespace YY.EventLogReaderAssistant
                                 {
                                     try
                                     {
+                                        DateTime rowPeriod = reader.GetInt64OrDefault(1).ToDateTimeFormat();
+                                        if (rowPeriod >= ReferencesReadDate)
+                                            ReadEventLogReferences();
+
                                         _readBuffer.Add(new RowData
                                         {
                                             RowID = reader.GetInt64OrDefault(0),
-                                            Period = reader.GetInt64OrDefault(1).ToDateTimeFormat(),
+                                            Period = rowPeriod,
                                             ConnectId = reader.GetInt64OrDefault(2),
                                             Session = reader.GetInt64OrDefault(3),
                                             TransactionStatus = GetTransactionStatus(reader.GetInt64OrDefault(4)),
@@ -296,6 +300,17 @@ namespace YY.EventLogReaderAssistant
 
         protected override void ReadEventLogReferences()
         {
+            _users.Clear();
+            _computers.Clear();
+            _events.Clear();
+            _metadata.Clear();
+            _applications.Clear();
+            _workServers.Clear();
+            _primaryPorts.Clear();
+            _secondaryPorts.Clear();
+
+            DateTime beginReadReferences = DateTime.Now;
+
             using (_connection = new SQLiteConnection(ConnectionString))
             {
                 _connection.Open();
@@ -405,6 +420,8 @@ namespace YY.EventLogReaderAssistant
                             });
                         }
                 }
+
+                _referencesReadDate = beginReadReferences;
             }
         }
 

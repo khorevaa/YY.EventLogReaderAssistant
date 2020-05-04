@@ -130,6 +130,13 @@ namespace YY.EventLogReaderAssistant
                         try
                         {
                             RowData eventData = LogParser.Parse(prepearedSourceData);
+
+                            if(eventData.Period >= ReferencesReadDate)
+                            {
+                                ReadEventLogReferences();
+                                eventData = LogParser.Parse(prepearedSourceData);
+                            }
+
                             _currentRow = eventData;
                         }
                         catch (Exception ex)
@@ -287,6 +294,17 @@ namespace YY.EventLogReaderAssistant
 
         protected override void ReadEventLogReferences()
         {
+            _users.Clear();
+            _computers.Clear();
+            _events.Clear();
+            _metadata.Clear();
+            _applications.Clear();
+            _workServers.Clear();
+            _primaryPorts.Clear();
+            _secondaryPorts.Clear();
+
+            DateTime beginReadReferences = DateTime.Now;
+
             LogParser.ReadEventLogReferences(
                    _users,
                    _computers,
@@ -296,6 +314,8 @@ namespace YY.EventLogReaderAssistant
                    _workServers,
                    _primaryPorts,
                    _secondaryPorts);
+
+            _referencesReadDate = beginReadReferences;
         }
 
         public long GetCurrentFileStreamPosition()

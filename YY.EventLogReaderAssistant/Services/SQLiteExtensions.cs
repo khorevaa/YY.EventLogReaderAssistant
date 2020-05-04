@@ -49,9 +49,10 @@ namespace YY.EventLogReaderAssistant.Services
             return builder.ToString();
         }
 
-        public static string GetConnectionString(string dbFile)
+        public static string GetConnectionString(string dbFile, bool readOnly = true)
         {
-            return String.Format("Data Source={0};Version=3;Read Only=True;", dbFile);
+            string readOnlyMode = readOnly ? "True" : "False";
+            return string.Format("Data Source={0};Version=3;Read Only={1};", dbFile, readOnlyMode);
         }
 
         #endregion
