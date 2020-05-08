@@ -54,9 +54,6 @@ namespace YY.EventLogReaderAssistant
         protected string _logFilePath;
         protected string _logFileDirectoryPath;
         protected long _currentFileEventNumber;
-        public long CurrentFileEventNumber { get { return _currentFileEventNumber; } }
-        public string LogFilePath { get { return _logFilePath; } }
-        public string LogFileDirectoryPath { get { return _logFileDirectoryPath; } }
 
         protected DateTime _referencesReadDate;
         protected List<Applications> _applications;
@@ -96,16 +93,26 @@ namespace YY.EventLogReaderAssistant
 
         #region Public Properties
 
-        public DateTime ReferencesReadDate { get { return _referencesReadDate; } }
-        public IReadOnlyList<Applications> Applications { get { return _applications; } }
-        public IReadOnlyList<Computers> Computers { get { return _computers; } }
-        public IReadOnlyList<Metadata> Metadata { get { return _metadata; } }
-        public IReadOnlyList<Events> Events { get { return _events; } }
-        public IReadOnlyList<PrimaryPorts> PrimaryPorts { get { return _primaryPorts; } }
-        public IReadOnlyList<SecondaryPorts> SecondaryPorts { get { return _secondaryPorts; } }
-        public IReadOnlyList<Users> Users { get { return _users; } }
-        public IReadOnlyList<WorkServers> WorkServers { get { return _workServers; } }
-        public RowData CurrentRow { get { return _currentRow; } }
+        public DateTime ReferencesReadDate => _referencesReadDate;
+        public IReadOnlyList<Applications> Applications => _applications;
+        public IReadOnlyList<Computers> Computers => _computers;
+        public IReadOnlyList<Metadata> Metadata => _metadata;
+        public IReadOnlyList<Events> Events => _events;
+        public IReadOnlyList<PrimaryPorts> PrimaryPorts => _primaryPorts;
+        public IReadOnlyList<SecondaryPorts> SecondaryPorts => _secondaryPorts;
+        public IReadOnlyList<Users> Users => _users;
+        public IReadOnlyList<WorkServers> WorkServers => _workServers;
+        public RowData CurrentRow => _currentRow;
+        public long CurrentFileEventNumber => _currentFileEventNumber;
+        public string LogFilePath => _logFilePath;
+        public string LogFileDirectoryPath => _logFileDirectoryPath;
+        public virtual string CurrentFile
+        {
+            get
+            {
+                return null;
+            }
+        }
 
         #endregion
 

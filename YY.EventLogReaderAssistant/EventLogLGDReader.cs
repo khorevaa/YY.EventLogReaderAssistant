@@ -44,6 +44,12 @@ namespace YY.EventLogReaderAssistant
 
         #endregion
 
+        #region Public Properties
+
+        public override string CurrentFile => _logFilePath;
+
+        #endregion
+
         #region Public Methods
 
         public override bool Read()

@@ -38,7 +38,7 @@ namespace YY.EventLogReaderAssistant
 
         #region Public Properties
 
-        public string CurrentFile
+        public override string CurrentFile
         {
             get
             {
