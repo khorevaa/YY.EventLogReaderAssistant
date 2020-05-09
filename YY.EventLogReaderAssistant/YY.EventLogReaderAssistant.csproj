@@ -15,8 +15,8 @@
     <Authors>Permitin Yuriy</Authors>
     <Product>Event log's reader assistant</Product>
     <PackageTags>event, log, 1C, enterprise</PackageTags>
-    <FileVersion>1.0.0.14</FileVersion>
-    <AssemblyVersion>1.0.0.14</AssemblyVersion>
+    <FileVersion>1.0.0.15</FileVersion>
+    <AssemblyVersion>1.0.0.15</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>

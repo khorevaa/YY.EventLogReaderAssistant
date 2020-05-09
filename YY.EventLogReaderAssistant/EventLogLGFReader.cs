@@ -204,6 +204,7 @@ namespace YY.EventLogReaderAssistant
             {
                 InitializeStream(currentLineNumber, fileIndex);
                 _eventCount = eventNumber - 1;
+                _currentFileEventNumber = eventNumber;
 
                 return true;
             }

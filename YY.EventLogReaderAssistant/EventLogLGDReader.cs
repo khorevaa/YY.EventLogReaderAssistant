@@ -140,7 +140,7 @@ namespace YY.EventLogReaderAssistant
                                             Data = reader.GetStringOrDefault(16).FromWin1251ToUTF8(),
                                             DataPresentation = reader.GetStringOrDefault(17),
                                             Metadata = GetMetadataByCode(reader.GetInt64OrDefault(18))
-                                    });
+                                        });                                        
                                     }
                                     catch (Exception ex)
                                     {
@@ -169,6 +169,7 @@ namespace YY.EventLogReaderAssistant
                     .First();
                 _lastRowNumberFromBuffer += 1;
                 _lastRowId = _currentRow.RowID;
+                _currentFileEventNumber += 1;
 
                 RaiseAfterRead(new AfterReadEventArgs(_currentRow, _eventCount));
 
