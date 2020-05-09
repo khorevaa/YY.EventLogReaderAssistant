@@ -2,6 +2,7 @@
 
 namespace YY.EventLogReaderAssistant.Models
 {
+    [Serializable]
     public class RowData
     {
         public DateTimeOffset Period { get; set; }

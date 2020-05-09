@@ -1,5 +1,8 @@
-﻿namespace YY.EventLogReaderAssistant.Models
+﻿using System;
+
+namespace YY.EventLogReaderAssistant.Models
 {
+    [Serializable]
     public class SecondaryPorts
     {
         public long Code { get; set; }

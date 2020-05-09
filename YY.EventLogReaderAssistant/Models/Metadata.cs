@@ -2,6 +2,7 @@
 
 namespace YY.EventLogReaderAssistant.Models
 {
+    [Serializable]
     public class Metadata
     {
         public long Code { get; set; }

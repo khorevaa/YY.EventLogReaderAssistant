@@ -1,5 +1,8 @@
-﻿namespace YY.EventLogReaderAssistant.Models
+﻿using System;
+
+namespace YY.EventLogReaderAssistant.Models
 {
+    [Serializable]
     public class Computers
     {
         public long Code { get; set; }
