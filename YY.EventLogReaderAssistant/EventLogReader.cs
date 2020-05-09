@@ -29,7 +29,7 @@ namespace YY.EventLogReaderAssistant
                 logFileInfo = new FileInfo(pathLogFile);
                 logFileWithReferences = logFileInfo.FullName;
             }
-                        
+
             if (!File.Exists(logFileWithReferences))
                 logFileWithReferences = string.Format("{0}{1}{2}", pathLogFile, Path.DirectorySeparatorChar, @"1Cv8.lgd");
 
@@ -56,6 +56,7 @@ namespace YY.EventLogReaderAssistant
         protected long _currentFileEventNumber;
 
         protected DateTime _referencesReadDate;
+        protected string _referencesHash;
         protected List<Applications> _applications;
         protected List<Computers> _computers;
         protected List<Metadata> _metadata;
@@ -94,6 +95,7 @@ namespace YY.EventLogReaderAssistant
         #region Public Properties
 
         public DateTime ReferencesReadDate => _referencesReadDate;
+        public string ReferencesHash => _referencesHash;
         public IReadOnlyList<Applications> Applications => _applications;
         public IReadOnlyList<Computers> Computers => _computers;
         public IReadOnlyList<Metadata> Metadata => _metadata;
@@ -299,9 +301,10 @@ namespace YY.EventLogReaderAssistant
 
         #region Private Methods
 
-        protected virtual void ReadEventLogReferences() 
-        { 
-
+        protected virtual void ReadEventLogReferences()
+        {
+            ReferencesDataHash data = ReferencesDataHash.CreateromReader(this);
+            _referencesHash = MD5HashGenerator.GetMD5Hash<ReferencesDataHash>(data);
         }
 
         #endregion
@@ -341,6 +344,60 @@ namespace YY.EventLogReaderAssistant
             OnErrorEvent?.Invoke(this, args);
         }
 
+        #endregion
+
+        #region Service
+
+        [Serializable]
+        private class ReferencesDataHash
+        {
+            public static ReferencesDataHash CreateromReader(EventLogReader reader)
+            {
+                List<Severity> severities = new List<Severity>();
+                severities.Add(Severity.Error);
+                severities.Add(Severity.Information);
+                severities.Add(Severity.Note);
+                severities.Add(Severity.Unknown);
+                severities.Add(Severity.Warning);
+
+                List<TransactionStatus> transactionStatuses = new List<TransactionStatus>();
+                transactionStatuses.Add(TransactionStatus.Committed);
+                transactionStatuses.Add(TransactionStatus.NotApplicable);
+                transactionStatuses.Add(TransactionStatus.RolledBack);
+                transactionStatuses.Add(TransactionStatus.Unfinished);
+                transactionStatuses.Add(TransactionStatus.Unknown);
+
+                ReferencesDataHash referenceData;
+
+                referenceData = new ReferencesDataHash()
+                {
+                    Applications = reader.Applications.ToList().AsReadOnly(),
+                    Computers = reader.Computers.ToList().AsReadOnly(),
+                    Events = reader.Events.ToList().AsReadOnly(),
+                    Metadata = reader.Metadata.ToList().AsReadOnly(),
+                    PrimaryPorts = reader.PrimaryPorts.ToList().AsReadOnly(),
+                    SecondaryPorts = reader.SecondaryPorts.ToList().AsReadOnly(),
+                    Users = reader.Users.ToList().AsReadOnly(),
+                    WorkServers = reader.WorkServers.ToList().AsReadOnly(),
+                    Severities = severities.ToList().AsReadOnly(),
+                    TransactionStatuses = transactionStatuses.ToList().AsReadOnly()
+                };
+
+                return referenceData;
+            }
+
+            public IReadOnlyList<Applications> Applications;
+            public IReadOnlyList<Computers> Computers;
+            public IReadOnlyList<Events> Events;
+            public IReadOnlyList<Metadata> Metadata;
+            public IReadOnlyList<PrimaryPorts> PrimaryPorts;
+            public IReadOnlyList<SecondaryPorts> SecondaryPorts;
+            public IReadOnlyList<Severity> Severities;
+            public IReadOnlyList<TransactionStatus> TransactionStatuses;
+            public IReadOnlyList<Users> Users;
+            public IReadOnlyList<WorkServers> WorkServers;
+        }
+        
         #endregion
     }
 }

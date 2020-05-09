@@ -319,6 +319,8 @@ namespace YY.EventLogReaderAssistant
                    _secondaryPorts);
 
             _referencesReadDate = beginReadReferences;
+
+            base.ReadEventLogReferences();
         }
 
         public long GetCurrentFileStreamPosition()

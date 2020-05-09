@@ -7,7 +7,7 @@ using System.IO;
 
 namespace YY.EventLogReaderAssistant.Services
 {
-    public sealed class MD5HashGenerator
+    internal sealed class MD5HashGenerator
     {
         #region Public Methods
 

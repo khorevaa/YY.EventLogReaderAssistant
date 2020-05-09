@@ -434,6 +434,8 @@ namespace YY.EventLogReaderAssistant
 
                 _referencesReadDate = beginReadReferences;
             }
+
+            base.ReadEventLogReferences();
         }
 
         #endregion
