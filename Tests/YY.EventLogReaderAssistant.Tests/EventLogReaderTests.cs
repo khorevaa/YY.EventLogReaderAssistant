@@ -4,6 +4,7 @@ using System.Data.SQLite;
 using System.IO;
 using System.Threading;
 using Xunit;
+using YY.EventLogReaderAssistant.Models;
 using YY.EventLogReaderAssistant.Services;
 
 namespace YY.EventLogReaderAssistant.Tests
@@ -19,6 +20,7 @@ namespace YY.EventLogReaderAssistant.Tests
         private readonly string sampleDataDirectory;
         private readonly string sampleDatabaseFileLGF;
         private readonly string sampleDatabaseFileLGD;
+        private readonly string sampleDatabaseFileLGD_ReadRefferences_IfChanged;
 
         #endregion
 
@@ -30,6 +32,8 @@ namespace YY.EventLogReaderAssistant.Tests
             sampleDataDirectory = Path.Combine(currentDirectory, "SampleData");
             sampleDatabaseFileLGF = Path.Combine(sampleDataDirectory, "LGFFormatEventLog", "1Cv8.lgf");
             sampleDatabaseFileLGD = Path.Combine(sampleDataDirectory, "SQLiteFormatEventLog", "1Cv8.lgd");
+            sampleDatabaseFileLGD_ReadRefferences_IfChanged = Path.Combine(
+                sampleDataDirectory, "SQLiteFormatEventLog", "1Cv8_ReadRefferences_IfChanged_Test.lgd");
         }
 
         #endregion
@@ -93,12 +97,96 @@ namespace YY.EventLogReaderAssistant.Tests
         [Fact]
         public void ReadRefferences_IfChanged_NewFormat_LGD_Test()
         {
-            ReadRefferences_IfChanged_Test(sampleDatabaseFileLGD);
+            ReadRefferences_IfChanged_Test(sampleDatabaseFileLGD_ReadRefferences_IfChanged);
+        }
+
+        [Fact]
+        public void CheckIdAfterSetPosition_OldFormat_LGF_Test()
+        {
+            CheckIdAfterSetPosition_Test(sampleDatabaseFileLGF);
+        }
+
+        [Fact]
+        public void CheckIdAfterSetPosition_NewFormat_LGD_Test()
+        {
+            CheckIdAfterSetPosition_Test(sampleDatabaseFileLGD);
+        }
+
+        [Fact]
+        public void CheckIdAfterGoToEvent_OldFormat_LGF_Test()
+        {
+            CheckIdAfterGoToEvent_Test(sampleDatabaseFileLGF);
+        }
+
+        [Fact]
+        public void CheckIdAfterGoToEvent_NewFormat_LGD_Test()
+        {
+            CheckIdAfterGoToEvent_Test(sampleDatabaseFileLGD);
         }
 
         #endregion
 
         #region Private Methods
+
+        private void CheckIdAfterSetPosition_Test(string eventLogPath)
+        {
+            int checkIdSteps = 5;
+            RowData rowAfterSteps = null;
+            EventLogPosition positionAfterSteps = null;
+            RowData rowAfterSetPosition = null;
+            EventLogPosition positionAfterSetPosition = null;
+
+            using (EventLogReader reader = EventLogReader.CreateReader(eventLogPath))
+            {
+                for (int i = 0; i < checkIdSteps; i++)                
+                    reader.Read();
+                rowAfterSteps = reader.CurrentRow;
+                positionAfterSteps = reader.GetCurrentPosition();
+
+                reader.Reset();
+                reader.SetCurrentPosition(positionAfterSteps);
+                if (reader.Read())
+                {
+                    positionAfterSetPosition = reader.GetCurrentPosition();
+                    rowAfterSetPosition = reader.CurrentRow;
+                }
+            }
+
+            Assert.NotNull(rowAfterSteps);
+            Assert.NotNull(rowAfterSetPosition);
+            Assert.Equal(rowAfterSteps.RowID, rowAfterSetPosition.RowID - 1);
+        }
+
+        private void CheckIdAfterGoToEvent_Test(string eventLogPath)
+        {
+            int checkIdSteps = 5;
+            RowData rowAfterSteps = null;
+            long eventNumberAfterSteps = -1;
+            RowData rowAfterGoToEvent = null;
+            long eventNumberAfterGoToEvent = -1;
+
+            using (EventLogReader reader = EventLogReader.CreateReader(eventLogPath))
+            {
+                for (int i = 0; i < checkIdSteps; i++)
+                    reader.Read();
+                rowAfterSteps = reader.CurrentRow;
+                eventNumberAfterSteps = reader.CurrentFileEventNumber;
+
+                reader.Reset();
+                reader.GoToEvent(eventNumberAfterSteps);
+                if (reader.Read())
+                {
+                    eventNumberAfterGoToEvent = reader.CurrentFileEventNumber;
+                    rowAfterGoToEvent = reader.CurrentRow;
+                }
+            }
+
+            Assert.NotNull(rowAfterSteps);
+            Assert.NotNull(rowAfterGoToEvent);
+            Assert.NotEqual(-1, eventNumberAfterSteps);
+            Assert.NotEqual(-1, eventNumberAfterGoToEvent);
+            Assert.Equal(rowAfterSteps.RowID, rowAfterGoToEvent.RowID - 1);
+        }
 
         private void GetCount_Test(string eventLogPath)
         {
@@ -344,7 +432,7 @@ namespace YY.EventLogReaderAssistant.Tests
                                 insertSQL.Parameters.Add(new SQLiteParameter(DbType.String, DataPresentation));
                                 insertSQL.ExecuteNonQuery();
                             }
-                        }                        
+                        }
                     }
 
                     #endregion
