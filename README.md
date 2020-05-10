@@ -7,13 +7,19 @@
 |:-------:|:------:|
 | [![Build status](https://ci.appveyor.com/api/projects/status/github/ypermitin/yy.eventlogreaderassistant?branch=develop&svg=true)](https://ci.appveyor.com/project/YPermitin/yy-eventlogreaderassistant) | [![Build Status](https://travis-ci.org/YPermitin/YY.EventLogReaderAssistant.svg?branch=master)](https://travis-ci.org/YPermitin/YY.EventLogReaderAssistant) |
 
-# Состав репозитория
+## Состав репозитория
 
 * **YY.EventLogReaderAssistant** - исходный код библиотеки
 * **YY.EventLogReaderAssistant.Tests** - unit-тесты для проверки работоспособности библиотеки.
 * **YY.EventLogReaderAssistantConsoleApp** - консольное приложение с примерами использования библиотеки.
 
-# Примеры использования
+## Требования и совместимость
+
+Работа библиотеки тестировалась с платформой 1С:Предприятие версии от 8.3.6 и выше.
+
+В большинстве случаев работоспособность подтверждается и на более старых версиях, но меньше тестируется. Основная разработка ведется для Microsoft Windows, но некоторый функционал проверялся под *.nix.*
+
+## Примеры использования
 
 Для примера создадим консольное приложение с таким содержимым в методе "Main()":
 
@@ -57,6 +63,7 @@ static void Main(string[] args)
     Console.ReadKey();
 }
 ```
+
 Для удобной обработки результатов чтения и других связанных событий можно использовать события (инициализировали подписки на события выше), но не обязательно. Для подписки доступны события:
 
 * **BeforeReadFile** - перед чтением файла.
@@ -99,6 +106,6 @@ private static void Reader_OnErrorEvent(EventLogReader sender, OnErrorEventArgs 
 
 В объекта "EventLogReader" также есть возможность обращаться к ссылочным данным журнала (приложения, пользователи, уровни событий, статус транзакции и другое).
 
-# Лицензия
+## Лицензия
 
 MIT - делайте все, что посчитаете нужным. Никакой гарантии и никаких ограничений по использованию.
