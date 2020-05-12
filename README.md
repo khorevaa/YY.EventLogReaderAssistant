@@ -46,7 +46,7 @@ static void Main(string[] args)
         reader.BeforeReadFile += Reader_BeforeReadFile;
         reader.OnErrorEvent += Reader_OnErrorEvent;
 
-        // Выводим общее количество собыитй
+        // Выводим общее количество событий
         Console.WriteLine($"{DateTime.Now}: Всего событий к обработке: ({reader.Count()})...");
         Console.WriteLine();
         Console.WriteLine();
