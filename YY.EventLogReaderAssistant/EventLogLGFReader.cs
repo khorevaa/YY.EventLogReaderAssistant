@@ -130,24 +130,23 @@ namespace YY.EventLogReaderAssistant
                         try
                         {
                             RowData eventData = LogParser.Parse(prepearedSourceData);
-
                             if(eventData.Period >= ReferencesReadDate)
                             {
                                 ReadEventLogReferences();
                                 eventData = LogParser.Parse(prepearedSourceData);
                             }
-
                             _currentRow = eventData;
+
+                            RaiseAfterRead(new AfterReadEventArgs(_currentRow, _currentFileEventNumber));
+                            return true;
                         }
                         catch (Exception ex)
                         {
                             RaiseOnError(new OnErrorEventArgs(ex, prepearedSourceData, false));
                             _currentRow = null;
                         }
-
-                        RaiseAfterRead(new AfterReadEventArgs(_currentRow, _currentFileEventNumber));
-
-                        return true;
+                        
+                        return false;
                     }
                     else
                     {
