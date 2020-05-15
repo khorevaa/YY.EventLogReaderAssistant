@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "YY.EventLogReaderAssistantConsoleApp": {
-      "commandName": "Project",
-      "commandLineArgs": "\"\\\\SRV-1C-01-VM\\1Cv8Log\""
-    }
-  }
-}
