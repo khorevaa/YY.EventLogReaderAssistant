@@ -243,7 +243,32 @@ namespace YY.EventLogReaderAssistant
 
             long newStreamPosition = (long)newPosition.StreamPosition;
             if(newStreamPosition < beginReadPosition)            
-                newStreamPosition = beginReadPosition;            
+                newStreamPosition = beginReadPosition;
+
+            string currentFilePath = _logFilesWithData[_indexCurrentFile];            
+            int attemptToFoundBeginEventLine = 0;
+            bool isCorrectBeginEvent = false;
+            while (!isCorrectBeginEvent && attemptToFoundBeginEventLine < 5)
+            {
+                string beginEventLine;
+                using (FileStream fileStreamCheckPosition = new FileStream(currentFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                {
+                    fileStreamCheckPosition.Seek(newStreamPosition, SeekOrigin.Begin);                    
+                    using (StreamReader fileStreamCheckReader = new StreamReader(fileStreamCheckPosition))
+                        beginEventLine = fileStreamCheckReader.ReadLine();
+                }
+
+                isCorrectBeginEvent = LogParserLGF.ItsBeginOfEvent(beginEventLine);
+                if (!isCorrectBeginEvent)
+                {
+                    newStreamPosition -= 1;
+                    attemptToFoundBeginEventLine += 1;
+                }
+            }
+            if(!isCorrectBeginEvent)
+            {
+                throw new ArgumentException("Wrong begin event stream position's");
+            }
 
             if (newPosition.StreamPosition != null)
                 SetCurrentFileStreamPosition(newStreamPosition);

@@ -65,6 +65,32 @@ namespace YY.EventLogReaderAssistant.Tests
         }
 
         [Fact]
+        public void SetBadStreamPosition_OldFormat_LGF_Test()
+        {
+            long correctRowId;
+            long fixedRowId;
+
+            using (EventLogReader reader = EventLogReader.CreateReader(sampleDatabaseFileLGF))
+            {
+                reader.GoToEvent(10);
+                EventLogPosition position = reader.GetCurrentPosition();
+                reader.Read();
+                correctRowId = reader.CurrentRow.RowID;
+
+                long wrongStreamPosition = (long)position.StreamPosition + 3;
+                reader.SetCurrentPosition(new EventLogPosition(
+                    position.EventNumber,
+                    position.CurrentFileReferences,
+                    position.CurrentFileData,
+                    wrongStreamPosition));
+                reader.Read();
+                fixedRowId = reader.CurrentRow.RowID;
+            }
+
+            Assert.Equal(correctRowId, fixedRowId);
+        }
+
+        [Fact]
         public void CountLogFiles_NewFormat_LGD_Test()
         {
             GetCountLogFiles_Test(sampleDatabaseFileLGD);
@@ -206,7 +232,7 @@ namespace YY.EventLogReaderAssistant.Tests
             Assert.NotEqual(0, countRecords);
             Assert.NotEqual(0, countRecordsStepByStep);
             Assert.Equal(countRecords, countRecordsStepByStep);
-        }
+        }      
 
         private void GetAndSetPosition_Test(string eventLogPath)
         {
