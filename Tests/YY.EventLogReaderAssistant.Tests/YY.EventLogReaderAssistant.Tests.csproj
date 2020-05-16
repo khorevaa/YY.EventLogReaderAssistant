@@ -34,6 +34,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="SampleData\LGFFormatEventLogBrokenFile\1Cv8.lgf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SampleData\LGFFormatEventLogBrokenFile\20200412130000.lgp">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="SampleData\LGFFormatEventLog\1Cv8.lgf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

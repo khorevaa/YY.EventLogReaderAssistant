@@ -21,6 +21,11 @@ namespace YY.EventLogReaderAssistant.Tests
         private readonly string sampleDatabaseFileLGF;
         private readonly string sampleDatabaseFileLGD;
         private readonly string sampleDatabaseFileLGD_ReadRefferences_IfChanged;
+        private readonly string sampleDatabaseFileLGFBrokenFile;
+
+        private OnErrorEventArgs LastErrorData;
+        private long EventCountSuccess;
+        private long EventCountError;
 
         #endregion
 
@@ -34,6 +39,10 @@ namespace YY.EventLogReaderAssistant.Tests
             sampleDatabaseFileLGD = Path.Combine(sampleDataDirectory, "SQLiteFormatEventLog", "1Cv8.lgd");
             sampleDatabaseFileLGD_ReadRefferences_IfChanged = Path.Combine(
                 sampleDataDirectory, "SQLiteFormatEventLog", "1Cv8_ReadRefferences_IfChanged_Test.lgd");
+            sampleDatabaseFileLGFBrokenFile = Path.Combine(sampleDataDirectory, "LGFFormatEventLogBrokenFile", "1Cv8.lgf");
+
+            EventCountSuccess = 0;
+            EventCountError = 0;
         }
 
         #endregion
@@ -74,6 +83,28 @@ namespace YY.EventLogReaderAssistant.Tests
         public void SetBadStreamPosition_Subtraction_OldFormat_LGF_Test()
         {
             SetBadStreamPosition_LGF_Format_Test(sampleDatabaseFileLGF, -3);
+        }
+
+        [Fact]
+        public void OnErrorHandlerBrokenEvent_OldFormat_LGF_Test()
+        {
+            EventCountSuccess = 0;
+            EventCountError = 0;
+            long totalCount = 0;
+
+            using (EventLogReader reader = EventLogReader.CreateReader(sampleDatabaseFileLGFBrokenFile))
+            {
+                totalCount = reader.Count();
+
+                reader.OnErrorEvent += Reader_OnErrorEvent;
+                reader.AfterReadEvent += Reader_AfterReadEvent;
+
+                while (reader.Read()) ;             
+            }
+
+            Assert.Equal(totalCount, (EventCountSuccess + EventCountError));
+            Assert.Equal(1, EventCountError);
+            Assert.Equal(4, EventCountSuccess);
         }
 
         [Fact]
@@ -482,6 +513,21 @@ namespace YY.EventLogReaderAssistant.Tests
             }
 
             Assert.Equal(correctRowId, fixedRowId);
+        }
+
+        #endregion
+
+        #region Events
+
+        private void Reader_AfterReadEvent(EventLogReader sender, AfterReadEventArgs args)
+        {
+            EventCountSuccess += 1;
+        }
+
+        private void Reader_OnErrorEvent(EventLogReader sender, OnErrorEventArgs args)
+        {
+            LastErrorData = args;
+            EventCountError += 1;
         }
 
         #endregion

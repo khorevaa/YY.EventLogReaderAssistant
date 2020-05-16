@@ -144,9 +144,8 @@ namespace YY.EventLogReaderAssistant
                         {
                             RaiseOnError(new OnErrorEventArgs(ex, prepearedSourceData, false));
                             _currentRow = null;
+                            return true;
                         }
-                        
-                        return false;
                     }
                     else
                     {
