@@ -245,11 +245,12 @@ namespace YY.EventLogReaderAssistant
             if(newStreamPosition < beginReadPosition)            
                 newStreamPosition = beginReadPosition;
 
+            long sourceStreamPosition = newStreamPosition;
             string currentFilePath = _logFilesWithData[_indexCurrentFile];            
             int attemptToFoundBeginEventLine = 0;
             bool isCorrectBeginEvent = false;
             bool notDataAvailiable = false;
-            while (!isCorrectBeginEvent && attemptToFoundBeginEventLine < 5)
+            while (!isCorrectBeginEvent && attemptToFoundBeginEventLine < 10)
             {
                 string beginEventLine;
                 using (FileStream fileStreamCheckPosition = new FileStream(currentFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
@@ -272,7 +273,38 @@ namespace YY.EventLogReaderAssistant
                     attemptToFoundBeginEventLine += 1;
                 }
             }
-            if(!isCorrectBeginEvent && !notDataAvailiable)
+                        
+            if (!isCorrectBeginEvent && !notDataAvailiable)
+            {
+                newStreamPosition = sourceStreamPosition;
+                attemptToFoundBeginEventLine = 0;
+                while (!isCorrectBeginEvent && attemptToFoundBeginEventLine < 10)
+                {
+                    string beginEventLine;
+                    using (FileStream fileStreamCheckPosition = new FileStream(currentFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                    {
+                        fileStreamCheckPosition.Seek(newStreamPosition, SeekOrigin.Begin);
+                        using (StreamReader fileStreamCheckReader = new StreamReader(fileStreamCheckPosition))
+                            beginEventLine = fileStreamCheckReader.ReadLine();
+                    }
+
+                    if (beginEventLine == null)
+                    {
+                        notDataAvailiable = true;
+                        break;
+                    }
+
+                    isCorrectBeginEvent = LogParserLGF.ItsBeginOfEvent(beginEventLine);
+                    if (!isCorrectBeginEvent)
+                    {
+                        newStreamPosition += 1;
+                        attemptToFoundBeginEventLine += 1;
+                    }
+                }
+            }
+            
+
+            if (!isCorrectBeginEvent && !notDataAvailiable)
             {
                 throw new ArgumentException("Wrong begin event stream position's");
             }

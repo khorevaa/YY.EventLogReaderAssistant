@@ -65,29 +65,15 @@ namespace YY.EventLogReaderAssistant.Tests
         }
 
         [Fact]
-        public void SetBadStreamPosition_OldFormat_LGF_Test()
+        public void SetBadStreamPosition_Addition_OldFormat_LGF_Test()
         {
-            long correctRowId;
-            long fixedRowId;
+            SetBadStreamPosition_LGF_Format_Test(sampleDatabaseFileLGF, 3);
+        }
 
-            using (EventLogReader reader = EventLogReader.CreateReader(sampleDatabaseFileLGF))
-            {
-                reader.GoToEvent(10);
-                EventLogPosition position = reader.GetCurrentPosition();
-                reader.Read();
-                correctRowId = reader.CurrentRow.RowID;
-
-                long wrongStreamPosition = (long)position.StreamPosition + 3;
-                reader.SetCurrentPosition(new EventLogPosition(
-                    position.EventNumber,
-                    position.CurrentFileReferences,
-                    position.CurrentFileData,
-                    wrongStreamPosition));
-                reader.Read();
-                fixedRowId = reader.CurrentRow.RowID;
-            }
-
-            Assert.Equal(correctRowId, fixedRowId);
+        [Fact]
+        public void SetBadStreamPosition_Subtraction_OldFormat_LGF_Test()
+        {
+            SetBadStreamPosition_LGF_Format_Test(sampleDatabaseFileLGF, -3);
         }
 
         [Fact]
@@ -471,6 +457,31 @@ namespace YY.EventLogReaderAssistant.Tests
             Assert.NotEqual(DateTime.MinValue, lastReadReferencesDate);
             Assert.NotEqual(DateTime.MinValue, lastReadReferencesDateBeforeRead);
             Assert.True(lastReadReferencesDateBeforeRead < lastReadReferencesDate);
+        }
+
+        private void SetBadStreamPosition_LGF_Format_Test(string eventLogPath, long changeStreamPosition)
+        {
+            long correctRowId;
+            long fixedRowId;
+
+            using (EventLogReader reader = EventLogReader.CreateReader(sampleDatabaseFileLGF))
+            {
+                reader.GoToEvent(10);
+                EventLogPosition position = reader.GetCurrentPosition();
+                reader.Read();
+                correctRowId = reader.CurrentRow.RowID;
+
+                long wrongStreamPosition = (long)position.StreamPosition + changeStreamPosition;
+                reader.SetCurrentPosition(new EventLogPosition(
+                    position.EventNumber,
+                    position.CurrentFileReferences,
+                    position.CurrentFileData,
+                    wrongStreamPosition));
+                reader.Read();
+                fixedRowId = reader.CurrentRow.RowID;
+            }
+
+            Assert.Equal(correctRowId, fixedRowId);
         }
 
         #endregion
