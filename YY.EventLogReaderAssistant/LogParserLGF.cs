@@ -18,16 +18,22 @@ namespace YY.EventLogReaderAssistant
 
         public static bool ItsBeginOfEvent(string sourceString)
         {
+            if (sourceString == null)
+                return false;
+
             return Regex.IsMatch(sourceString, @"^{\d{4}\d{2}\d{2}\d+,");
         }
 
         public static bool ItsEndOfEvent(string sourceString, ref int count, ref bool textBlockOpen)
         {
-            string TempStr = sourceString;
+            if (sourceString == null)
+                return false;
 
-            for (int i = 0; i <= TempStr.Length - 1; i++)
+            string bufferString = sourceString;
+
+            for (int i = 0; i <= bufferString.Length - 1; i++)
             {
-                string Simb = TempStr.Substring(i, 1);
+                string Simb = bufferString.Substring(i, 1);
                 if (Simb == "\"")
                 {
                     textBlockOpen = !textBlockOpen;
