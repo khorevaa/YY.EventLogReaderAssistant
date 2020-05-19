@@ -101,7 +101,11 @@ namespace YY.EventLogReaderAssistant.Tests
                 reader.OnErrorEvent += Reader_OnErrorEvent;
                 reader.AfterReadEvent += Reader_AfterReadEvent;
 
-                while (reader.Read()) ;             
+                bool dataExist = false;
+                do
+                {
+                    dataExist = reader.Read();
+                } while (dataExist);       
             }
 
             Assert.Equal(totalCount, (EventCountSuccess + EventCountError));
@@ -270,7 +274,13 @@ namespace YY.EventLogReaderAssistant.Tests
 
                 reader.Reset();
                 EventLogPosition position = reader.GetCurrentPosition();
-                while (reader.Read()) ;
+
+                bool dataExist = false;
+                do
+                {
+                    dataExist = reader.Read();
+                } while (dataExist);
+
                 reader.SetCurrentPosition(position);
                 while (reader.Read())
                 {
@@ -334,8 +344,8 @@ namespace YY.EventLogReaderAssistant.Tests
 
         private void ReadRefferences_IfChanged_Test(string eventLogPath)
         {
-            DateTime lastReadReferencesDateBeforeRead = DateTime.MinValue;
-            DateTime lastReadReferencesDate = DateTime.MinValue;
+            DateTime lastReadReferencesDateBeforeRead;
+            DateTime lastReadReferencesDate;
 
             using (EventLogReader reader = EventLogReader.CreateReader(eventLogPath))
             {
@@ -476,7 +486,11 @@ namespace YY.EventLogReaderAssistant.Tests
                     #endregion
                 }
 
-                while (reader.Read());
+                bool dataExist = false;
+                do
+                {
+                    dataExist = reader.Read();
+                } while (dataExist);
                 lastReadReferencesDate = reader.ReferencesReadDate;
             }
 
