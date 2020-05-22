@@ -433,12 +433,15 @@ namespace YY.EventLogReaderAssistant
 
             long currentStreamPosition = _stream.GetPosition();
 
-            using (StreamReader checkReader = new StreamReader(CurrentFile))
+            using (FileStream fileStreamCheckReader = new FileStream(CurrentFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
-                checkReader.SetPosition(currentStreamPosition);
-                string lineContent = checkReader.ReadLine();
-                nextIsBeginEvent = LogParserLGF.ItsBeginOfEvent(lineContent);
-            }
+                using (StreamReader checkReader = new StreamReader(fileStreamCheckReader))
+                {
+                    checkReader.SetPosition(currentStreamPosition);
+                    string lineContent = checkReader.ReadLine();
+                    nextIsBeginEvent = LogParserLGF.ItsBeginOfEvent(lineContent);
+                }
+            }            
 
             return nextIsBeginEvent;
         }
