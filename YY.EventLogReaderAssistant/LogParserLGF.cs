@@ -82,8 +82,7 @@ namespace YY.EventLogReaderAssistant
                 IList<PrimaryPorts> primaryPorts,
                 IList<SecondaryPorts> secondaryPorts)
         {
-            string empty = string.Empty;
-            string textReferencesData = empty;
+            string textReferencesData;
 
             using (FileStream FS = new FileStream(_reader.LogFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             using (StreamReader SR = new StreamReader(FS))
@@ -96,84 +95,87 @@ namespace YY.EventLogReaderAssistant
             textReferencesData = textReferencesData.Substring(beginBlockIndex);
             string[] objectTexts = ParseEventLogString("{" + textReferencesData + "}");
             string lastProcessedObjectForDebug;
-            foreach (string TextObject in objectTexts)
+            if (objectTexts != null)
             {
-                lastProcessedObjectForDebug = TextObject;
-                string[] parsedEventData = ParseEventLogString(TextObject);
-
-                if ((parsedEventData != null))
+                foreach (string TextObject in objectTexts)
                 {
-                    switch (parsedEventData[0])
+                    lastProcessedObjectForDebug = TextObject;
+                    string[] parsedEventData = ParseEventLogString(TextObject);
+
+                    if ((parsedEventData != null))
                     {
-                        case "1":
-                            users.Add(new Users()
-                            {
-                                Code = parsedEventData[3].ToInt64(),
-                                Uuid = parsedEventData[1].ToGuid(),
-                                Name = parsedEventData[2]
-                            });
-                            break;
-                        case "2":
-                            computers.Add(new Computers()
-                            {
-                                Code = parsedEventData[2].ToInt64(),
-                                Name = parsedEventData[1]
-                            });
-                            break;
-                        case "3":
-                            applications.Add(new Applications()
-                            {
-                                Code = parsedEventData[2].ToInt64(),
-                                Name = parsedEventData[1]
-                            });
-                            break;
-                        case "4":
-                            events.Add(new Events()
-                            {
-                                Code = parsedEventData[2].ToInt64(),
-                                Name = parsedEventData[1]
-                            });
-                            break;
-                        case "5":
-                            metadata.Add(new Metadata()
-                            {
-                                Code = parsedEventData[3].ToInt64(),
-                                Uuid = parsedEventData[1].ToGuid(),
-                                Name = parsedEventData[2]
-                            });
-                            break;
-                        case "6":
-                            workServers.Add(new WorkServers()
-                            {
-                                Code = parsedEventData[2].ToInt64(),
-                                Name = parsedEventData[1]
-                            });
-                            break;
-                        case "7":
-                            primaryPorts.Add(new PrimaryPorts()
-                            {
-                                Code = parsedEventData[2].ToInt64(),
-                                Name = parsedEventData[1]
-                            });
-                            break;
-                        case "8":
-                            secondaryPorts.Add(new SecondaryPorts()
-                            {
-                                Code = parsedEventData[2].ToInt64(),
-                                Name = parsedEventData[1]
-                            });
-                            break;
-                        //Case "9" - неизвестные значения, возможно связаны с разделением данных
-                        //Case "10"
-                        case "11":
-                            break;
-                        case "12":
-                            break;
-                        case "13":
-                            break;
-                        //  Последние значения хранят статус транзакции и уровень события                        
-                        default:
-                            break;
+                        switch (parsedEventData[0])
+                        {
+                            case "1":
+                                users.Add(new Users()
+                                {
+                                    Code = parsedEventData[3].ToInt64(),
+                                    Uuid = parsedEventData[1].ToGuid(),
+                                    Name = parsedEventData[2]
+                                });
+                                break;
+                            case "2":
+                                computers.Add(new Computers()
+                                {
+                                    Code = parsedEventData[2].ToInt64(),
+                                    Name = parsedEventData[1]
+                                });
+                                break;
+                            case "3":
+                                applications.Add(new Applications()
+                                {
+                                    Code = parsedEventData[2].ToInt64(),
+                                    Name = parsedEventData[1]
+                                });
+                                break;
+                            case "4":
+                                events.Add(new Events()
+                                {
+                                    Code = parsedEventData[2].ToInt64(),
+                                    Name = parsedEventData[1]
+                                });
+                                break;
+                            case "5":
+                                metadata.Add(new Metadata()
+                                {
+                                    Code = parsedEventData[3].ToInt64(),
+                                    Uuid = parsedEventData[1].ToGuid(),
+                                    Name = parsedEventData[2]
+                                });
+                                break;
+                            case "6":
+                                workServers.Add(new WorkServers()
+                                {
+                                    Code = parsedEventData[2].ToInt64(),
+                                    Name = parsedEventData[1]
+                                });
+                                break;
+                            case "7":
+                                primaryPorts.Add(new PrimaryPorts()
+                                {
+                                    Code = parsedEventData[2].ToInt64(),
+                                    Name = parsedEventData[1]
+                                });
+                                break;
+                            case "8":
+                                secondaryPorts.Add(new SecondaryPorts()
+                                {
+                                    Code = parsedEventData[2].ToInt64(),
+                                    Name = parsedEventData[1]
+                                });
+                                break;
+                            //Case "9" - неизвестные значения, возможно связаны с разделением данных
+                            //Case "10"
+                            case "11":
+                                break;
+                            case "12":
+                                break;
+                            case "13":
+                                break;
+                            //  Последние значения хранят статус транзакции и уровень события                        
+                            default:
+                                break;
+                        }
                     }
                 }
             }
@@ -182,31 +184,36 @@ namespace YY.EventLogReaderAssistant
         public RowData Parse(string eventSource)
         {
             string[] parseResult = ParseEventLogString(eventSource);
-            string transactionSourceString = parseResult[2].RemoveBraces();
+            RowData dataRow = null;
 
-            RowData dataRow  =new RowData()
+            if (parseResult != null)
             {
-                RowID = _reader.CurrentFileEventNumber,
-                Period = DateTime.ParseExact(parseResult[0], "yyyyMMddHHmmss", CultureInfo.InvariantCulture),
-                TransactionStatus = _reader.GetTransactionStatus(parseResult[1]),
-                TransactionDate = GetTransactionDate(transactionSourceString),
-                TransactionId = GetTransactionId(transactionSourceString),
-                User = _reader.GetUserByCode(parseResult[3]),
-                Computer = _reader.GetComputerByCode(parseResult[4]),
-                Application = _reader.GetApplicationByCode(parseResult[5]),
-                ConnectId = parseResult[6].ToInt32(),
-                Event = _reader.GetEventByCode(parseResult[7]),
-                Severity = _reader.GetSeverityByCode(parseResult[8]),
-                Comment = parseResult[9].RemoveQuotes(),
-                Metadata = _reader.GetMetadataByCode(parseResult[10]),
-                Data = GetData(parseResult[11]),                
-                DataPresentation = parseResult[12].RemoveQuotes(),
-                WorkServer = _reader.GetWorkServerByCode(parseResult[13]),
-                PrimaryPort = _reader.GetPrimaryPortByCode(parseResult[14]),
-                SecondaryPort = _reader.GetSecondaryPortByCode(parseResult[15]),
-                Session = parseResult[16].ToInt64()
-            };
-            dataRow.DataUUID = GetDataUUID(dataRow.Data);
+                string transactionSourceString = parseResult[2].RemoveBraces();
+
+                dataRow = new RowData()
+                {
+                    RowID = _reader.CurrentFileEventNumber,
+                    Period = DateTime.ParseExact(parseResult[0], "yyyyMMddHHmmss", CultureInfo.InvariantCulture),
+                    TransactionStatus = _reader.GetTransactionStatus(parseResult[1]),
+                    TransactionDate = GetTransactionDate(transactionSourceString),
+                    TransactionId = GetTransactionId(transactionSourceString),
+                    User = _reader.GetUserByCode(parseResult[3]),
+                    Computer = _reader.GetComputerByCode(parseResult[4]),
+                    Application = _reader.GetApplicationByCode(parseResult[5]),
+                    ConnectId = parseResult[6].ToInt32(),
+                    Event = _reader.GetEventByCode(parseResult[7]),
+                    Severity = _reader.GetSeverityByCode(parseResult[8]),
+                    Comment = parseResult[9].RemoveQuotes(),
+                    Metadata = _reader.GetMetadataByCode(parseResult[10]),
+                    Data = GetData(parseResult[11]),
+                    DataPresentation = parseResult[12].RemoveQuotes(),
+                    WorkServer = _reader.GetWorkServerByCode(parseResult[13]),
+                    PrimaryPort = _reader.GetPrimaryPortByCode(parseResult[14]),
+                    SecondaryPort = _reader.GetSecondaryPortByCode(parseResult[15]),
+                    Session = parseResult[16].ToInt64()
+                };
+                dataRow.DataUUID = GetDataUUID(dataRow.Data);
+            }
 
             return dataRow;
         }
@@ -224,11 +231,14 @@ namespace YY.EventLogReaderAssistant
             else if (data.StartsWith("{"))
             {
                 string[] parsedObjects = ParseEventLogString(data);
-                if (parsedObjects.Length == 2)
-                {
-                    if (parsedObjects[0] == "\"S\"" || parsedObjects[0] == "\"R\"")
+                if (parsedObjects != null)
+                { 
+                    if (parsedObjects.Length == 2)
                     {
-                        data = parsedObjects[1].RemoveQuotes();
+                        if (parsedObjects[0] == "\"S\"" || parsedObjects[0] == "\"R\"")
+                        {
+                            data = parsedObjects[1].RemoveQuotes();
+                        }
                     }
                 }
             }
@@ -327,20 +337,27 @@ namespace YY.EventLogReaderAssistant
                 if (counter1 == counter2 & counter3 == 0)
                 {
                     Array.Resize(ref resultStrings, i + 1);
-                    if (bufferString.StartsWith("\"") && bufferString.EndsWith("\""))
+                    if (bufferString != null)
                     {
-                        bufferString = bufferString.Substring(1, bufferString.Length - 2);
+                        if (bufferString.StartsWith("\"") && bufferString.EndsWith("\""))
+                        {
+                            bufferString = bufferString.Substring(1, bufferString.Length - 2);
+                        }
                     }
 
                     if (isSpecialString)
                     {
                         char[] denied = new[] { '\n', '\t', '\r' };
                         StringBuilder newString = new StringBuilder();
-                        foreach (var ch in bufferString)
-                            if (!denied.Contains(ch))
-                                newString.Append(ch);
 
-                        bufferString = newString.ToString();
+                        if (bufferString != null)
+                        {
+                            foreach (var ch in bufferString)
+                                if (!denied.Contains(ch))
+                                    newString.Append(ch);
+
+                            bufferString = newString.ToString();
+                        }                                                
                     }
 
                     resultStrings[i] = bufferString;
@@ -360,8 +377,8 @@ namespace YY.EventLogReaderAssistant
                 {
                     delimIndex = preparedString.IndexOf(",");
                 }
-
             }
+
             return resultStrings;
         }
 

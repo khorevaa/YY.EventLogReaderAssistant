@@ -32,6 +32,9 @@ namespace YY.EventLogReaderAssistant.Services.Tests
                 sampleDataDirectory, "SQLiteFormatEventLog", "1Cv8_ReadRefferences_IfChanged_Test.lgd");
         }
 
+        public string SampleDatabaseFileLGD_ReadRefferences_IfChanged => sampleDatabaseFileLGD_ReadRefferences_IfChanged;
+        public string SampleDatabaseFileLGD => sampleDatabaseFileLGD;
+
         #endregion
 
         #region Public Methods
@@ -67,19 +70,23 @@ namespace YY.EventLogReaderAssistant.Services.Tests
         {
             public static ReferencesData CreateromReader(EventLogReader reader)
             {
-                List<Severity> severities = new List<Severity>();
-                severities.Add(Severity.Error);
-                severities.Add(Severity.Information);
-                severities.Add(Severity.Note);
-                severities.Add(Severity.Unknown);
-                severities.Add(Severity.Warning);
+                List<Severity> severities = new List<Severity>
+                {
+                    Severity.Error,
+                    Severity.Information,
+                    Severity.Note,
+                    Severity.Unknown,
+                    Severity.Warning
+                };
 
-                List<TransactionStatus> transactionStatuses = new List<TransactionStatus>();
-                transactionStatuses.Add(TransactionStatus.Committed);
-                transactionStatuses.Add(TransactionStatus.NotApplicable);
-                transactionStatuses.Add(TransactionStatus.RolledBack);
-                transactionStatuses.Add(TransactionStatus.Unfinished);
-                transactionStatuses.Add(TransactionStatus.Unknown);
+                List<TransactionStatus> transactionStatuses = new List<TransactionStatus>
+                {
+                    TransactionStatus.Committed,
+                    TransactionStatus.NotApplicable,
+                    TransactionStatus.RolledBack,
+                    TransactionStatus.Unfinished,
+                    TransactionStatus.Unknown
+                };
 
                 ReferencesData referenceData;
 
