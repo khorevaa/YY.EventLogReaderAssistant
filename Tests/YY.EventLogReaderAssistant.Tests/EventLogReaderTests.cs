@@ -9,10 +9,10 @@ using YY.EventLogReaderAssistant.Services;
 
 namespace YY.EventLogReaderAssistant.Tests
 {
-    [CollectionDefinition("SQLite Event Log Test", DisableParallelization = true)]
+    [CollectionDefinition("Event Log Test", DisableParallelization = true)]
     public class SQLiteEventLogTestDefinition { }
 
-    [Collection("SQLite Event Log Test")]
+    [Collection("Event Log Test")]
     public class EventLogReaderTests
     {
         #region Private Member Variables
@@ -56,37 +56,31 @@ namespace YY.EventLogReaderAssistant.Tests
         {
             GetCount_Test(sampleDatabaseFileLGD);
         }
-
         [Fact]
         public void GetCount_OldFormat_LGF_Test()
         {
             GetCount_Test(sampleDatabaseFileLGF);
         }
-
         [Fact]
         public void GetAndSetPosition_NewFormat_LGD_Test()
         {
             GetAndSetPosition_Test(sampleDatabaseFileLGD);
         }
-
         [Fact]
         public void GetAndSetPosition_OldFormat_LGF_Test()
         {
             GetAndSetPosition_Test(sampleDatabaseFileLGF);
         }
-
         [Fact]
         public void SetBadStreamPosition_Addition_OldFormat_LGF_Test()
         {
             SetBadStreamPosition_LGF_Format_Test(sampleDatabaseFileLGF, 3);
         }
-
         [Fact]
         public void SetBadStreamPosition_Subtraction_OldFormat_LGF_Test()
         {
             SetBadStreamPosition_LGF_Format_Test(sampleDatabaseFileLGF, -3);
         }
-
         [Fact]
         public void OnErrorHandlerBrokenEvent_OldFormat_LGF_Test()
         {
@@ -112,65 +106,102 @@ namespace YY.EventLogReaderAssistant.Tests
             Assert.Equal(1, EventCountError);
             Assert.Equal(4, EventCountSuccess);
         }
-
         [Fact]
         public void CountLogFiles_NewFormat_LGD_Test()
         {
             GetCountLogFiles_Test(sampleDatabaseFileLGD);
         }
-
         [Fact]
         public void CountLogFiles_OldFormat_LGF_Test()
         {
             GetCountLogFiles_Test(sampleDatabaseFileLGF);
         }
-
         [Fact]
         public void GoToEvent_NewFormat_LGD_Test()
         {
             GoToEvent_Test(sampleDatabaseFileLGD);
         }
-
         [Fact]
         public void GoToEvent_OldFormat_LGF_Test()
         {
             GoToEvent_Test(sampleDatabaseFileLGF);
         }
-
         [Fact]
         public void ReadRefferences_IfChanged_OldFormat_LGF_Test()
         {
             ReadRefferences_IfChanged_Test(sampleDatabaseFileLGF);
         }
-
         [Fact]
         public void ReadRefferences_IfChanged_NewFormat_LGD_Test()
         {
             ReadRefferences_IfChanged_Test(sampleDatabaseFileLGD_ReadRefferences_IfChanged);
         }
-
         [Fact]
         public void CheckIdAfterSetPosition_OldFormat_LGF_Test()
         {
             CheckIdAfterSetPosition_Test(sampleDatabaseFileLGF);
         }
-
         [Fact]
         public void CheckIdAfterSetPosition_NewFormat_LGD_Test()
         {
             CheckIdAfterSetPosition_Test(sampleDatabaseFileLGD);
         }
-
         [Fact]
         public void CheckIdAfterGoToEvent_OldFormat_LGF_Test()
         {
             CheckIdAfterGoToEvent_Test(sampleDatabaseFileLGF);
         }
-
         [Fact]
         public void CheckIdAfterGoToEvent_NewFormat_LGD_Test()
         {
             CheckIdAfterGoToEvent_Test(sampleDatabaseFileLGD);
+        }
+        [Fact]
+        public void ReadOnChanging_OldFormat_LFG_Test()
+        {
+            DateTime newLogRecordPeriod = DateTime.UtcNow;
+            RowData lastRowData = null;
+
+            using (EventLogReader reader = EventLogReader.CreateReader(sampleDatabaseFileLGF))
+            {
+                long totalEvents = reader.Count();
+                long currentEventNumber = 0;
+                
+                bool dataExist = false;
+                do
+                {
+                    dataExist = reader.Read();
+                    lastRowData = reader.CurrentRow;
+                    currentEventNumber += 1;
+                    
+                    if(totalEvents == currentEventNumber)
+                    {
+                        string descriptionNewEvent = "Новое событие в процессе чтения!";
+                        string newLogRecordPeriodAsString = newLogRecordPeriod.ToString("yyyyMMddHHmmss");
+
+                        using (StreamWriter sw = File.AppendText(reader.CurrentFile))
+                        {
+                            sw.WriteLine(",");
+                            sw.WriteLine($"{{{newLogRecordPeriodAsString},N,");
+                            sw.WriteLine($"{{0,0}},1,1,2,2,3,N,\"{descriptionNewEvent}\",3,");
+                            sw.WriteLine($"{{\"S\",\"{descriptionNewEvent}\"}},\"\",1,1,0,2,0,");
+                            sw.WriteLine("{0}");
+                            sw.WriteLine("}");
+                        }
+
+                        dataExist = reader.Read();
+                        lastRowData = reader.CurrentRow;
+                        currentEventNumber += 1;
+                        break;
+                    }
+                } while (dataExist);
+            }
+
+            Assert.NotNull(lastRowData);
+            Assert.Equal(newLogRecordPeriod.Date, lastRowData.Period.Date);
+            Assert.Equal(newLogRecordPeriod.Hour, lastRowData.Period.Hour);
+            Assert.Equal(newLogRecordPeriod.Minute, lastRowData.Period.Minute);
+            Assert.Equal(newLogRecordPeriod.Second, lastRowData.Period.Second);
         }
 
         #endregion
@@ -205,7 +236,6 @@ namespace YY.EventLogReaderAssistant.Tests
             Assert.NotNull(rowAfterSetPosition);
             Assert.Equal(rowAfterSteps.RowID, rowAfterSetPosition.RowID - 1);
         }
-
         private void CheckIdAfterGoToEvent_Test(string eventLogPath)
         {
             int checkIdSteps = 5;
@@ -236,7 +266,6 @@ namespace YY.EventLogReaderAssistant.Tests
             Assert.NotEqual(-1, eventNumberAfterGoToEvent);
             Assert.Equal(rowAfterSteps.RowID, rowAfterGoToEvent.RowID - 1);
         }
-
         private void GetCount_Test(string eventLogPath)
         {
             long countRecords = 0;
@@ -256,7 +285,6 @@ namespace YY.EventLogReaderAssistant.Tests
             Assert.NotEqual(0, countRecordsStepByStep);
             Assert.Equal(countRecords, countRecordsStepByStep);
         }      
-
         private void GetAndSetPosition_Test(string eventLogPath)
         {
             long countRecords = 0;
@@ -294,7 +322,6 @@ namespace YY.EventLogReaderAssistant.Tests
             Assert.Equal(countRecords, countRecordsStepByStep);
             Assert.Equal(countRecords, countRecordsStepByStepAfterSetPosition);
         }
-
         private void GetCountLogFiles_Test(string eventLogPath)
         {
             long countLogFiles = 0;
@@ -319,7 +346,6 @@ namespace YY.EventLogReaderAssistant.Tests
 
             Assert.NotEqual(0, countLogFiles);
         }
-
         private void GoToEvent_Test(string eventLogPath)
         {
             string dataAfterGoEvent = string.Empty;
@@ -341,7 +367,6 @@ namespace YY.EventLogReaderAssistant.Tests
 
             Assert.Equal(dataAfterGoEvent, dataAfterSetPosition);
         }
-
         private void ReadRefferences_IfChanged_Test(string eventLogPath)
         {
             DateTime lastReadReferencesDateBeforeRead;
@@ -498,7 +523,6 @@ namespace YY.EventLogReaderAssistant.Tests
             Assert.NotEqual(DateTime.MinValue, lastReadReferencesDateBeforeRead);
             Assert.True(lastReadReferencesDateBeforeRead < lastReadReferencesDate);
         }
-
         private void SetBadStreamPosition_LGF_Format_Test(string eventLogPath, long changeStreamPosition)
         {
             long correctRowId;
@@ -532,7 +556,6 @@ namespace YY.EventLogReaderAssistant.Tests
         {
             EventCountSuccess += 1;
         }
-
         private void Reader_OnErrorEvent(EventLogReader sender, OnErrorEventArgs args)
         {
             LastErrorData = args;

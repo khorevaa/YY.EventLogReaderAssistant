@@ -103,6 +103,10 @@ namespace YY.EventLogReaderAssistant
                 while (true)
                 {
                     sourceData = _stream.ReadLine();
+
+                    if(sourceData == "," && NextLineIsBeginEvent())
+                        sourceData = _stream.ReadLine();
+
                     if (sourceData == null)
                     {
                         NextFile();
@@ -163,7 +167,6 @@ namespace YY.EventLogReaderAssistant
                 return false;
             }
         }
-
         public override bool GoToEvent(long eventNumber)
         {
             Reset();
@@ -214,7 +217,6 @@ namespace YY.EventLogReaderAssistant
                 return false;
             }
         }
-
         public override EventLogPosition GetCurrentPosition()
         {
             return new EventLogPosition(
@@ -223,7 +225,6 @@ namespace YY.EventLogReaderAssistant
                 CurrentFile, 
                 GetCurrentFileStreamPosition());
         }
-
         public override void SetCurrentPosition(EventLogPosition newPosition)
         {
             Reset();
@@ -314,7 +315,6 @@ namespace YY.EventLogReaderAssistant
             if (newPosition.StreamPosition != null)
                 SetCurrentFileStreamPosition(newStreamPosition);
         }
-
         public override long Count()
         {
             if(_eventCount < 0)
@@ -322,7 +322,6 @@ namespace YY.EventLogReaderAssistant
 
             return _eventCount;
         }
-
         public override void Reset()
         {
             if (_stream != null)
@@ -335,7 +334,6 @@ namespace YY.EventLogReaderAssistant
             _currentFileEventNumber = 0;
             _currentRow = null;
         }
-
         public override void NextFile()
         {
             RaiseAfterReadFile(new AfterReadFileEventArgs(CurrentFile));
@@ -348,7 +346,6 @@ namespace YY.EventLogReaderAssistant
 
             _indexCurrentFile += 1;
         }
-
         public override void Dispose()
         {
             base.Dispose();
@@ -359,7 +356,6 @@ namespace YY.EventLogReaderAssistant
                 _stream = null;
             }
         }
-
         protected override void ReadEventLogReferences()
         {
             _users.Clear();
@@ -387,7 +383,6 @@ namespace YY.EventLogReaderAssistant
 
             base.ReadEventLogReferences();
         }
-
         public long GetCurrentFileStreamPosition()
         {
             if (_stream != null)
@@ -395,7 +390,6 @@ namespace YY.EventLogReaderAssistant
             else
                 return 0;
         }
-
         public void SetCurrentFileStreamPosition(long position)
         {
             if (_stream != null)
@@ -412,7 +406,6 @@ namespace YY.EventLogReaderAssistant
             _stream = new StreamReader(fs);
             _stream.SkipLine(linesToSkip);
         }
-
         private long GetEventCount()
         {
             long eventCount = 0;
@@ -431,6 +424,23 @@ namespace YY.EventLogReaderAssistant
             }
 
             return eventCount;
+        }
+        private bool NextLineIsBeginEvent()
+        {
+            bool nextIsBeginEvent = false;
+            if (CurrentFile == null || _stream == null)
+                return nextIsBeginEvent;
+
+            long currentStreamPosition = _stream.GetPosition();
+
+            using (StreamReader checkReader = new StreamReader(CurrentFile))
+            {
+                checkReader.SetPosition(currentStreamPosition);
+                string lineContent = checkReader.ReadLine();
+                nextIsBeginEvent = LogParserLGF.ItsBeginOfEvent(lineContent);
+            }
+
+            return nextIsBeginEvent;
         }
 
         #endregion
