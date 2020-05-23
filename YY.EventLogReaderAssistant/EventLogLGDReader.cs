@@ -196,46 +196,26 @@ namespace YY.EventLogReaderAssistant
         {
             Reset();
 
-            long eventCount = Count();
-            if (eventCount >= eventNumber)
+            long eventNumberToSkip = eventNumber - 1;
+            if (eventNumberToSkip <= 0)
             {
-                long eventNumberToSkip = eventNumber - 1;
-                if (eventNumberToSkip <= 0)
-                {
-                    _lastRowId = 0;
-                    _currentFileEventNumber = 0;
-                    return true;
-                }
+                _lastRowId = 0;
+                _currentFileEventNumber = 0;
+                return true;
+            }
 
-                using (_connection = new SQLiteConnection(ConnectionString))
-                {
-                    _connection.Open();
-
-                    string queryText = String.Format(
-                         "Select\n" +
-                         "    el.RowId\n" +
-                         "From\n" +
-                         "    EventLog el\n" +
-                         "Where RowID > {0}\n" +
-                         "Order By rowID\n" +
-                         "Limit 1 OFFSET {1}\n", _lastRowId, eventNumberToSkip);
-
-                    using (SQLiteCommand cmd = new SQLiteCommand(queryText, _connection))
-                    {
-                        using (SQLiteDataReader reader = cmd.ExecuteReader())
-                        {
-                            if (reader.Read())
-                            {
-                                _lastRowId = reader.GetInt64OrDefault(0);
-                                _currentFileEventNumber = eventNumber;
-                                return true;
-                            }
-                        }
-                    }
-                }               
-            }            
-
-            return false;
+            long newValueLastRowId = GetLastRowId(eventNumberToSkip);
+            if(newValueLastRowId == 0)
+            {
+                _lastRowId = newValueLastRowId;
+                _currentFileEventNumber = 0;
+                return false;
+            } else
+            {
+                _lastRowId = newValueLastRowId;
+                _currentFileEventNumber = eventNumber;
+                return true;
+            }
         }
         public override EventLogPosition GetCurrentPosition()
         {
@@ -319,6 +299,37 @@ namespace YY.EventLogReaderAssistant
 
         #region Private Methods
 
+        private long GetLastRowId(long eventNumberToSkip)
+        {
+            long valueLastRowId = 0;
+
+            using (_connection = new SQLiteConnection(ConnectionString))
+            {
+                _connection.Open();
+
+                string queryText = String.Format(
+                     "Select\n" +
+                     "    el.RowId\n" +
+                     "From\n" +
+                     "    EventLog el\n" +
+                     "Where RowID > {0}\n" +
+                     "Order By rowID\n" +
+                     "Limit 1 OFFSET {1}\n", _lastRowId, eventNumberToSkip);
+
+                using (SQLiteCommand cmd = new SQLiteCommand(queryText, _connection))
+                {
+                    using (SQLiteDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            valueLastRowId = reader.GetInt64OrDefault(0);
+                        }
+                    }
+                }
+            }
+
+            return valueLastRowId;
+        }
         protected override void ReadEventLogReferences()
         {
             _users.Clear();
