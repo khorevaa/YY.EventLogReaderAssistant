@@ -119,6 +119,16 @@ namespace YY.EventLogReaderAssistant
                                         if (rowPeriod >= ReferencesReadDate)
                                             ReadEventLogReferences();
 
+                                        if (_readDelayMilliseconds != 0)
+                                        {
+                                            DateTimeOffset stopPeriod = DateTimeOffset.Now.AddMilliseconds(-_readDelayMilliseconds);
+                                            if (rowPeriod >= stopPeriod)
+                                            {
+                                                _currentRow = null;
+                                                return false;
+                                            }
+                                        }
+
                                         _readBuffer.Add(new RowData
                                         {
                                             RowID = reader.GetInt64OrDefault(0),

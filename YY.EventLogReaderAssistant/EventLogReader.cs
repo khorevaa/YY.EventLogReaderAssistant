@@ -67,6 +67,8 @@ namespace YY.EventLogReaderAssistant
         protected List<WorkServers> _workServers;
         protected RowData _currentRow;
 
+        protected double _readDelayMilliseconds;
+
         #endregion
 
         #region Constructor
@@ -88,6 +90,8 @@ namespace YY.EventLogReaderAssistant
 
             _referencesReadDate = DateTime.MinValue;
             ReadEventLogReferences();
+
+            _readDelayMilliseconds = 1000;
         }
 
         #endregion
@@ -113,6 +117,13 @@ namespace YY.EventLogReaderAssistant
             get
             {
                 return null;
+            }
+        }
+        public virtual double ReadDelayMilliseconds
+        {
+            get
+            {
+                return _readDelayMilliseconds;
             }
         }
 
@@ -147,6 +158,10 @@ namespace YY.EventLogReaderAssistant
         public virtual void NextFile()
         {
             throw new NotImplementedException();
+        }
+        public virtual void SetReadDelay(double milliseconds)
+        {
+            _readDelayMilliseconds = milliseconds;
         }
         public virtual void Dispose()
         {
