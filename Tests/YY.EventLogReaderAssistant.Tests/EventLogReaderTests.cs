@@ -21,7 +21,10 @@ namespace YY.EventLogReaderAssistant.Tests
         private readonly string sampleDatabaseFileLGF;
         private readonly string sampleDatabaseFileLGD;
         private readonly string sampleDatabaseFileLGD_ReadRefferences_IfChanged;
+        private readonly string sampleDatabaseFileLGDReadWithDelay;
         private readonly string sampleDatabaseFileLGFBrokenFile;
+        private readonly string sampleDatabaseFileLGFOnChanging;
+        private readonly string sampleDatabaseFileLGFReadWithDelay;
 
         private OnErrorEventArgs _lastErrorData;
         private long EventCountSuccess;
@@ -41,7 +44,10 @@ namespace YY.EventLogReaderAssistant.Tests
             sampleDatabaseFileLGD = Path.Combine(sampleDataDirectory, "SQLiteFormatEventLog", "1Cv8.lgd");
             sampleDatabaseFileLGD_ReadRefferences_IfChanged = Path.Combine(
                 sampleDataDirectory, "SQLiteFormatEventLog", "1Cv8_ReadRefferences_IfChanged_Test.lgd");
+            sampleDatabaseFileLGDReadWithDelay = Path.Combine(sampleDataDirectory, "SQLiteFormatEventLogReadWithDelay", "1Cv8.lgd");
             sampleDatabaseFileLGFBrokenFile = Path.Combine(sampleDataDirectory, "LGFFormatEventLogBrokenFile", "1Cv8.lgf");
+            sampleDatabaseFileLGFOnChanging = Path.Combine(sampleDataDirectory, "LGFFormatEventLogOnChanging", "1Cv8.lgf");
+            sampleDatabaseFileLGFReadWithDelay = Path.Combine(sampleDataDirectory, "LGFFormatEventLogReadWithDelay", "1Cv8.lgf");
 
             EventCountSuccess = 0;
             EventCountError = 0;
@@ -162,7 +168,7 @@ namespace YY.EventLogReaderAssistant.Tests
             DateTime newLogRecordPeriod = DateTime.UtcNow;
             RowData lastRowData = null;
 
-            using (EventLogReader reader = EventLogReader.CreateReader(sampleDatabaseFileLGF))
+            using (EventLogReader reader = EventLogReader.CreateReader(sampleDatabaseFileLGFOnChanging))
             {
                 long totalEvents = reader.Count();
                 long currentEventNumber = 0;
@@ -202,6 +208,196 @@ namespace YY.EventLogReaderAssistant.Tests
             Assert.Equal(newLogRecordPeriod.Hour, lastRowData.Period.Hour);
             Assert.Equal(newLogRecordPeriod.Minute, lastRowData.Period.Minute);
             Assert.Equal(newLogRecordPeriod.Second, lastRowData.Period.Second);
+        }
+        [Fact]
+        public void ReadOnChanging_WithReadDelay_OldFormat_LFG_Test()
+        {
+            DateTimeOffset newLogRecordPeriod = DateTimeOffset.Now.AddSeconds(60);
+            RowData lastRowData = null;
+
+            using (EventLogReader reader = EventLogReader.CreateReader(sampleDatabaseFileLGFReadWithDelay))
+            {
+                long totalEvents = reader.Count();
+                long currentEventNumber = 0;
+
+                reader.SetReadDelay(1000);
+                bool dataExist = false;
+                do
+                {
+                    dataExist = reader.Read();
+                    lastRowData = reader.CurrentRow;
+                    currentEventNumber += 1;
+
+                    if (totalEvents == currentEventNumber)
+                    {
+                        string descriptionNewEvent = "Новое событие в процессе чтения!";
+                        string newLogRecordPeriodAsString = newLogRecordPeriod.ToString("yyyyMMddHHmmss");
+
+                        using (StreamWriter sw = File.AppendText(reader.CurrentFile))
+                        {
+                            sw.WriteLine(",");
+                            sw.WriteLine($"{{{newLogRecordPeriodAsString},N,");
+                            sw.WriteLine($"{{0,0}},1,1,2,2,3,N,\"{descriptionNewEvent}\",3,");
+                            sw.WriteLine($"{{\"S\",\"{descriptionNewEvent}\"}},\"\",1,1,0,2,0,");
+                            sw.WriteLine("{0}");
+                            sw.WriteLine("}");
+                        }
+
+                        dataExist = reader.Read();
+                        lastRowData = reader.CurrentRow;
+                        currentEventNumber += 1;
+                        break;
+                    }
+                } while (dataExist);
+            }
+
+            Assert.Null(lastRowData);
+        }
+        [Fact]
+        public void ReadOnChanging_WithReadDelay_NewFormat_LGD_Test()
+        {
+            DateTime newLogRecordPeriod = DateTime.Now.AddHours(1);
+            RowData lastRowData = null;
+
+            #region addNewRecord
+
+            string lgdConnectionString = SQLiteExtensions.GetConnectionString(sampleDatabaseFileLGDReadWithDelay, false);
+            using (SQLiteConnection connection = new SQLiteConnection(lgdConnectionString))
+            {
+                connection.Open();
+                string queryText = String.Format(
+                    "Select\n" +
+                    "    el.RowId,\n" +
+                    "    el.Date AS Date,\n" +
+                    "    el.ConnectId,\n" +
+                    "    el.Session,\n" +
+                    "    el.TransactionStatus,\n" +
+                    "    el.TransactionDate,\n" +
+                    "    el.TransactionId,\n" +
+                    "    el.UserCode AS UserCode,\n" +
+                    "    el.ComputerCode AS ComputerCode,\n" +
+                    "    el.appCode AS ApplicationCode,\n" +
+                    "    el.eventCode AS EventCode,\n" +
+                    "    el.primaryPortCode AS PrimaryPortCode,\n" +
+                    "    el.secondaryPortCode AS SecondaryPortCode,\n" +
+                    "    el.workServerCode AS WorkServerCode,\n" +
+                    "    el.Severity AS SeverityCode,\n" +
+                    "    el.Comment AS Comment,\n" +
+                    "    el.Data AS Data,\n" +
+                    "    el.DataPresentation AS DataPresentation,\n" +
+                    "    elm.metadataCode AS MetadataCode\n" +
+                    "From\n" +
+                    "    EventLog el\n" +
+                    "    left join EventLogMetadata elm on el.RowId = elm.eventLogID\n" +
+                    "    left join MetadataCodes mc on elm.metadataCode = mc.code\n" +
+                    "Where RowID = (SELECT MAX(RowID) from EventLog)\n");
+
+                long RowID = 0, ConnectId = 0, Session = 0,
+                        TransactionStatus = 0, TransactionDate = 0, TransactionId = 0,
+                        User = 0, Computer = 0, Application = 0, Event = 0, PrimaryPort = 0,
+                        SecondaryPort = 0, WorkServer = 0, Severity = 0, Metadata = 0;
+                string Comment = string.Empty, Data = string.Empty, DataPresentation = string.Empty;
+
+                using (SQLiteCommand sqliteCmd = new SQLiteCommand(queryText, connection))
+                {
+                    using (SQLiteDataReader sqliteReader = sqliteCmd.ExecuteReader())
+                    {
+                        while (sqliteReader.Read())
+                        {
+                            RowID = sqliteReader.GetInt64OrDefault(0);
+                            ConnectId = sqliteReader.GetInt64OrDefault(2);
+                            Session = sqliteReader.GetInt64OrDefault(3);
+                            TransactionStatus = sqliteReader.GetInt64OrDefault(4);
+                            TransactionDate = sqliteReader.GetInt64OrDefault(5);
+                            TransactionId = sqliteReader.GetInt64OrDefault(6);
+                            User = sqliteReader.GetInt64OrDefault(7);
+                            Computer = sqliteReader.GetInt64OrDefault(8);
+                            Application = sqliteReader.GetInt64OrDefault(9);
+                            Event = sqliteReader.GetInt64OrDefault(10);
+                            PrimaryPort = sqliteReader.GetInt64OrDefault(11);
+                            SecondaryPort = sqliteReader.GetInt64OrDefault(12);
+                            WorkServer = sqliteReader.GetInt64OrDefault(13);
+                            Severity = sqliteReader.GetInt64OrDefault(14);
+                            Comment = sqliteReader.GetStringOrDefault(15);
+                            Data = sqliteReader.GetStringOrDefault(16);
+                            DataPresentation = sqliteReader.GetStringOrDefault(17);
+                            Metadata = sqliteReader.GetInt64OrDefault(18);
+                        }
+                    }
+                }
+
+                string queryInsertLog =
+                    "INSERT INTO EventLog " +
+                    "(" +
+                    "   RowId, " +
+                    "   Date, " +
+                    "   ConnectId, " +
+                    "   Session, " +
+                    "   TransactionStatus, " +
+                    "   TransactionDate, " +
+                    "   TransactionId, " +
+                    "   UserCode, " +
+                    "   ComputerCode, " +
+                    "   appCode, " +
+                    "   eventCode, " +
+                    "   primaryPortCode, " +
+                    "   secondaryPortCode, " +
+                    "   workServerCode, " +
+                    "   Severity, " +
+                    "   Comment, " +
+                    "   Data, " +
+                    "   DataPresentation " +
+                    ") " +
+                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
+                using (SQLiteCommand insertSQL = new SQLiteCommand(queryInsertLog, connection))
+                {
+                    long newRowId = RowID + 1;
+                    long newPeriod = newLogRecordPeriod.ToLongDateTimeFormat();
+
+                    insertSQL.Parameters.Add(new SQLiteParameter(DbType.Int64, newRowId));
+                    insertSQL.Parameters.Add(new SQLiteParameter(DbType.Int64, newPeriod));
+                    insertSQL.Parameters.Add(new SQLiteParameter(DbType.Int64, ConnectId));
+                    insertSQL.Parameters.Add(new SQLiteParameter(DbType.Int64, Session));
+                    insertSQL.Parameters.Add(new SQLiteParameter(DbType.Int64, TransactionStatus));
+                    insertSQL.Parameters.Add(new SQLiteParameter(DbType.Int64, TransactionDate));
+                    insertSQL.Parameters.Add(new SQLiteParameter(DbType.Int64, TransactionId));
+                    insertSQL.Parameters.Add(new SQLiteParameter(DbType.Int64, User));
+                    insertSQL.Parameters.Add(new SQLiteParameter(DbType.Int64, Computer));
+                    insertSQL.Parameters.Add(new SQLiteParameter(DbType.Int64, Application));
+                    insertSQL.Parameters.Add(new SQLiteParameter(DbType.Int64, Event));
+                    insertSQL.Parameters.Add(new SQLiteParameter(DbType.Int64, PrimaryPort));
+                    insertSQL.Parameters.Add(new SQLiteParameter(DbType.Int64, SecondaryPort));
+                    insertSQL.Parameters.Add(new SQLiteParameter(DbType.Int64, WorkServer));
+                    insertSQL.Parameters.Add(new SQLiteParameter(DbType.Int64, Severity));
+                    insertSQL.Parameters.Add(new SQLiteParameter(DbType.String, Comment));
+                    insertSQL.Parameters.Add(new SQLiteParameter(DbType.String, Data));
+                    insertSQL.Parameters.Add(new SQLiteParameter(DbType.String, DataPresentation));
+                    insertSQL.ExecuteNonQuery();
+                }
+            }
+
+            #endregion
+
+            using (EventLogReader reader = EventLogReader.CreateReader(sampleDatabaseFileLGDReadWithDelay))
+            {
+                long totalEvents = reader.Count();
+                long currentEventNumber = 0;
+
+                reader.SetReadDelay(1000);               
+
+                bool dataExist = false;
+                do
+                {
+                    dataExist = reader.Read();
+                    if(dataExist)
+                        lastRowData = reader.CurrentRow;
+                    currentEventNumber += 1;
+                } while (dataExist);
+            }
+
+            Assert.NotNull(lastRowData);
+            Assert.NotEqual(newLogRecordPeriod, lastRowData.Period);
         }
 
         #endregion
