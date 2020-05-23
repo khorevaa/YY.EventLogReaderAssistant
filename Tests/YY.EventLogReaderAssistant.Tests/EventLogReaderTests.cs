@@ -212,7 +212,7 @@ namespace YY.EventLogReaderAssistant.Tests
         [Fact]
         public void ReadOnChanging_WithReadDelay_OldFormat_LFG_Test()
         {
-            DateTimeOffset newLogRecordPeriod = DateTime.Now.AddHours(1);
+            DateTime newLogRecordPeriod = DateTime.Now.AddHours(1);
             RowData lastRowData = null;
 
             using (EventLogReader reader = EventLogReader.CreateReader(sampleDatabaseFileLGFReadWithDelay))
