@@ -142,6 +142,17 @@ namespace YY.EventLogReaderAssistant
                                     eventData = LogParser.Parse(prepearedSourceData);
                                 }
                             }
+
+                            if (_readDelayMilliseconds != 0)
+                            {
+                                DateTimeOffset stopPeriod = DateTimeOffset.Now.AddMilliseconds(-_readDelayMilliseconds);
+                                if (eventData.Period >= stopPeriod)
+                                {
+                                    _currentRow = null;
+                                    return false;
+                                }
+                            }
+
                             _currentRow = eventData;
 
                             RaiseAfterRead(new AfterReadEventArgs(_currentRow, _currentFileEventNumber));
