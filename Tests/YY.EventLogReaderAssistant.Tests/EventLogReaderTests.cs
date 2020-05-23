@@ -165,11 +165,12 @@ namespace YY.EventLogReaderAssistant.Tests
         [Fact]
         public void ReadOnChanging_OldFormat_LFG_Test()
         {
-            DateTime newLogRecordPeriod = DateTime.UtcNow;
+            DateTime newLogRecordPeriod = DateTime.Now;
             RowData lastRowData = null;
 
             using (EventLogReader reader = EventLogReader.CreateReader(sampleDatabaseFileLGFOnChanging))
             {
+                reader.SetReadDelay(0);
                 long totalEvents = reader.Count();
                 long currentEventNumber = 0;
                 
@@ -251,8 +252,7 @@ namespace YY.EventLogReaderAssistant.Tests
                 } while (dataExist);
             }
                         
-            //Assert.Null(lastRowData);
-            Assert.NotEqual(newLogRecordPeriod, lastRowData.Period);
+            Assert.Null(lastRowData);
         }
         [Fact]
         public void ReadOnChanging_WithReadDelay_NewFormat_LGD_Test()
