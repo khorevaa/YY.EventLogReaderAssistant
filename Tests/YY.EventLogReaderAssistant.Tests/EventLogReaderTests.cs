@@ -250,8 +250,9 @@ namespace YY.EventLogReaderAssistant.Tests
                     }
                 } while (dataExist);
             }
-
-            Assert.Null(lastRowData);
+                        
+            //Assert.Null(lastRowData);
+            Assert.NotEqual(newLogRecordPeriod, lastRowData.Period);
         }
         [Fact]
         public void ReadOnChanging_WithReadDelay_NewFormat_LGD_Test()
