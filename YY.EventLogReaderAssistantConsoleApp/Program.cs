@@ -1,5 +1,6 @@
 ﻿using System;
 using YY.EventLogReaderAssistant;
+using YY.EventLogReaderAssistant.EventArguments;
 
 namespace YY.EventLogReaderAssistantConsoleApp
 {
@@ -17,7 +18,6 @@ namespace YY.EventLogReaderAssistantConsoleApp
 
             using (EventLogReader reader = EventLogReader.CreateReader(dataDirectoryPath))
             {
-                reader.SetCurrentPosition(new EventLogPosition(10000000000000000, @"F:\Trash\Новая папка\1Cv8.lgd", @"F:\Trash\Новая папка\1Cv8.lgd", null));
                 reader.AfterReadEvent += Reader_AfterReadEvent;
                 reader.AfterReadFile += Reader_AfterReadFile;
                 reader.BeforeReadEvent += Reader_BeforeReadEvent;

@@ -7,8 +7,7 @@ namespace YY.EventLogReaderAssistant.Tests
     {
         #region Private Member Variables
 
-        private readonly string sampleDataDirectory;
-        private readonly string sampleDatabaseFile;
+        private readonly string _sampleDatabaseFile;
 
         #endregion
 
@@ -17,8 +16,8 @@ namespace YY.EventLogReaderAssistant.Tests
         public LogParserLGFTests()
         {
             string currentDirectory = Directory.GetCurrentDirectory();
-            sampleDataDirectory = Path.Combine(currentDirectory, "SampleData");
-            sampleDatabaseFile = Path.Combine(sampleDataDirectory, "LGFFormatEventLog", "1Cv8.lgf");
+            var sampleDataDirectory = Path.Combine(currentDirectory, "SampleData");
+            _sampleDatabaseFile = Path.Combine(sampleDataDirectory, "LGFFormatEventLog", "1Cv8.lgf");
         }
 
         #endregion
@@ -69,9 +68,9 @@ namespace YY.EventLogReaderAssistant.Tests
         [Fact]
         public void ReadEventLogReferences_Test()
         {
-            bool dataExists = false;
+            bool dataExists;
 
-            using (EventLogReader reader = EventLogReader.CreateReader(sampleDatabaseFile))
+            using (EventLogReader reader = EventLogReader.CreateReader(_sampleDatabaseFile))
             {
                 dataExists =
                     reader.Applications.Count > 0

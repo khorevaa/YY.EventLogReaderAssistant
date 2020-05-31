@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using YY.EventLogReaderAssistant.EventArguments;
 using YY.EventLogReaderAssistant.Models;
 using YY.EventLogReaderAssistant.Services;
 
@@ -53,7 +54,6 @@ namespace YY.EventLogReaderAssistant
 
         #region Constructor
 
-        internal EventLogLGFReader() : base() { }
         internal EventLogLGFReader(string logFilePath) : base(logFilePath)
         {
             _indexCurrentFile = 0;
@@ -125,7 +125,6 @@ namespace YY.EventLogReaderAssistant
 
                     if (LogParserLGF.ItsEndOfEvent(sourceData, ref countBracket, ref textBlockOpen))
                     {
-                        newLine = true;
                         _currentFileEventNumber += 1;
                         string prepearedSourceData = _eventSource.ToString();
 
@@ -143,7 +142,7 @@ namespace YY.EventLogReaderAssistant
                                 }
                             }
 
-                            if (_readDelayMilliseconds != 0)
+                            if (Math.Abs(_readDelayMilliseconds) > 0 && eventData != null)
                             {
                                 DateTimeOffset stopPeriod = DateTimeOffset.Now.AddMilliseconds(-_readDelayMilliseconds);
                                 if (eventData.Period >= stopPeriod)

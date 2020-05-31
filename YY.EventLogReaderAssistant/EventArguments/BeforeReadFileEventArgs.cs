@@ -1,8 +1,6 @@
-﻿using System;
-
-namespace YY.EventLogReaderAssistant
+﻿namespace YY.EventLogReaderAssistant.EventArguments
 {
-    public sealed class BeforeReadFileEventArgs : EventArgs
+    public sealed class BeforeReadFileEventArgs : System.EventArgs
     {
         public BeforeReadFileEventArgs(string fileName)
         {
@@ -11,6 +9,6 @@ namespace YY.EventLogReaderAssistant
         }
 
         public string FileName { get; }
-        public bool Cancel { get; set; }
+        public bool Cancel { get; }
     }
 }

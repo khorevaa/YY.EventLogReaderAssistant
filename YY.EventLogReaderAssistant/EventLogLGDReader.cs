@@ -5,6 +5,7 @@ using System.Data.SQLite;
 using YY.EventLogReaderAssistant.Models;
 using YY.EventLogReaderAssistant.Services;
 using System.Runtime.CompilerServices;
+using YY.EventLogReaderAssistant.EventArguments;
 
 [assembly: InternalsVisibleTo("YY.EventLogReaderAssistant.Tests")]
 namespace YY.EventLogReaderAssistant
@@ -14,7 +15,7 @@ namespace YY.EventLogReaderAssistant
         #region Private Member Variables
 
         private string _connectionString;
-        private string ConnectionString => _connectionString ?? (_connectionString = SqLiteExtensions.GetConnectionString(_logFilePath));
+        private string ConnectionString => _connectionString ?? (_connectionString = SQLiteExtensions.GetConnectionString(_logFilePath));
         private SQLiteConnection _connection;
         private readonly List<RowData> _readBuffer;
         private long _lastRowId;
@@ -110,7 +111,7 @@ namespace YY.EventLogReaderAssistant
                                         if (rowPeriod >= ReferencesReadDate)
                                             ReadEventLogReferences();
 
-                                        if (_readDelayMilliseconds != 0)
+                                        if (Math.Abs(_readDelayMilliseconds) > 0)
                                         {
                                             DateTimeOffset stopPeriod = DateTimeOffset.Now.AddMilliseconds(-_readDelayMilliseconds);
                                             if (rowPeriod >= stopPeriod)

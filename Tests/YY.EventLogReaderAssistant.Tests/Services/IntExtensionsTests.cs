@@ -1,7 +1,8 @@
 ﻿using System;
 using Xunit;
+using YY.EventLogReaderAssistant.Services;
 
-namespace YY.EventLogReaderAssistant.Services.Tests
+namespace YY.EventLogReaderAssistant.Tests.Services
 {
     public class IntExtensionsTests
     {

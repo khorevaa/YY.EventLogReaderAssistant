@@ -1,8 +1,7 @@
 ﻿using System;
 
-namespace YY.EventLogReaderAssistant
+namespace YY.EventLogReaderAssistant.EventArguments
 {
-
     public sealed class BeforeReadEventArgs : EventArgs
     {
         public BeforeReadEventArgs(string sourceData, long eventNumber)

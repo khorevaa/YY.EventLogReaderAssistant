@@ -6,7 +6,7 @@ using System.Text;
 [assembly: InternalsVisibleTo("YY.EventLogReaderAssistant.Tests")]
 namespace YY.EventLogReaderAssistant.Services
 {
-    internal static class SqLiteExtensions
+    internal static class SQLiteExtensions
     {
         #region Public Methods
 
