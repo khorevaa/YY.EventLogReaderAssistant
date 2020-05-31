@@ -1,13 +1,11 @@
 ﻿using System;
-using System.IO;
 using YY.EventLogReaderAssistant;
-using YY.EventLogReaderAssistant.Models;
 
 namespace YY.EventLogReaderAssistantConsoleApp
 {
     class Program
     {
-        private static int _eventNumber = 0;
+        private static int _eventNumber;
 
         static void Main(string[] args)
         {
@@ -19,6 +17,7 @@ namespace YY.EventLogReaderAssistantConsoleApp
 
             using (EventLogReader reader = EventLogReader.CreateReader(dataDirectoryPath))
             {
+                reader.SetCurrentPosition(new EventLogPosition(10000000000000000, @"F:\Trash\Новая папка\1Cv8.lgd", @"F:\Trash\Новая папка\1Cv8.lgd", null));
                 reader.AfterReadEvent += Reader_AfterReadEvent;
                 reader.AfterReadFile += Reader_AfterReadFile;
                 reader.BeforeReadEvent += Reader_BeforeReadEvent;

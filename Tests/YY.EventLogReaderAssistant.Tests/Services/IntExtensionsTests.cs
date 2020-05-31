@@ -22,7 +22,7 @@ namespace YY.EventLogReaderAssistant.Services.Tests
         {
             long sourceLong = 637149888000000;
             DateTime checkDate = new DateTime(2020, 1, 19);
-            DateTime? resultDate = sourceLong.ToNullableDateTimeELFormat();
+            DateTime? resultDate = sourceLong.ToNullableDateTimeElFormat();
 
             Assert.Equal(checkDate, resultDate);
         }

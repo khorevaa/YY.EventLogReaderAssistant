@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using Xunit;
 using YY.EventLogReaderAssistant.Models;
-using YY.EventLogReaderAssistant;
 using System.IO;
 using System.Linq;
 
@@ -54,8 +52,8 @@ namespace YY.EventLogReaderAssistant.Services.Tests
                 data2 = ReferencesData.CreateromReader(reader);
             }
 
-            string hashMD5_1 = MD5HashGenerator.GetMD5Hash<ReferencesData>(data1);
-            string hashMD5_2 = MD5HashGenerator.GetMD5Hash<ReferencesData>(data2);
+            string hashMD5_1 = Md5HashGenerator.GetMd5Hash<ReferencesData>(data1);
+            string hashMD5_2 = Md5HashGenerator.GetMd5Hash<ReferencesData>(data2);
 
             Assert.Equal(hashMD5_1, hashMD5_2);
 

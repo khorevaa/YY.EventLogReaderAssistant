@@ -173,8 +173,6 @@ namespace YY.EventLogReaderAssistant
                             case "13":
                                 break;
                             //  Последние значения хранят статус транзакции и уровень события                        
-                            default:
-                                break;
                         }
                     }
                 }
@@ -192,7 +190,7 @@ namespace YY.EventLogReaderAssistant
 
                 dataRow = new RowData()
                 {
-                    RowID = _reader.CurrentFileEventNumber,
+                    RowId = _reader.CurrentFileEventNumber,
                     Period = DateTime.ParseExact(parseResult[0], "yyyyMMddHHmmss", CultureInfo.InvariantCulture),
                     TransactionStatus = _reader.GetTransactionStatus(parseResult[1]),
                     TransactionDate = GetTransactionDate(transactionSourceString),
@@ -212,7 +210,7 @@ namespace YY.EventLogReaderAssistant
                     SecondaryPort = _reader.GetSecondaryPortByCode(parseResult[15]),
                     Session = parseResult[16].ToInt64()
                 };
-                dataRow.DataUUID = GetDataUUID(dataRow.Data);
+                dataRow.DataUuid = GetDataUUID(dataRow.Data);
             }
 
             return dataRow;
@@ -248,7 +246,7 @@ namespace YY.EventLogReaderAssistant
 
         private string GetDataUUID(string sourceData)
         {
-            string dataUUID;
+            string dataUuid;
 
             MatchCollection matches = _regexDataUUID.Matches(sourceData);
             if (matches.Count > 0)
@@ -256,25 +254,25 @@ namespace YY.EventLogReaderAssistant
                 string[] dataPartsUUID = sourceData.Split(':');
                 if (dataPartsUUID.Length == 2)
                 {
-                    dataUUID = dataPartsUUID[1].Replace("}", string.Empty);
+                    dataUuid = dataPartsUUID[1].Replace("}", string.Empty);
                 } else
-                    dataUUID = string.Empty;
+                    dataUuid = string.Empty;
             }
             else
-                dataUUID = string.Empty;
+                dataUuid = string.Empty;
 
-            return dataUUID;
+            return dataUuid;
         }
 
         private DateTime? GetTransactionDate(string sourceString)
         {
             DateTime? transactionDate;
 
-            long TransDate = sourceString.Substring(0, sourceString.IndexOf(",")).From16To10();
+            long TransDate = sourceString.Substring(0, sourceString.IndexOf(",", StringComparison.Ordinal)).From16To10();
             try
             {
                 if (!(TransDate == 0))
-                    transactionDate = new System.DateTime().AddSeconds((double)TransDate / 10000);
+                    transactionDate = new DateTime().AddSeconds((double)TransDate / 10000);
                 else
                     transactionDate = null;
             }
@@ -290,7 +288,7 @@ namespace YY.EventLogReaderAssistant
         {
             long? transactionId;
 
-            transactionId = sourceString.Substring(sourceString.IndexOf(",") + 1).From16To10();
+            transactionId = sourceString.Substring(sourceString.IndexOf(",", StringComparison.Ordinal) + 1).From16To10();
 
             return transactionId;
         }
@@ -308,7 +306,7 @@ namespace YY.EventLogReaderAssistant
             string preparedString = sourceString.Substring(1, (sourceString.EndsWith(",") ? sourceString.Length - 3 : sourceString.Length - 2)) + ",";
             string bufferString = string.Empty;
 
-            int delimIndex = preparedString.IndexOf(",");
+            int delimIndex = preparedString.IndexOf(",", StringComparison.Ordinal);
             int i = 0;
             int partNumber = 0;
             bool isSpecialString = false;
@@ -371,11 +369,11 @@ namespace YY.EventLogReaderAssistant
 
                 if (isSpecialString)
                 {
-                    delimIndex = preparedString.IndexOf("\",") + 1;
+                    delimIndex = preparedString.IndexOf("\",", StringComparison.Ordinal) + 1;
                 }
                 else
                 {
-                    delimIndex = preparedString.IndexOf(",");
+                    delimIndex = preparedString.IndexOf(",", StringComparison.Ordinal);
                 }
             }
 

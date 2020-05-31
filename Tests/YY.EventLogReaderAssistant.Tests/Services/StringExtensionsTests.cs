@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Text;
 using Xunit;
+using YY.EventLogReaderAssistant.Services;
 
-namespace YY.EventLogReaderAssistant.Services.Tests
+namespace YY.EventLogReaderAssistant.Tests.Services
 {
     public class StringExtensionsTests
     {
@@ -66,7 +67,7 @@ namespace YY.EventLogReaderAssistant.Services.Tests
             string sourceText = "Р—Р°РєР°Р· Р·РІРѕРЅРєР° С‚РµС…РЅРёС‡РµСЃРєРѕР№ РїРѕРґРґРµСЂР¶РєРё";
             string checkValue = "Заказ звонка технической поддержки";
 
-            string resultValue = sourceText.FromWin1251ToUTF8();
+            string resultValue = sourceText.FromWin1251ToUtf8();
 
             Assert.Equal(checkValue, resultValue);
         }

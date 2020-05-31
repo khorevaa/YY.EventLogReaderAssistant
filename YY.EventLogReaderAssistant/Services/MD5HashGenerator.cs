@@ -1,29 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Text;
 using System.Security.Cryptography;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
 
 namespace YY.EventLogReaderAssistant.Services
 {
-    internal sealed class MD5HashGenerator
+    internal static class Md5HashGenerator
     {
         #region Public Methods
 
-        public static string GetMD5Hash<T>(T source)
+        public static string GetMd5Hash<T>(T source)
         {
-            byte[] objectAsByteArray = ObjectToByteArray<T>(source);
+            byte[] objectAsByteArray = ObjectToByteArray(source);
 
-            byte[] dataMD5;
+            byte[] dataMd5;
             using (MD5 md5Hash = MD5.Create())
-                dataMD5 = md5Hash.ComputeHash(objectAsByteArray);
+                dataMd5 = md5Hash.ComputeHash(objectAsByteArray);
 
             StringBuilder sBuilder = new StringBuilder();
-            for (int i = 0; i < dataMD5.Length; i++)            
-                sBuilder.Append(dataMD5[i].ToString("x2"));
+            for (int i = 0; i < dataMd5.Length; i++)            
+                sBuilder.Append(dataMd5[i].ToString("x2"));
 
-            return sBuilder.ToString(); ;
+            return sBuilder.ToString();
         }
 
         #endregion

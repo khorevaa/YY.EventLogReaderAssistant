@@ -3,16 +3,16 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using Xunit;
+using YY.EventLogReaderAssistant.Services;
 
-namespace YY.EventLogReaderAssistant.Services.Tests
+namespace YY.EventLogReaderAssistant.Tests.Services
 {
     public class StreamLineReaderTests
     {
         #region Private Member Variables
 
-        private readonly string sampleDataDirectory;
-        private readonly string sampleDatabaseFile;
-        private readonly string[] sampleFilesLGP;
+        private readonly string _sampleDatabaseFile;
+        private readonly string[] _sampleFilesLgp;
 
         #endregion
 
@@ -21,11 +21,11 @@ namespace YY.EventLogReaderAssistant.Services.Tests
         public StreamLineReaderTests()
         {
             string currentDirectory = Directory.GetCurrentDirectory();
-            sampleDataDirectory = Path.Combine(currentDirectory, "SampleData");
-            sampleDatabaseFile = Path.Combine(sampleDataDirectory, "LGFFormatEventLog", "1Cv8.lgf");
+            var sampleDataDirectory = Path.Combine(currentDirectory, "SampleData");
+            _sampleDatabaseFile = Path.Combine(sampleDataDirectory, "LGFFormatEventLog", "1Cv8.lgf");
 
-            string dataDirectoryLGF = Path.Combine(sampleDataDirectory, "LGFFormatEventLog");
-            sampleFilesLGP = Directory.GetFiles(dataDirectoryLGF, "*.lgp");
+            string dataDirectoryLgf = Path.Combine(sampleDataDirectory, "LGFFormatEventLog");
+            _sampleFilesLgp = Directory.GetFiles(dataDirectoryLgf, "*.lgp");
         }
 
         #endregion
@@ -36,7 +36,7 @@ namespace YY.EventLogReaderAssistant.Services.Tests
         public void GoToLine_Test()
         {
             string lineContent = string.Empty;
-            using (StreamReader reader = new StreamReader(sampleDatabaseFile))
+            using (StreamReader reader = new StreamReader(_sampleDatabaseFile))
             {
                 using StreamLineReader lineReader = new StreamLineReader(reader.BaseStream, reader.CurrentEncoding);
                 if (lineReader.GoToLine(1))
@@ -53,7 +53,7 @@ namespace YY.EventLogReaderAssistant.Services.Tests
         public void GetCount_Test()
         {
             long lineCounterNative = 0;
-            using (var reader = new StreamReader(sampleDatabaseFile))
+            using (var reader = new StreamReader(_sampleDatabaseFile))
             {
                 while (reader.ReadLine() != null)
                 {
@@ -61,8 +61,8 @@ namespace YY.EventLogReaderAssistant.Services.Tests
                 }
             }
 
-            long lineCounterLibrary = 0;
-            using (StreamReader reader = new StreamReader(sampleDatabaseFile))
+            long lineCounterLibrary;
+            using (StreamReader reader = new StreamReader(_sampleDatabaseFile))
             {
                 using StreamLineReader lineReader = new StreamLineReader(reader.BaseStream, reader.CurrentEncoding);
                 lineCounterLibrary = lineReader.GetCount();
@@ -78,7 +78,7 @@ namespace YY.EventLogReaderAssistant.Services.Tests
             Encoding utf8 = Encoding.UTF8;
 
             List<string> correctLines = new List<string>();
-            using (var reader = new StreamReader(sampleDatabaseFile, utf8))
+            using (var reader = new StreamReader(_sampleDatabaseFile, utf8))
             {
                 string currentLine = reader.ReadLine();
                 do
@@ -89,7 +89,7 @@ namespace YY.EventLogReaderAssistant.Services.Tests
             }
 
             List<string> resultLines = new List<string>();
-            using (StreamReader reader = new StreamReader(sampleDatabaseFile, utf8))
+            using (StreamReader reader = new StreamReader(_sampleDatabaseFile, utf8))
             {
                 using StreamLineReader lineReader = new StreamLineReader(reader.BaseStream, reader.CurrentEncoding);
                 string currentLine = lineReader.ReadLine();
@@ -112,9 +112,9 @@ namespace YY.EventLogReaderAssistant.Services.Tests
             List<string> correctLines = new List<string>();
             List<string> resultLines = new List<string>();
 
-            foreach (string fileLGP in sampleFilesLGP)
+            foreach (string fileLgp in _sampleFilesLgp)
             {               
-                using (var reader = new StreamReader(fileLGP, utf8))
+                using (var reader = new StreamReader(fileLgp, utf8))
                 {
                     string currentLine = reader.ReadLine();
                     while (currentLine != null)
@@ -124,7 +124,7 @@ namespace YY.EventLogReaderAssistant.Services.Tests
                     }
                 }
                 
-                using (StreamReader reader = new StreamReader(fileLGP, utf8))
+                using (StreamReader reader = new StreamReader(fileLgp, utf8))
                 {
                     using StreamLineReader lineReader = new StreamLineReader(reader.BaseStream, reader.CurrentEncoding);
                     string currentLine = lineReader.ReadLine();

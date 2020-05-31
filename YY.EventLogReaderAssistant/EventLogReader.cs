@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 [assembly: InternalsVisibleTo("YY.EventLogReaderAssistant.Tests")]
 namespace YY.EventLogReaderAssistant
 {
-    public abstract partial class EventLogReader : IEventLogReader, IDisposable
+    public abstract class EventLogReader : IEventLogReader, IDisposable
     {
         #region Static Methods
 
@@ -51,7 +51,7 @@ namespace YY.EventLogReaderAssistant
 
         #region Private Member Variables
 
-        protected string _logFilePath;
+        protected readonly string _logFilePath;
         protected string _logFileDirectoryPath;
         protected long _currentFileEventNumber;
 
@@ -73,7 +73,8 @@ namespace YY.EventLogReaderAssistant
 
         #region Constructor
 
-        internal EventLogReader() : base() { }
+        internal EventLogReader()
+        { }
         internal EventLogReader(string logFilePath)
         {
             _logFilePath = logFilePath;
@@ -319,7 +320,7 @@ namespace YY.EventLogReaderAssistant
         protected virtual void ReadEventLogReferences()
         {
             ReferencesDataHash data = ReferencesDataHash.CreateromReader(this);
-            _referencesHash = MD5HashGenerator.GetMD5Hash<ReferencesDataHash>(data);
+            _referencesHash = Md5HashGenerator.GetMd5Hash(data);
         }
 
         #endregion

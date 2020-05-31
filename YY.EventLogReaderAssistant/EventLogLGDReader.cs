@@ -14,19 +14,11 @@ namespace YY.EventLogReaderAssistant
         #region Private Member Variables
 
         private string _connectionString;
-        private string ConnectionString 
-        { 
-            get 
-            { 
-                if(_connectionString == null)
-                    _connectionString = SQLiteExtensions.GetConnectionString(_logFilePath);
-                return _connectionString;
-            } 
-        }
+        private string ConnectionString => _connectionString ?? (_connectionString = SqLiteExtensions.GetConnectionString(_logFilePath));
         private SQLiteConnection _connection;
         private readonly List<RowData> _readBuffer;
         private long _lastRowId;
-        private const int _readBufferSize = 1000;
+        private const int ReadBufferSize = 1000;
         private long _lastRowNumberFromBuffer;
         private long _eventCount = -1;
 
@@ -34,7 +26,6 @@ namespace YY.EventLogReaderAssistant
 
         #region Constructor
 
-        internal EventLogLGDReader() : base() { }
         internal EventLogLGDReader(string logFilePath) : base(logFilePath) 
         {            
             _readBuffer = new List<RowData>();
@@ -69,7 +60,7 @@ namespace YY.EventLogReaderAssistant
                 #region bufferedRead
 
                 if (_lastRowNumberFromBuffer == 0
-                    || _lastRowNumberFromBuffer >= _readBufferSize)
+                    || _lastRowNumberFromBuffer >= ReadBufferSize)
                 {
                     _readBuffer.Clear();
                     _lastRowNumberFromBuffer = 0;
@@ -105,7 +96,7 @@ namespace YY.EventLogReaderAssistant
                          "    left join MetadataCodes mc on elm.metadataCode = mc.code\n" +
                          "Where RowID > {0}\n" +
                          "Order By rowID\n" +
-                         "Limit {1}\n", _lastRowId, _readBufferSize);
+                         "Limit {1}\n", _lastRowId, ReadBufferSize);
 
                         using (SQLiteCommand cmd = new SQLiteCommand(queryText, _connection))
                         {
@@ -131,12 +122,12 @@ namespace YY.EventLogReaderAssistant
 
                                         _readBuffer.Add(new RowData
                                         {
-                                            RowID = reader.GetInt64OrDefault(0),
+                                            RowId = reader.GetInt64OrDefault(0),
                                             Period = rowPeriod,
                                             ConnectId = reader.GetInt64OrDefault(2),
                                             Session = reader.GetInt64OrDefault(3),
                                             TransactionStatus = GetTransactionStatus(reader.GetInt64OrDefault(4)),
-                                            TransactionDate = reader.GetInt64OrDefault(5).ToNullableDateTimeELFormat(),
+                                            TransactionDate = reader.GetInt64OrDefault(5).ToNullableDateTimeElFormat(),
                                             TransactionId = reader.GetInt64OrDefault(6),
                                             User = GetUserByCode(reader.GetInt64OrDefault(7)),
                                             Computer = GetComputerByCode(reader.GetInt64OrDefault(8)),
@@ -147,7 +138,7 @@ namespace YY.EventLogReaderAssistant
                                             WorkServer = GetWorkServerByCode(reader.GetInt64OrDefault(13)),
                                             Severity = GetSeverityByCode(reader.GetInt64OrDefault(14)),
                                             Comment = reader.GetStringOrDefault(15),
-                                            Data = reader.GetStringOrDefault(16).FromWin1251ToUTF8(),
+                                            Data = reader.GetStringOrDefault(16).FromWin1251ToUtf8(),
                                             DataPresentation = reader.GetStringOrDefault(17),
                                             Metadata = GetMetadataByCode(reader.GetInt64OrDefault(18))
                                         });                                        
@@ -175,10 +166,10 @@ namespace YY.EventLogReaderAssistant
                 RaiseBeforeRead(new BeforeReadEventArgs(null, _eventCount));
 
                 _currentRow = _readBuffer
-                    .Where(bufRow => bufRow.RowID > _lastRowId)
+                    .Where(bufRow => bufRow.RowId > _lastRowId)
                     .First();
                 _lastRowNumberFromBuffer += 1;
-                _lastRowId = _currentRow.RowID;
+                _lastRowId = _currentRow.RowId;
                 _currentFileEventNumber += 1;
 
                 RaiseAfterRead(new AfterReadEventArgs(_currentRow, _eventCount));
@@ -271,7 +262,7 @@ namespace YY.EventLogReaderAssistant
         }
         public override void Reset()
         {
-            System.Data.SQLite.SQLiteConnection.ClearAllPools();
+            SQLiteConnection.ClearAllPools();
             if (_connection != null)
             {
                 _connection.Dispose();
@@ -287,11 +278,8 @@ namespace YY.EventLogReaderAssistant
         {
             base.Dispose();
 
-            System.Data.SQLite.SQLiteConnection.ClearAllPools();
-            if(_connection != null)
-            {
-                _connection.Dispose();
-            }
+            SQLiteConnection.ClearAllPools();
+            _connection?.Dispose();
             _readBuffer.Clear();
         }
 

@@ -14,7 +14,7 @@ namespace YY.EventLogReaderAssistant
     {
         #region Private Member Variables
 
-        private const long _defaultBeginLineForLGF = 3;
+        private const long DefaultBeginLineForLgf = 3;
         private int _indexCurrentFile;
         private readonly string[] _logFilesWithData;
         private long _eventCount = -1;
@@ -80,7 +80,7 @@ namespace YY.EventLogReaderAssistant
                         return false;
                     }
                     
-                    InitializeStream(_defaultBeginLineForLGF, _indexCurrentFile);
+                    InitializeStream(DefaultBeginLineForLgf, _indexCurrentFile);
                     _currentFileEventNumber = 0;
                 }
                 _eventSource.Clear();
@@ -252,10 +252,15 @@ namespace YY.EventLogReaderAssistant
 
             _currentFileEventNumber = newPosition.EventNumber;
 
-            InitializeStream(_defaultBeginLineForLGF, _indexCurrentFile);
+            InitializeStream(DefaultBeginLineForLgf, _indexCurrentFile);
             long beginReadPosition =_stream.GetPosition();
 
-            long newStreamPosition = (long)newPosition.StreamPosition;
+            long newStreamPosition;
+            if (newPosition.StreamPosition == null)
+                newStreamPosition = 0;
+            else
+                newStreamPosition = (long)newPosition.StreamPosition;
+
             if(newStreamPosition < beginReadPosition)            
                 newStreamPosition = beginReadPosition;
 
@@ -438,10 +443,10 @@ namespace YY.EventLogReaderAssistant
         }
         private bool NextLineIsBeginEvent()
         {
-            bool nextIsBeginEvent = false;
             if (CurrentFile == null || _stream == null)
-                return nextIsBeginEvent;
+                return false;
 
+            bool nextIsBeginEvent;
             long currentStreamPosition = _stream.GetPosition();
 
             using (FileStream fileStreamCheckReader = new FileStream(CurrentFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))

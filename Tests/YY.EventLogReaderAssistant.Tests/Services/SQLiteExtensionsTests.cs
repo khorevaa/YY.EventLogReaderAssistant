@@ -3,16 +3,16 @@ using System.Data.SQLite;
 using System.IO;
 using System.Linq;
 using Xunit;
+using YY.EventLogReaderAssistant.Services;
 
-namespace YY.EventLogReaderAssistant.Services.Tests
+namespace YY.EventLogReaderAssistant.Tests.Services
 {
     [Collection("SQLite Event Log Test")]
     public class SQLiteExtensionsTests
     {
         #region Private Member Variables
 
-        private readonly string sampleDataDirectory;
-        private readonly string sampleDatabaseFile;
+        private readonly string _sampleDatabaseFile;
 
         #endregion
 
@@ -21,8 +21,8 @@ namespace YY.EventLogReaderAssistant.Services.Tests
         public SQLiteExtensionsTests()
         {
             string currentDirectory = Directory.GetCurrentDirectory();
-            sampleDataDirectory = Path.Combine(currentDirectory, "SampleData");
-            sampleDatabaseFile = Path.Combine(sampleDataDirectory, "SQLiteFormatEventLog", "1Cv8.lgd");
+            var sampleDataDirectory = Path.Combine(currentDirectory, "SampleData");
+            _sampleDatabaseFile = Path.Combine(sampleDataDirectory, "SQLiteFormatEventLog", "1Cv8.lgd");
         }
 
         #endregion
@@ -32,7 +32,7 @@ namespace YY.EventLogReaderAssistant.Services.Tests
         [Fact]
         public void GetStringOrDefault_Test()
         {
-            string connectionString = SQLiteExtensions.GetConnectionString(sampleDatabaseFile);
+            string connectionString = SqLiteExtensions.GetConnectionString(_sampleDatabaseFile);
 
             string queryText = string.Format(
                 "Select\n" +
@@ -44,8 +44,8 @@ namespace YY.EventLogReaderAssistant.Services.Tests
                 "Order By rowID\n" +
                 "Limit {1}\n", 0, 1);
 
-            string DataPresentation = null;
-            string DataPresentationEmpty = null;
+            string dataPresentation = null;
+            string dataPresentationEmpty = null;
             using (SQLiteConnection connection = new SQLiteConnection(connectionString))
             {
                 connection.Open();
@@ -53,19 +53,19 @@ namespace YY.EventLogReaderAssistant.Services.Tests
                 SQLiteDataReader reader = command.ExecuteReader();
                 if (reader.Read())
                 {
-                    DataPresentation = SQLiteExtensions.GetStringOrDefault(reader, 0);
-                    DataPresentationEmpty = SQLiteExtensions.GetStringOrDefault(reader, 1);
+                    dataPresentation = SqLiteExtensions.GetStringOrDefault(reader, 0);
+                    dataPresentationEmpty = SqLiteExtensions.GetStringOrDefault(reader, 1);
                 }
             }
 
-            Assert.Equal("Hello, world!", DataPresentation);
-            Assert.Equal(String.Empty, DataPresentationEmpty);
+            Assert.Equal("Hello, world!", dataPresentation);
+            Assert.Equal(String.Empty, dataPresentationEmpty);
         }
 
         [Fact]
         public void GetInt64OrDefault_Test()
         {
-            string connectionString = SQLiteExtensions.GetConnectionString(sampleDatabaseFile);
+            string connectionString = SqLiteExtensions.GetConnectionString(_sampleDatabaseFile);
 
             string queryText = String.Format(
                 "Select\n" +
@@ -86,8 +86,8 @@ namespace YY.EventLogReaderAssistant.Services.Tests
                 using SQLiteDataReader reader = command.ExecuteReader();
                 if (reader.Read())
                 {
-                    connectionId = SQLiteExtensions.GetInt64OrDefault(reader, 0);
-                    sessionId = SQLiteExtensions.GetInt64OrDefault(reader, 1);
+                    connectionId = SqLiteExtensions.GetInt64OrDefault(reader, 0);
+                    sessionId = SqLiteExtensions.GetInt64OrDefault(reader, 1);
                 }
             }
             Assert.Equal(0, connectionId);
@@ -97,7 +97,7 @@ namespace YY.EventLogReaderAssistant.Services.Tests
         [Fact]
         public void GetRowAsString_Test()
         {
-            string connectionString = SQLiteExtensions.GetConnectionString(sampleDatabaseFile);
+            string connectionString = SqLiteExtensions.GetConnectionString(_sampleDatabaseFile);
 
             string queryText = String.Format(
                 "Select\n" +
@@ -135,7 +135,7 @@ namespace YY.EventLogReaderAssistant.Services.Tests
         [Fact]
         public void GetConnectionString_Test()
         {            
-            string connectionString = SQLiteExtensions.GetConnectionString(sampleDatabaseFile);
+            string connectionString = SqLiteExtensions.GetConnectionString(_sampleDatabaseFile);
 
             string queryText = String.Format(
                     "Select\n" +

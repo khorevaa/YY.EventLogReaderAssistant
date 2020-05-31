@@ -1,15 +1,14 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using Xunit;
+using YY.EventLogReaderAssistant.Services;
 
-namespace YY.EventLogReaderAssistant.Services.Tests
+namespace YY.EventLogReaderAssistant.Tests.Services
 {
     public class StreamReaderExtensionsTests
     {
         #region Private Member Variables
 
-        private readonly string sampleDataDirectory;
-        private readonly string sampleDatabaseFile;
+        private readonly string _sampleDatabaseFile;
 
         #endregion
 
@@ -18,8 +17,8 @@ namespace YY.EventLogReaderAssistant.Services.Tests
         public StreamReaderExtensionsTests()
         {
             string currentDirectory = Directory.GetCurrentDirectory();
-            sampleDataDirectory = Path.Combine(currentDirectory, "SampleData");
-            sampleDatabaseFile = Path.Combine(sampleDataDirectory, "LGFFormatEventLog", "1Cv8.lgf");
+            var sampleDataDirectory = Path.Combine(currentDirectory, "SampleData");
+            _sampleDatabaseFile = Path.Combine(sampleDataDirectory, "LGFFormatEventLog", "1Cv8.lgf");
         }
 
         #endregion
@@ -29,18 +28,18 @@ namespace YY.EventLogReaderAssistant.Services.Tests
         [Fact]
         public void GetAndSetPosition_Test()
         {
-            string checkString = string.Empty;
-            string resultString = string.Empty;
-            long position = 0;
+            string checkString;
+            string resultString;
+            long position;
 
-            using (StreamReader reader = new StreamReader(sampleDatabaseFile))
+            using (StreamReader reader = new StreamReader(_sampleDatabaseFile))
             {
                 reader.ReadLine();
                 position = reader.GetPosition();
                 checkString = reader.ReadLine();
             }
 
-            using (StreamReader reader = new StreamReader(sampleDatabaseFile))
+            using (StreamReader reader = new StreamReader(_sampleDatabaseFile))
             {
                 reader.SetPosition(position);
                 resultString = reader.ReadLine();
@@ -52,16 +51,16 @@ namespace YY.EventLogReaderAssistant.Services.Tests
         [Fact]
         public void SkipLine_Test()
         {
-            string checkString = string.Empty;
-            string resultString = string.Empty;
+            string checkString;
+            string resultString;
 
-            using (StreamReader reader = new StreamReader(sampleDatabaseFile))
+            using (StreamReader reader = new StreamReader(_sampleDatabaseFile))
             {
                 reader.SkipLine(10);
                 checkString = reader.ReadLine();
             }
 
-            using (StreamReader reader = new StreamReader(sampleDatabaseFile))
+            using (StreamReader reader = new StreamReader(_sampleDatabaseFile))
             {
                 reader.SkipLine(10);
                 resultString = reader.ReadLine();

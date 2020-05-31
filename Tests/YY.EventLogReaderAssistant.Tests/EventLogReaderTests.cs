@@ -262,7 +262,7 @@ namespace YY.EventLogReaderAssistant.Tests
 
             #region addNewRecord
 
-            string lgdConnectionString = SQLiteExtensions.GetConnectionString(sampleDatabaseFileLGDReadWithDelay, false);
+            string lgdConnectionString = SqLiteExtensions.GetConnectionString(sampleDatabaseFileLGDReadWithDelay, false);
             using (SQLiteConnection connection = new SQLiteConnection(lgdConnectionString))
             {
                 connection.Open();
@@ -431,7 +431,7 @@ namespace YY.EventLogReaderAssistant.Tests
 
             Assert.NotNull(rowAfterSteps);
             Assert.NotNull(rowAfterSetPosition);
-            Assert.Equal(rowAfterSteps.RowID, rowAfterSetPosition.RowID - 1);
+            Assert.Equal(rowAfterSteps.RowId, rowAfterSetPosition.RowId - 1);
         }
         private void CheckIdAfterGoToEvent_Test(string eventLogPath)
         {
@@ -461,7 +461,7 @@ namespace YY.EventLogReaderAssistant.Tests
             Assert.NotNull(rowAfterGoToEvent);
             Assert.NotEqual(-1, eventNumberAfterSteps);
             Assert.NotEqual(-1, eventNumberAfterGoToEvent);
-            Assert.Equal(rowAfterSteps.RowID, rowAfterGoToEvent.RowID - 1);
+            Assert.Equal(rowAfterSteps.RowId, rowAfterGoToEvent.RowId - 1);
         }
         private void GetCount_Test(string eventLogPath)
         {
@@ -596,7 +596,7 @@ namespace YY.EventLogReaderAssistant.Tests
                 {
                     #region LGD
 
-                    string lgdConnectionString = SQLiteExtensions.GetConnectionString(eventLogPath, false);
+                    string lgdConnectionString = SqLiteExtensions.GetConnectionString(eventLogPath, false);
                     using SQLiteConnection connection = new SQLiteConnection(lgdConnectionString);
                     connection.Open();
                     string queryText = String.Format(
@@ -730,7 +730,7 @@ namespace YY.EventLogReaderAssistant.Tests
                 reader.GoToEvent(10);
                 EventLogPosition position = reader.GetCurrentPosition();
                 reader.Read();
-                correctRowId = reader.CurrentRow.RowID;
+                correctRowId = reader.CurrentRow.RowId;
 
                 long wrongStreamPosition = (long)position.StreamPosition + changeStreamPosition;
                 reader.SetCurrentPosition(new EventLogPosition(
@@ -739,7 +739,7 @@ namespace YY.EventLogReaderAssistant.Tests
                     position.CurrentFileData,
                     wrongStreamPosition));
                 reader.Read();
-                fixedRowId = reader.CurrentRow.RowID;
+                fixedRowId = reader.CurrentRow.RowId;
             }
 
             Assert.Equal(correctRowId, fixedRowId);
