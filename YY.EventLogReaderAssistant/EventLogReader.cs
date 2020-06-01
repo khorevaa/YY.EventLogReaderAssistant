@@ -5,11 +5,12 @@ using System.Linq;
 using YY.EventLogReaderAssistant.Services;
 using YY.EventLogReaderAssistant.Models;
 using System.Runtime.CompilerServices;
+using YY.EventLogReaderAssistant.EventArguments;
 
 [assembly: InternalsVisibleTo("YY.EventLogReaderAssistant.Tests")]
 namespace YY.EventLogReaderAssistant
 {
-    public abstract partial class EventLogReader : IEventLogReader, IDisposable
+    public abstract class EventLogReader : IEventLogReader, IDisposable
     {
         #region Static Methods
 
@@ -51,7 +52,7 @@ namespace YY.EventLogReaderAssistant
 
         #region Private Member Variables
 
-        protected string _logFilePath;
+        protected readonly string _logFilePath;
         protected string _logFileDirectoryPath;
         protected long _currentFileEventNumber;
 
@@ -73,11 +74,12 @@ namespace YY.EventLogReaderAssistant
 
         #region Constructor
 
-        internal EventLogReader() : base() { }
+        internal EventLogReader()
+        { }
         internal EventLogReader(string logFilePath)
         {
             _logFilePath = logFilePath;
-            _logFileDirectoryPath = new FileInfo(_logFilePath).Directory.FullName;
+            _logFileDirectoryPath = new FileInfo(_logFilePath).Directory?.FullName;
 
             _applications = new List<Applications>();
             _computers = new List<Computers>();
@@ -112,14 +114,8 @@ namespace YY.EventLogReaderAssistant
         public long CurrentFileEventNumber => _currentFileEventNumber;
         public string LogFilePath => _logFilePath;
         public string LogFileDirectoryPath => _logFileDirectoryPath;
-        public virtual string CurrentFile
-        {
-            get
-            {
-                return null;
-            }
-        }
-        public virtual double ReadDelayMilliseconds
+        public virtual string CurrentFile => null;
+        public double ReadDelayMilliseconds
         {
             get
             {
@@ -175,7 +171,6 @@ namespace YY.EventLogReaderAssistant
             _workServers.Clear();
             _currentRow = null;
         }
-
         public Users GetUserByCode(string code)
         {
             return GetUserByCode(code.ToInt64());
@@ -184,7 +179,6 @@ namespace YY.EventLogReaderAssistant
         {
             return _users.Where(i => i.Code == code).FirstOrDefault();
         }
-
         public Computers GetComputerByCode(string code)
         {
             return GetComputerByCode(code.ToInt64());
@@ -193,7 +187,6 @@ namespace YY.EventLogReaderAssistant
         {
             return _computers.Where(i => i.Code == code).FirstOrDefault();
         }
-
         public Applications GetApplicationByCode(string code)
         {
             return GetApplicationByCode(code.ToInt64());
@@ -202,7 +195,6 @@ namespace YY.EventLogReaderAssistant
         {
             return _applications.Where(i => i.Code == code).FirstOrDefault();
         }
-
         public Events GetEventByCode(string code)
         {
             return GetEventByCode(code.ToInt64());
@@ -211,7 +203,6 @@ namespace YY.EventLogReaderAssistant
         {
             return _events.Where(i => i.Code == code).FirstOrDefault();
         }
-
         public Severity GetSeverityByCode(string code)
         {
             Severity severity;
@@ -247,7 +238,6 @@ namespace YY.EventLogReaderAssistant
                 return Severity.Unknown;
             }
         }
-
         public TransactionStatus GetTransactionStatus(string code)
         {
             TransactionStatus transactionStatus;
@@ -275,7 +265,6 @@ namespace YY.EventLogReaderAssistant
                 return TransactionStatus.Unknown;
             }
         }
-
         public Metadata GetMetadataByCode(string code)
         {
             return GetMetadataByCode(code.ToInt64());
@@ -284,7 +273,6 @@ namespace YY.EventLogReaderAssistant
         {
             return _metadata.Where(i => i.Code == code).FirstOrDefault();
         }
-
         public WorkServers GetWorkServerByCode(string code)
         {
             return GetWorkServerByCode(code.ToInt64());
@@ -293,7 +281,6 @@ namespace YY.EventLogReaderAssistant
         {
             return _workServers.Where(i => i.Code == code).FirstOrDefault();
         }
-
         public PrimaryPorts GetPrimaryPortByCode(string code)
         {
             return GetPrimaryPortByCode(code.ToInt64());
@@ -302,7 +289,6 @@ namespace YY.EventLogReaderAssistant
         {
             return _primaryPorts.Where(i => i.Code == code).FirstOrDefault();
         }
-
         public SecondaryPorts GetSecondaryPortByCode(string code)
         {
             return GetSecondaryPortByCode(code.ToInt64());
@@ -318,8 +304,8 @@ namespace YY.EventLogReaderAssistant
 
         protected virtual void ReadEventLogReferences()
         {
-            ReferencesDataHash data = ReferencesDataHash.CreateromReader(this);
-            _referencesHash = MD5HashGenerator.GetMD5Hash<ReferencesDataHash>(data);
+            ReferencesDataHash data = ReferencesDataHash.CreateFromReader(this);
+            _referencesHash = MD5HashGenerator.GetMd5Hash(data);
         }
 
         #endregion
@@ -366,7 +352,9 @@ namespace YY.EventLogReaderAssistant
         [Serializable]
         private class ReferencesDataHash
         {
-            public static ReferencesDataHash CreateromReader(EventLogReader reader)
+            #region Public Static Methods
+
+            public static ReferencesDataHash CreateFromReader(EventLogReader reader)
             {
                 List<Severity> severities = new List<Severity>
                 {
@@ -386,9 +374,7 @@ namespace YY.EventLogReaderAssistant
                     TransactionStatus.Unknown
                 };
 
-                ReferencesDataHash referenceData;
-
-                referenceData = new ReferencesDataHash()
+                var referenceData = new ReferencesDataHash()
                 {
                     Applications = reader.Applications.ToList().AsReadOnly(),
                     Computers = reader.Computers.ToList().AsReadOnly(),
@@ -405,18 +391,24 @@ namespace YY.EventLogReaderAssistant
                 return referenceData;
             }
 
-            public IReadOnlyList<Applications> Applications;
-            public IReadOnlyList<Computers> Computers;
-            public IReadOnlyList<Events> Events;
-            public IReadOnlyList<Metadata> Metadata;
-            public IReadOnlyList<PrimaryPorts> PrimaryPorts;
-            public IReadOnlyList<SecondaryPorts> SecondaryPorts;
-            public IReadOnlyList<Severity> Severities;
-            public IReadOnlyList<TransactionStatus> TransactionStatuses;
-            public IReadOnlyList<Users> Users;
-            public IReadOnlyList<WorkServers> WorkServers;
+            #endregion
+
+            #region Public Members
+
+            public IReadOnlyList<Applications> Applications { get; set; }
+            public IReadOnlyList<Computers> Computers { get; set; }
+            public IReadOnlyList<Events> Events { get; set; }
+            public IReadOnlyList<Metadata> Metadata { get; set; }
+            public IReadOnlyList<PrimaryPorts> PrimaryPorts { get; set; }
+            public IReadOnlyList<SecondaryPorts> SecondaryPorts { get; set; }
+            public IReadOnlyList<Severity> Severities { get; set; }
+            public IReadOnlyList<TransactionStatus> TransactionStatuses { get; set; }
+            public IReadOnlyList<Users> Users { get; set; }
+            public IReadOnlyList<WorkServers> WorkServers { get; set; }
+
+            #endregion
         }
-        
+
         #endregion
     }
 }

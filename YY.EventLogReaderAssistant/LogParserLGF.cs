@@ -33,16 +33,16 @@ namespace YY.EventLogReaderAssistant
 
             for (int i = 0; i <= bufferString.Length - 1; i++)
             {
-                string Simb = bufferString.Substring(i, 1);
-                if (Simb == "\"")
+                string simb = bufferString.Substring(i, 1);
+                if (simb == "\"")
                 {
                     textBlockOpen = !textBlockOpen;
                 }
-                else if (Simb == "}" & !textBlockOpen)
+                else if (simb == "}" & !textBlockOpen)
                 {
                     count -= 1;
                 }
-                else if (Simb == "{" & !textBlockOpen)
+                else if (simb == "{" & !textBlockOpen)
                 {
                     count += 1;
                 }
@@ -56,7 +56,7 @@ namespace YY.EventLogReaderAssistant
         #region Private Member Variables
 
         private readonly EventLogLGFReader _reader;
-        private readonly Regex _regexDataUUID;
+        private readonly Regex _regexDataUuid;
 
         #endregion
 
@@ -65,7 +65,7 @@ namespace YY.EventLogReaderAssistant
         public LogParserLGF(EventLogLGFReader reader)
         {
             _reader = reader;
-            _regexDataUUID = new Regex(@"[\d]+:[\dA-Za-zА-Яа-я]{32}}");
+            _regexDataUuid = new Regex(@"[\d]+:[\dA-Za-zА-Яа-я]{32}}");
         }
 
         #endregion
@@ -84,23 +84,21 @@ namespace YY.EventLogReaderAssistant
         {
             string textReferencesData;
 
-            using (FileStream FS = new FileStream(_reader.LogFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-            using (StreamReader SR = new StreamReader(FS))
-                textReferencesData = SR.ReadToEnd();
+            using (FileStream fs = new FileStream(_reader.LogFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (StreamReader sr = new StreamReader(fs))
+                textReferencesData = sr.ReadToEnd();
 
-            int beginBlockIndex = textReferencesData.IndexOf("{");
+            int beginBlockIndex = textReferencesData.IndexOf("{", StringComparison.Ordinal);
             if (beginBlockIndex < 0)
                 return;
 
             textReferencesData = textReferencesData.Substring(beginBlockIndex);
             string[] objectTexts = ParseEventLogString("{" + textReferencesData + "}");
-            string lastProcessedObjectForDebug;
             if (objectTexts != null)
             {
-                foreach (string TextObject in objectTexts)
+                foreach (string textObject in objectTexts)
                 {
-                    lastProcessedObjectForDebug = TextObject;
-                    string[] parsedEventData = ParseEventLogString(TextObject);
+                    string[] parsedEventData = ParseEventLogString(textObject);
 
                     if ((parsedEventData != null))
                     {
@@ -173,8 +171,6 @@ namespace YY.EventLogReaderAssistant
                             case "13":
                                 break;
                             //  Последние значения хранят статус транзакции и уровень события                        
-                            default:
-                                break;
                         }
                     }
                 }
@@ -192,7 +188,7 @@ namespace YY.EventLogReaderAssistant
 
                 dataRow = new RowData()
                 {
-                    RowID = _reader.CurrentFileEventNumber,
+                    RowId = _reader.CurrentFileEventNumber,
                     Period = DateTime.ParseExact(parseResult[0], "yyyyMMddHHmmss", CultureInfo.InvariantCulture),
                     TransactionStatus = _reader.GetTransactionStatus(parseResult[1]),
                     TransactionDate = GetTransactionDate(transactionSourceString),
@@ -212,7 +208,7 @@ namespace YY.EventLogReaderAssistant
                     SecondaryPort = _reader.GetSecondaryPortByCode(parseResult[15]),
                     Session = parseResult[16].ToInt64()
                 };
-                dataRow.DataUUID = GetDataUUID(dataRow.Data);
+                dataRow.DataUuid = GetDataUuid(dataRow.Data);
             }
 
             return dataRow;
@@ -246,35 +242,35 @@ namespace YY.EventLogReaderAssistant
             return data;
         }
 
-        private string GetDataUUID(string sourceData)
+        private string GetDataUuid(string sourceData)
         {
-            string dataUUID;
+            string dataUuid;
 
-            MatchCollection matches = _regexDataUUID.Matches(sourceData);
+            MatchCollection matches = _regexDataUuid.Matches(sourceData);
             if (matches.Count > 0)
             {
-                string[] dataPartsUUID = sourceData.Split(':');
-                if (dataPartsUUID.Length == 2)
+                string[] dataPartsUuid = sourceData.Split(':');
+                if (dataPartsUuid.Length == 2)
                 {
-                    dataUUID = dataPartsUUID[1].Replace("}", string.Empty);
+                    dataUuid = dataPartsUuid[1].Replace("}", string.Empty);
                 } else
-                    dataUUID = string.Empty;
+                    dataUuid = string.Empty;
             }
             else
-                dataUUID = string.Empty;
+                dataUuid = string.Empty;
 
-            return dataUUID;
+            return dataUuid;
         }
 
         private DateTime? GetTransactionDate(string sourceString)
         {
             DateTime? transactionDate;
 
-            long TransDate = sourceString.Substring(0, sourceString.IndexOf(",")).From16To10();
+            long transDate = sourceString.Substring(0, sourceString.IndexOf(",", StringComparison.Ordinal)).From16To10();
             try
             {
-                if (!(TransDate == 0))
-                    transactionDate = new System.DateTime().AddSeconds((double)TransDate / 10000);
+                if (!(transDate == 0))
+                    transactionDate = new DateTime().AddSeconds((double)transDate / 10000);
                 else
                     transactionDate = null;
             }
@@ -290,7 +286,7 @@ namespace YY.EventLogReaderAssistant
         {
             long? transactionId;
 
-            transactionId = sourceString.Substring(sourceString.IndexOf(",") + 1).From16To10();
+            transactionId = sourceString.Substring(sourceString.IndexOf(",", StringComparison.Ordinal) + 1).From16To10();
 
             return transactionId;
         }
@@ -308,7 +304,7 @@ namespace YY.EventLogReaderAssistant
             string preparedString = sourceString.Substring(1, (sourceString.EndsWith(",") ? sourceString.Length - 3 : sourceString.Length - 2)) + ",";
             string bufferString = string.Empty;
 
-            int delimIndex = preparedString.IndexOf(",");
+            int delimIndex = preparedString.IndexOf(",", StringComparison.Ordinal);
             int i = 0;
             int partNumber = 0;
             bool isSpecialString = false;
@@ -337,12 +333,9 @@ namespace YY.EventLogReaderAssistant
                 if (counter1 == counter2 & counter3 == 0)
                 {
                     Array.Resize(ref resultStrings, i + 1);
-                    if (bufferString != null)
+                    if (bufferString.StartsWith("\"") && bufferString.EndsWith("\""))
                     {
-                        if (bufferString.StartsWith("\"") && bufferString.EndsWith("\""))
-                        {
-                            bufferString = bufferString.Substring(1, bufferString.Length - 2);
-                        }
+                        bufferString = bufferString.Substring(1, bufferString.Length - 2);
                     }
 
                     if (isSpecialString)
@@ -350,14 +343,11 @@ namespace YY.EventLogReaderAssistant
                         char[] denied = new[] { '\n', '\t', '\r' };
                         StringBuilder newString = new StringBuilder();
 
-                        if (bufferString != null)
-                        {
-                            foreach (var ch in bufferString)
-                                if (!denied.Contains(ch))
-                                    newString.Append(ch);
+                        foreach (var ch in bufferString)
+                            if (!denied.Contains(ch))
+                                newString.Append(ch);
 
-                            bufferString = newString.ToString();
-                        }                                                
+                        bufferString = newString.ToString();
                     }
 
                     resultStrings[i] = bufferString;
@@ -371,11 +361,11 @@ namespace YY.EventLogReaderAssistant
 
                 if (isSpecialString)
                 {
-                    delimIndex = preparedString.IndexOf("\",") + 1;
+                    delimIndex = preparedString.IndexOf("\",", StringComparison.Ordinal) + 1;
                 }
                 else
                 {
-                    delimIndex = preparedString.IndexOf(",");
+                    delimIndex = preparedString.IndexOf(",", StringComparison.Ordinal);
                 }
             }
 

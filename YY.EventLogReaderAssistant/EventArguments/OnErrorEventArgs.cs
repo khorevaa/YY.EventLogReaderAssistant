@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace YY.EventLogReaderAssistant
+namespace YY.EventLogReaderAssistant.EventArguments
 {
     public sealed class OnErrorEventArgs : EventArgs
     {

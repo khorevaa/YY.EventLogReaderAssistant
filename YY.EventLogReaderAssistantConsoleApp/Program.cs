@@ -1,13 +1,12 @@
 ﻿using System;
-using System.IO;
 using YY.EventLogReaderAssistant;
-using YY.EventLogReaderAssistant.Models;
+using YY.EventLogReaderAssistant.EventArguments;
 
 namespace YY.EventLogReaderAssistantConsoleApp
 {
     class Program
     {
-        private static int _eventNumber = 0;
+        private static int _eventNumber;
 
         static void Main(string[] args)
         {

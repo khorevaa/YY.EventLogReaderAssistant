@@ -9,9 +9,9 @@ namespace YY.EventLogReaderAssistant.Services
     {
         #region Private Member Variables
 
-        readonly static FieldInfo charPosField = typeof(StreamReader).GetField("_charPos", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly);
-        readonly static FieldInfo byteLenField = typeof(StreamReader).GetField("_byteLen", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly);
-        readonly static FieldInfo charBufferField = typeof(StreamReader).GetField("_charBuffer", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+        readonly static FieldInfo CharPosField = typeof(StreamReader).GetField("_charPos", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+        static readonly FieldInfo ByteLenField = typeof(StreamReader).GetField("_byteLen", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+        static readonly FieldInfo CharBufferField = typeof(StreamReader).GetField("_charBuffer", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly);
 
         #endregion
 
@@ -19,13 +19,13 @@ namespace YY.EventLogReaderAssistant.Services
 
         public static long GetPosition(this StreamReader reader)
         {
-            int byteLen = (int)byteLenField.GetValue(reader);
+            int byteLen = (int)ByteLenField.GetValue(reader);
             var position = reader.BaseStream.Position - byteLen;
 
-            int charPos = (int)charPosField.GetValue(reader);
+            int charPos = (int)CharPosField.GetValue(reader);
             if (charPos > 0)
             {
-                var charBuffer = (char[])charBufferField.GetValue(reader);
+                var charBuffer = (char[])CharBufferField.GetValue(reader);
                 var encoding = reader.CurrentEncoding;
                 var bytesConsumed = encoding.GetBytes(charBuffer, 0, charPos).Length;
                 position += bytesConsumed;

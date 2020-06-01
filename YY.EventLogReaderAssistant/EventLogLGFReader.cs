@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using YY.EventLogReaderAssistant.EventArguments;
 using YY.EventLogReaderAssistant.Models;
 using YY.EventLogReaderAssistant.Services;
 
@@ -14,7 +15,7 @@ namespace YY.EventLogReaderAssistant
     {
         #region Private Member Variables
 
-        private const long _defaultBeginLineForLGF = 3;
+        private const long DefaultBeginLineForLgf = 3;
         private int _indexCurrentFile;
         private readonly string[] _logFilesWithData;
         private long _eventCount = -1;
@@ -53,7 +54,6 @@ namespace YY.EventLogReaderAssistant
 
         #region Constructor
 
-        internal EventLogLGFReader() : base() { }
         internal EventLogLGFReader(string logFilePath) : base(logFilePath)
         {
             _indexCurrentFile = 0;
@@ -80,7 +80,7 @@ namespace YY.EventLogReaderAssistant
                         return false;
                     }
                     
-                    InitializeStream(_defaultBeginLineForLGF, _indexCurrentFile);
+                    InitializeStream(DefaultBeginLineForLgf, _indexCurrentFile);
                     _currentFileEventNumber = 0;
                 }
                 _eventSource.Clear();
@@ -125,7 +125,6 @@ namespace YY.EventLogReaderAssistant
 
                     if (LogParserLGF.ItsEndOfEvent(sourceData, ref countBracket, ref textBlockOpen))
                     {
-                        newLine = true;
                         _currentFileEventNumber += 1;
                         string prepearedSourceData = _eventSource.ToString();
 
@@ -143,7 +142,7 @@ namespace YY.EventLogReaderAssistant
                                 }
                             }
 
-                            if (_readDelayMilliseconds != 0)
+                            if (Math.Abs(_readDelayMilliseconds) > 0 && eventData != null)
                             {
                                 DateTimeOffset stopPeriod = DateTimeOffset.Now.AddMilliseconds(-_readDelayMilliseconds);
                                 if (eventData.Period >= stopPeriod)
@@ -252,10 +251,15 @@ namespace YY.EventLogReaderAssistant
 
             _currentFileEventNumber = newPosition.EventNumber;
 
-            InitializeStream(_defaultBeginLineForLGF, _indexCurrentFile);
+            InitializeStream(DefaultBeginLineForLgf, _indexCurrentFile);
             long beginReadPosition =_stream.GetPosition();
 
-            long newStreamPosition = (long)newPosition.StreamPosition;
+            long newStreamPosition;
+            if (newPosition.StreamPosition == null)
+                newStreamPosition = 0;
+            else
+                newStreamPosition = (long)newPosition.StreamPosition;
+
             if(newStreamPosition < beginReadPosition)            
                 newStreamPosition = beginReadPosition;
 
@@ -438,10 +442,10 @@ namespace YY.EventLogReaderAssistant
         }
         private bool NextLineIsBeginEvent()
         {
-            bool nextIsBeginEvent = false;
             if (CurrentFile == null || _stream == null)
-                return nextIsBeginEvent;
+                return false;
 
+            bool nextIsBeginEvent;
             long currentStreamPosition = _stream.GetPosition();
 
             using (FileStream fileStreamCheckReader = new FileStream(CurrentFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))

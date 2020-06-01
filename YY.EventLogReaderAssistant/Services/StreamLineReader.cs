@@ -11,12 +11,12 @@ namespace YY.EventLogReaderAssistant.Services
     {
         #region Private Member Variables
 
-        private const int _bufferLength = 1024;
+        private const int BufferLength = 1024;
         private readonly byte[] _utf8Preamble = Encoding.UTF8.GetPreamble();
         private Stream _base;
         private readonly Encoding _encoding;
-        private int _read = 0, _index = 0;
-        private readonly byte[] _readBuffer = new byte[_bufferLength];
+        private int _read, _index;
+        private readonly byte[] _readBuffer = new byte[BufferLength];
 
         #endregion
 
@@ -36,18 +36,18 @@ namespace YY.EventLogReaderAssistant.Services
 
         #region Public Methods
 
-        public long CurrentPosition { get; private set; } = 0;
+        public long CurrentPosition { get; private set; }
 
-        public long CurrentLine { get; private set; } = 0;
+        public long CurrentLine { get; private set; }
 
         public bool GoToLine(long goToLine)
         { 
-            return IGetCount(goToLine, true) == goToLine;
+            return GetCount(goToLine, true) == goToLine;
         }
 
         public long GetCount(long goToLine = 0) 
         { 
-            return IGetCount(goToLine, false);
+            return GetCount(goToLine, false);
         }
 
         public string ReadLine()
@@ -60,7 +60,7 @@ namespace YY.EventLogReaderAssistant.Services
                 if (_read <= 0)
                 {
                     _index = 0;
-                    _read = _base.Read(_readBuffer, 0, _bufferLength);
+                    _read = _base.Read(_readBuffer, 0, BufferLength);
                     if (_read == 0)
                     {
                         if (bufferConvertEncodingCollection.Count > 0) 
@@ -85,7 +85,6 @@ namespace YY.EventLogReaderAssistant.Services
                     }
                     else if (ch == '\r')
                     {
-                        continue;
                     } else
                     {
                         bufferConvertEncodingCollection.Add(_readBuffer[_index - 1]);
@@ -114,7 +113,7 @@ namespace YY.EventLogReaderAssistant.Services
 
         #region Private Methods
 
-        private long IGetCount(long goToLine, bool stopWhenLine)
+        private long GetCount(long goToLine, bool stopWhenLine)
         {
             _base.Seek(0, SeekOrigin.Begin);
             CurrentPosition = 0;
@@ -149,7 +148,7 @@ namespace YY.EventLogReaderAssistant.Services
             Array.Copy(bufferString, 0, readyConvertData, 0, bufferSizeCopy);
 
             string prepearedString;
-            if (_encoding == Encoding.UTF8 && ByteArrayStartsWith(readyConvertData, 0, _utf8Preamble))
+            if (Equals(_encoding, Encoding.UTF8) && ByteArrayStartsWith(readyConvertData, 0, _utf8Preamble))
             {
                 prepearedString = _encoding.GetString(readyConvertData, _utf8Preamble.Length, readyConvertData.Length - _utf8Preamble.Length);
             }

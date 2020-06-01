@@ -6,7 +6,7 @@ namespace YY.EventLogReaderAssistant.Models
     public class RowData
     {
         public DateTimeOffset Period { get; set; }
-        public long RowID { get; set; }
+        public long RowId { get; set; }
         public Severity Severity { get; set; }
         public long? ConnectId { get; set; }
         public long? Session { get; set; }
@@ -20,7 +20,7 @@ namespace YY.EventLogReaderAssistant.Models
         public string Comment { get; set; }
         public Metadata Metadata { get; set; }
         public string Data { get; set; }
-        public string DataUUID { get; set; }
+        public string DataUuid { get; set; }
         public string DataPresentation { get; set; }
         public WorkServers WorkServer { get; set; }
         public PrimaryPorts PrimaryPort { get; set; }

@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using System.Security.Cryptography;
 using System.Text;
 
 [assembly: InternalsVisibleTo("YY.EventLogReaderAssistant.Tests")]
@@ -48,7 +46,7 @@ namespace YY.EventLogReaderAssistant.Services
             return Convert.ToInt64(sourceString);
         }
 
-        public static string FromWin1251ToUTF8(this string sourceValue)
+        public static string FromWin1251ToUtf8(this string sourceValue)
         {
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             Encoding utf8 = Encoding.GetEncoding("UTF-8");

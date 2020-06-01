@@ -1,22 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using Xunit;
-using YY.EventLogReaderAssistant.Models;
-using YY.EventLogReaderAssistant;
 using System.IO;
 using System.Linq;
+using Xunit;
+using YY.EventLogReaderAssistant.Models;
+using YY.EventLogReaderAssistant.Services;
 
-namespace YY.EventLogReaderAssistant.Services.Tests
+namespace YY.EventLogReaderAssistant.Tests.Services
 {
     public class MD5HashGeneratorTests
     {
         #region Private Member Variables
 
-        private readonly string sampleDataDirectory;
-        private readonly string sampleDatabaseFileLGF;
-        private readonly string sampleDatabaseFileLGD;
-        private readonly string sampleDatabaseFileLGD_ReadRefferences_IfChanged;
+        private readonly string _sampleDatabaseFileLGF;
+        private readonly string _sampleDatabaseFileLgd;
+        private readonly string _sampleDatabaseFileLgdReadRefferencesIfChanged;
 
         #endregion
 
@@ -25,15 +23,15 @@ namespace YY.EventLogReaderAssistant.Services.Tests
         public MD5HashGeneratorTests()
         {
             string currentDirectory = Directory.GetCurrentDirectory();
-            sampleDataDirectory = Path.Combine(currentDirectory, "SampleData");
-            sampleDatabaseFileLGF = Path.Combine(sampleDataDirectory, "LGFFormatEventLog", "1Cv8.lgf");
-            sampleDatabaseFileLGD = Path.Combine(sampleDataDirectory, "SQLiteFormatEventLog", "1Cv8.lgd");
-            sampleDatabaseFileLGD_ReadRefferences_IfChanged = Path.Combine(
+            var sampleDataDirectory = Path.Combine(currentDirectory, "SampleData");
+            _sampleDatabaseFileLGF = Path.Combine(sampleDataDirectory, "LGFFormatEventLog", "1Cv8.lgf");
+            _sampleDatabaseFileLgd = Path.Combine(sampleDataDirectory, "SQLiteFormatEventLog", "1Cv8.lgd");
+            _sampleDatabaseFileLgdReadRefferencesIfChanged = Path.Combine(
                 sampleDataDirectory, "SQLiteFormatEventLog", "1Cv8_ReadRefferences_IfChanged_Test.lgd");
         }
 
-        public string SampleDatabaseFileLGD_ReadRefferences_IfChanged => sampleDatabaseFileLGD_ReadRefferences_IfChanged;
-        public string SampleDatabaseFileLGD => sampleDatabaseFileLGD;
+        public string SampleDatabaseFileLGD_ReadRefferences_IfChanged => _sampleDatabaseFileLgdReadRefferencesIfChanged;
+        public string SampleDatabaseFileLGD => _sampleDatabaseFileLgd;
 
         #endregion
 
@@ -45,19 +43,19 @@ namespace YY.EventLogReaderAssistant.Services.Tests
             ReferencesData data1;
             ReferencesData data2;
 
-            using(EventLogReader reader = EventLogReader.CreateReader(sampleDatabaseFileLGF))
+            using(EventLogReader reader = EventLogReader.CreateReader(_sampleDatabaseFileLGF))
             {
-                data1 = ReferencesData.CreateromReader(reader);
+                data1 = ReferencesData.CreateFromReader(reader);
             }
-            using (EventLogReader reader = EventLogReader.CreateReader(sampleDatabaseFileLGF))
+            using (EventLogReader reader = EventLogReader.CreateReader(_sampleDatabaseFileLGF))
             {
-                data2 = ReferencesData.CreateromReader(reader);
+                data2 = ReferencesData.CreateFromReader(reader);
             }
 
-            string hashMD5_1 = MD5HashGenerator.GetMD5Hash<ReferencesData>(data1);
-            string hashMD5_2 = MD5HashGenerator.GetMD5Hash<ReferencesData>(data2);
+            string hashMD51 = MD5HashGenerator.GetMd5Hash(data1);
+            string hashMD52 = MD5HashGenerator.GetMd5Hash(data2);
 
-            Assert.Equal(hashMD5_1, hashMD5_2);
+            Assert.Equal(hashMD51, hashMD52);
 
         }
 
@@ -68,7 +66,9 @@ namespace YY.EventLogReaderAssistant.Services.Tests
         [Serializable]
         private class ReferencesData
         {
-            public static ReferencesData CreateromReader(EventLogReader reader)
+            #region  Public Static Methods
+            
+            public static ReferencesData CreateFromReader(EventLogReader reader)
             {
                 List<Severity> severities = new List<Severity>
                 {
@@ -88,9 +88,7 @@ namespace YY.EventLogReaderAssistant.Services.Tests
                     TransactionStatus.Unknown
                 };
 
-                ReferencesData referenceData;
-
-                referenceData = new ReferencesData()
+                var referenceData = new ReferencesData()
                 {
                     Applications = reader.Applications.ToList().AsReadOnly(),
                     Computers = reader.Computers.ToList().AsReadOnly(),
@@ -107,16 +105,22 @@ namespace YY.EventLogReaderAssistant.Services.Tests
                 return referenceData;
             }
 
-            public IReadOnlyList<Applications> Applications;
-            public IReadOnlyList<Computers> Computers;
-            public IReadOnlyList<Events> Events;
-            public IReadOnlyList<Metadata> Metadata;
-            public IReadOnlyList<PrimaryPorts> PrimaryPorts;
-            public IReadOnlyList<SecondaryPorts> SecondaryPorts;
-            public IReadOnlyList<Severity> Severities;
-            public IReadOnlyList<TransactionStatus> TransactionStatuses;
-            public IReadOnlyList<Users> Users;
-            public IReadOnlyList<WorkServers> WorkServers;
+            #endregion
+
+            #region Public Members
+
+            public IReadOnlyList<Applications> Applications { get; set; }
+            public IReadOnlyList<Computers> Computers { get; set; }
+            public IReadOnlyList<Events> Events { get; set; }
+            public IReadOnlyList<Metadata> Metadata { get; set; }
+            public IReadOnlyList<PrimaryPorts> PrimaryPorts { get; set; }
+            public IReadOnlyList<SecondaryPorts> SecondaryPorts { get; set; }
+            public IReadOnlyList<Severity> Severities { get; set; }
+            public IReadOnlyList<TransactionStatus> TransactionStatuses { get; set; }
+            public IReadOnlyList<Users> Users { get; set; }
+            public IReadOnlyList<WorkServers> WorkServers { get; set; }
+
+            #endregion
         }
 
         #endregion

@@ -13,7 +13,7 @@ namespace YY.EventLogReaderAssistant.Services
             return DateTime.MinValue.AddSeconds((double)s / 10000);
         }
 
-        public static DateTime? ToNullableDateTimeELFormat(this long s)
+        public static DateTime? ToNullableDateTimeElFormat(this long s)
         {
             if (s == 0)
                 return null;

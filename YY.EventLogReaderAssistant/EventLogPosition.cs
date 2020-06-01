@@ -7,12 +7,12 @@ namespace YY.EventLogReaderAssistant
     {
         #region Constructor
 
-        public EventLogPosition(long EventNumber, string CurrentFileReferences, string CurrentFileData, long? StreamPosition)
+        public EventLogPosition(long eventNumber, string currentFileReferences, string currentFileData, long? streamPosition)
         {
-            this.EventNumber = EventNumber;
-            this.CurrentFileReferences = CurrentFileReferences;
-            this.CurrentFileData = CurrentFileData;
-            this.StreamPosition = StreamPosition;
+            EventNumber = eventNumber;
+            CurrentFileReferences = currentFileReferences;
+            CurrentFileData = currentFileData;
+            StreamPosition = streamPosition;
         }
 
         #endregion
