@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>1.0.0.26</Version>
+    <Version>1.0.0.27</Version>
     <Description>Library for reading 1C:Enterprise 8.x platform's event log files</Description>
     <Copyright>Copyright (c) 2020 Permitin Yury</Copyright>
     <PackageProjectUrl>https://github.com/YPermitin/YY.EventLogReaderAssistant</PackageProjectUrl>
@@ -15,12 +15,12 @@
     <Authors>Permitin Yuriy</Authors>
     <Product>Event log's reader assistant</Product>
     <PackageTags>event, log, 1C, enterprise</PackageTags>
-    <FileVersion>1.0.0.26</FileVersion>
-    <AssemblyVersion>1.0.0.26</AssemblyVersion>
+    <FileVersion>1.0.0.27</FileVersion>
+    <AssemblyVersion>1.0.0.27</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Data.SQLite" Version="1.0.112.2" />
+    <PackageReference Include="System.Data.SQLite" Version="1.0.113.1" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="4.7.1" />
   </ItemGroup>
 
