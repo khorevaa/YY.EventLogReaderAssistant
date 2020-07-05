@@ -12,40 +12,46 @@ namespace YY.EventLogReaderAssistant
 {
     public abstract class EventLogReader : IEventLogReader, IDisposable
     {
-        #region Static Methods
+        #region Public Static Methods
 
         public static EventLogReader CreateReader(string pathLogFile)
         {
-            FileAttributes attr = File.GetAttributes(pathLogFile);
-
-            FileInfo logFileInfo = null;
-            string logFileWithReferences;
-            if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
-            {
-                string currentLogFilesPath = pathLogFile;
-                logFileWithReferences = string.Format("{0}{1}{2}", currentLogFilesPath, Path.DirectorySeparatorChar, @"1Cv8.lgf");
-            }
-            else
-            {
-                logFileInfo = new FileInfo(pathLogFile);
-                logFileWithReferences = logFileInfo.FullName;
-            }
-
-            if (!File.Exists(logFileWithReferences))
-                logFileWithReferences = string.Format("{0}{1}{2}", pathLogFile, Path.DirectorySeparatorChar, @"1Cv8.lgd");
-
+            string logFileWithReferences = GetEventLogFileWithReferences(pathLogFile);
             if (File.Exists(logFileWithReferences))
             {
-                if (logFileInfo == null) logFileInfo = new FileInfo(logFileWithReferences);
+                FileInfo logFileInfo = new FileInfo(logFileWithReferences);
 
                 string logFileExtension = logFileInfo.Extension.ToUpper();
                 if (logFileExtension.EndsWith("LGF"))
                     return new EventLogLGFReader(logFileInfo.FullName);
-                else if (logFileExtension.EndsWith("LGD"))
+                if (logFileExtension.EndsWith("LGD"))
                     return new EventLogLGDReader(logFileInfo.FullName);
             }
 
             throw new ArgumentException("Invalid log file path");
+        }
+
+        #endregion
+
+        #region Private Static Methods
+
+        private static string GetEventLogFileWithReferences(string pathLogFile)
+        {
+            FileAttributes attr = File.GetAttributes(pathLogFile);
+
+            string logFileWithReferences;
+            if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+                logFileWithReferences = $"{pathLogFile}{Path.DirectorySeparatorChar}{@"1Cv8.lgf"}";
+            else
+            {
+                var logFileInfo = new FileInfo(pathLogFile);
+                logFileWithReferences = logFileInfo.FullName;
+            }
+
+            if (!File.Exists(logFileWithReferences))
+                logFileWithReferences = $"{pathLogFile}{Path.DirectorySeparatorChar}{@"1Cv8.lgd"}";
+
+            return logFileWithReferences;
         }
 
         #endregion
