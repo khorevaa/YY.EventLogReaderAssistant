@@ -336,116 +336,39 @@ namespace YY.EventLogReaderAssistant
             {
                 _connection.Open();
 
-                using (SQLiteCommand cmdUserCodes = new SQLiteCommand("Select Code, Name, UUID From UserCodes", _connection))
-                {
-                    using (SQLiteDataReader readerUserCodes = cmdUserCodes.ExecuteReader())
-                        while (readerUserCodes.Read())
-                        {
-                            _users.Add(new Users()
-                            {
-                                Code = readerUserCodes.GetInt64(0),
-                                Name = readerUserCodes.GetString(1),
-                                Uuid = readerUserCodes.GetString(2).ToGuid()
-                            });
-                        }
-                }
-
-                using (SQLiteCommand cmdComputerCodes = new SQLiteCommand("Select Code, Name From ComputerCodes", _connection))
-                {
-                    using (SQLiteDataReader readerComputerCodes = cmdComputerCodes.ExecuteReader())
-                        while (readerComputerCodes.Read())
-                        {
-                            _computers.Add(new Computers()
-                            {
-                                Code = readerComputerCodes.GetInt64(0),
-                                Name = readerComputerCodes.GetString(1)
-                            });
-                        }
-                }
-
-                using (SQLiteCommand cmdEventCodes = new SQLiteCommand("Select Code, Name From EventCodes", _connection))
-                {
-                    using (SQLiteDataReader readerEventCodes = cmdEventCodes.ExecuteReader())
-                        while (readerEventCodes.Read())
-                        {
-                            _events.Add(new Events()
-                            {
-                                Code = readerEventCodes.GetInt64(0),
-                                Name = readerEventCodes.GetString(1)
-                            });
-                        }
-                }
-
-                using (SQLiteCommand cmdMetadataCodes = new SQLiteCommand("Select Code, Name, UUID From MetadataCodes", _connection))
-                {
-                    using (SQLiteDataReader readerMetadataCodes = cmdMetadataCodes.ExecuteReader())
-                        while (readerMetadataCodes.Read())
-                        {
-                            _metadata.Add(new Metadata()
-                            {
-                                Code = readerMetadataCodes.GetInt64(0),
-                                Name = readerMetadataCodes.GetString(1),
-                                Uuid = readerMetadataCodes.GetString(2).ToGuid()
-                            });
-                        }
-                }
-
-                using (SQLiteCommand cmdAppCodes = new SQLiteCommand("Select Code, Name From AppCodes", _connection))
-                {
-                    using (SQLiteDataReader readerAppCodes = cmdAppCodes.ExecuteReader())
-                        while (readerAppCodes.Read())
-                        {
-                            _applications.Add(new Applications()
-                            {
-                                Code = readerAppCodes.GetInt64(0),
-                                Name = readerAppCodes.GetString(1)
-                            });
-                        }
-                }
-
-                using (SQLiteCommand cmdWorkServerCodes = new SQLiteCommand("Select Code, Name From WorkServerCodes", _connection))
-                {
-                    using (SQLiteDataReader readerWorkServerCodes = cmdWorkServerCodes.ExecuteReader())
-                        while (readerWorkServerCodes.Read())
-                        {
-                            _workServers.Add(new WorkServers()
-                            {
-                                Code = readerWorkServerCodes.GetInt64(0),
-                                Name = readerWorkServerCodes.GetString(1)
-                            });
-                        }
-                }
-
-                using (SQLiteCommand cmdPrimaryPortCodes = new SQLiteCommand("Select Code, Name From PrimaryPortCodes", _connection))
-                {
-                    using (SQLiteDataReader readerPrimaryPortCodes = cmdPrimaryPortCodes.ExecuteReader())
-                        while (readerPrimaryPortCodes.Read())
-                        {
-                            _primaryPorts.Add(new PrimaryPorts()
-                            {
-                                Code = readerPrimaryPortCodes.GetInt64(0),
-                                Name = readerPrimaryPortCodes.GetString(1)
-                            });
-                        }
-                }
-
-                using (SQLiteCommand cmdSecondaryPortCodes = new SQLiteCommand("Select Code, Name From SecondaryPortCodes", _connection))
-                {
-                    using (SQLiteDataReader readerSecondaryPortCodes = cmdSecondaryPortCodes.ExecuteReader())
-                        while (readerSecondaryPortCodes.Read())
-                        {
-                            _secondaryPorts.Add(new SecondaryPorts()
-                            {
-                                Code = readerSecondaryPortCodes.GetInt64(0),
-                                Name = readerSecondaryPortCodes.GetString(1)
-                            });
-                        }
-                }
-
+                ReadReferencesByType(_users, "Select Code, Name, UUID From UserCodes");
+                ReadReferencesByType(_computers, "Select Code, Name From ComputerCodes");
+                ReadReferencesByType(_events, "Select Code, Name From EventCodes");
+                ReadReferencesByType(_metadata, "Select Code, Name, UUID From MetadataCodes");
+                ReadReferencesByType(_applications, "Select Code, Name From AppCodes");
+                ReadReferencesByType(_workServers, "Select Code, Name From WorkServerCodes");
+                ReadReferencesByType(_primaryPorts, "Select Code, Name From PrimaryPortCodes");
+                ReadReferencesByType(_secondaryPorts, "Select Code, Name From SecondaryPortCodes");
+                
                 _referencesReadDate = beginReadReferences;
             }
 
             base.ReadEventLogReferences();
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        private void ReadReferencesByType<T>(List<T> referenceCollection, string cmdSqliteText) where T: IReferenceObject, new()
+        {
+            referenceCollection.Clear();
+
+            using (SQLiteCommand cmdReadReferences = new SQLiteCommand(cmdSqliteText, _connection))
+            {
+                using (SQLiteDataReader readerReferences = cmdReadReferences.ExecuteReader())
+                    while (readerReferences.Read())
+                    {
+                        IReferenceObject referenceObject = new T();
+                        referenceObject.FillBySqliteReader(readerReferences);
+                        referenceCollection.Add((T)referenceObject);
+                    }
+            }
         }
 
         #endregion
