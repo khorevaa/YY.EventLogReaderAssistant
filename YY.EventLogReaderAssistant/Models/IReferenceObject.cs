@@ -1,6 +1,6 @@
 ﻿using System.Data.SQLite;
 
-namespace YY.EventLogReaderAssistant
+namespace YY.EventLogReaderAssistant.Models
 {
     public interface IReferenceObject
     {
