@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Xunit;
+using YY.EventLogReaderAssistant.Helpers;
 using YY.EventLogReaderAssistant.Models;
-using YY.EventLogReaderAssistant.Services;
 
 namespace YY.EventLogReaderAssistant.Tests.Services
 {

@@ -5,8 +5,8 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using YY.EventLogReaderAssistant.EventArguments;
+using YY.EventLogReaderAssistant.Helpers;
 using YY.EventLogReaderAssistant.Models;
-using YY.EventLogReaderAssistant.Services;
 
 [assembly: InternalsVisibleTo("YY.EventLogReaderAssistant.Tests")]
 namespace YY.EventLogReaderAssistant

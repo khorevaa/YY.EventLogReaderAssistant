@@ -5,8 +5,8 @@ using System.IO;
 using System.Threading;
 using Xunit;
 using YY.EventLogReaderAssistant.EventArguments;
+using YY.EventLogReaderAssistant.Helpers;
 using YY.EventLogReaderAssistant.Models;
-using YY.EventLogReaderAssistant.Services;
 
 namespace YY.EventLogReaderAssistant.Tests
 {

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Data.SQLite;
-using YY.EventLogReaderAssistant.Services;
+using YY.EventLogReaderAssistant.Helpers;
 
 namespace YY.EventLogReaderAssistant.Models
 {

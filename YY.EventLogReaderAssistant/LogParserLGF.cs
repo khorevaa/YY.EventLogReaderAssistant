@@ -3,11 +3,11 @@ using System;
 using System.Globalization;
 using System.Linq;
 using System.Text;
-using YY.EventLogReaderAssistant.Services;
 using System.Text.RegularExpressions;
 using System.IO;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using YY.EventLogReaderAssistant.Helpers;
 
 [assembly: InternalsVisibleTo("YY.EventLogReaderAssistant.Tests")]
 namespace YY.EventLogReaderAssistant
@@ -83,7 +83,6 @@ namespace YY.EventLogReaderAssistant
                 IList<SecondaryPorts> secondaryPorts)
         {
             string textReferencesData;
-
             using (FileStream fs = new FileStream(_reader.LogFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             using (StreamReader sr = new StreamReader(fs))
                 textReferencesData = sr.ReadToEnd();

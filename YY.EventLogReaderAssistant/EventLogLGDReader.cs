@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Data.SQLite;
 using YY.EventLogReaderAssistant.Models;
-using YY.EventLogReaderAssistant.Services;
 using System.Runtime.CompilerServices;
 using YY.EventLogReaderAssistant.EventArguments;
+using YY.EventLogReaderAssistant.Helpers;
 
 [assembly: InternalsVisibleTo("YY.EventLogReaderAssistant.Tests")]
 namespace YY.EventLogReaderAssistant
