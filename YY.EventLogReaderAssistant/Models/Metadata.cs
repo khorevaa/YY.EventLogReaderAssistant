@@ -5,27 +5,20 @@ using YY.EventLogReaderAssistant.Services;
 namespace YY.EventLogReaderAssistant.Models
 {
     [Serializable]
-    public class Metadata : IReferenceObject
+    public class Metadata : ReferenceObject
     {
         #region Public Members
 
-        public long Code { get; set; }
         public Guid Uuid { get; set; }
-        public string Name { get; set; }
 
         #endregion
 
         #region Public Methods
 
-        public void FillBySqliteReader(SQLiteDataReader reader)
+        public override void FillBySqliteReader(SQLiteDataReader reader)
         {
-            Code = reader.GetInt64(0);
-            Name = reader.GetString(1);
+            base.FillBySqliteReader(reader);
             Uuid = reader.GetString(2).ToGuid();
-        }
-        public override string ToString()
-        {
-            return Name;
         }
 
         #endregion

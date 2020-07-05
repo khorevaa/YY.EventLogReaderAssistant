@@ -321,15 +321,6 @@ namespace YY.EventLogReaderAssistant
         }
         protected override void ReadEventLogReferences()
         {
-            _users.Clear();
-            _computers.Clear();
-            _events.Clear();
-            _metadata.Clear();
-            _applications.Clear();
-            _workServers.Clear();
-            _primaryPorts.Clear();
-            _secondaryPorts.Clear();
-
             DateTime beginReadReferences = DateTime.Now;
 
             using (_connection = new SQLiteConnection(ConnectionString))
