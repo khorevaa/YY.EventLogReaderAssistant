@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data.SQLite;
+using YY.EventLogReaderAssistant.Helpers;
 
 namespace YY.EventLogReaderAssistant.Models
 {
@@ -19,6 +20,11 @@ namespace YY.EventLogReaderAssistant.Models
         {
             Code = reader.GetInt64(0);
             Name = reader.GetString(1);
+        }
+        public virtual void FillByStringParsedData(string[] parsedEventData)
+        {
+            Code = parsedEventData[2].ToInt64();
+            Name = parsedEventData[1];
         }
         public override string ToString()
         {

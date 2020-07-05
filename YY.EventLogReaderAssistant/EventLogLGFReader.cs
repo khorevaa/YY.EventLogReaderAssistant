@@ -337,26 +337,17 @@ namespace YY.EventLogReaderAssistant
         }
         protected override void ReadEventLogReferences()
         {
-            _users.Clear();
-            _computers.Clear();
-            _events.Clear();
-            _metadata.Clear();
-            _applications.Clear();
-            _workServers.Clear();
-            _primaryPorts.Clear();
-            _secondaryPorts.Clear();
-
             DateTime beginReadReferences = DateTime.Now;
 
-            LogParser.ReadEventLogReferences(
-                   _users,
-                   _computers,
-                   _applications,
-                   _events,
-                   _metadata,
-                   _workServers,
-                   _primaryPorts,
-                   _secondaryPorts);
+            var referencesInfo = LogParser.GetEventLogReferences();
+            referencesInfo.ReadReferencesByType(_users);
+            referencesInfo.ReadReferencesByType(_computers);
+            referencesInfo.ReadReferencesByType(_applications);
+            referencesInfo.ReadReferencesByType(_events);
+            referencesInfo.ReadReferencesByType(_metadata);
+            referencesInfo.ReadReferencesByType(_workServers);
+            referencesInfo.ReadReferencesByType(_primaryPorts);
+            referencesInfo.ReadReferencesByType(_secondaryPorts);
 
             _referencesReadDate = beginReadReferences;
 
