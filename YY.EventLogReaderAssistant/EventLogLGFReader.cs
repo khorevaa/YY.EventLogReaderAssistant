@@ -237,59 +237,17 @@ namespace YY.EventLogReaderAssistant
         }
         public override void SetCurrentPosition(EventLogPosition newPosition)
         {
-            Reset();
-            if (newPosition == null)
+            if(ApplyEventLogPosition(newPosition) == false)
                 return;
-
-            if(newPosition.CurrentFileReferences != _logFilePath)
-                throw new Exception("Invalid data file with references");
-
-            int indexOfFileData = Array.IndexOf(_logFilesWithData, newPosition.CurrentFileData);
-            if (indexOfFileData < 0)
-                throw new Exception("Invalid data file");
-            _indexCurrentFile = indexOfFileData;
-
-            _currentFileEventNumber = newPosition.EventNumber;
-
+            
             InitializeStream(DefaultBeginLineForLgf, _indexCurrentFile);
             long beginReadPosition =_stream.GetPosition();
-
-            long newStreamPosition;
-            if (newPosition.StreamPosition == null)
-                newStreamPosition = 0;
-            else
-                newStreamPosition = (long)newPosition.StreamPosition;
-
-            if(newStreamPosition < beginReadPosition)            
-                newStreamPosition = beginReadPosition;
+            long newStreamPosition = Math.Max(beginReadPosition, newPosition.StreamPosition ?? 0);
 
             long sourceStreamPosition = newStreamPosition;
             string currentFilePath = _logFilesWithData[_indexCurrentFile];            
             
-            bool isCorrectBeginEvent = false;
-            bool notDataAvailiable = false;
-
-            FixBeginEventPosition(
-                ref isCorrectBeginEvent,
-                currentFilePath,
-                ref newStreamPosition, 
-                ref notDataAvailiable);
-
-            if (!isCorrectBeginEvent && !notDataAvailiable)
-            {
-                newStreamPosition = sourceStreamPosition;
-                FixBeginEventPosition(
-                    ref isCorrectBeginEvent,
-                    currentFilePath,
-                    ref newStreamPosition,
-                    ref notDataAvailiable,
-                    -1);
-            }
-
-            if (!isCorrectBeginEvent && !notDataAvailiable)
-            {
-                throw new ArgumentException("Wrong begin event stream position's");
-            }
+            FixEventPosition(currentFilePath, ref newStreamPosition, sourceStreamPosition);
 
             if (newPosition.StreamPosition != null)
                 SetCurrentFileStreamPosition(newStreamPosition);
@@ -370,6 +328,25 @@ namespace YY.EventLogReaderAssistant
 
         #region Private Methods
 
+        private bool ApplyEventLogPosition(EventLogPosition position)
+        {
+            Reset();
+
+            if (position == null)
+                return false;
+
+            if (position.CurrentFileReferences != _logFilePath)
+                throw new Exception("Invalid data file with references");
+
+            int indexOfFileData = Array.IndexOf(_logFilesWithData, position.CurrentFileData);
+            if (indexOfFileData < 0)
+                throw new Exception("Invalid data file");
+
+            _indexCurrentFile = indexOfFileData;
+            _currentFileEventNumber = position.EventNumber;
+
+            return true;
+        }
         private void InitializeStream(long linesToSkip, int fileIndex = 0)
         {
             FileStream fs = new FileStream(_logFilesWithData[fileIndex], FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
@@ -415,13 +392,39 @@ namespace YY.EventLogReaderAssistant
 
             return nextIsBeginEvent;
         }
-        private void FixBeginEventPosition(ref bool isCorrectBeginEvent, string currentFilePath, ref long newStreamPosition, ref bool notDataAvailiable, int stepSize = 1)
+        private void FixEventPosition(string currentFilePath, ref long newStreamPosition, long sourceStreamPosition)
+        {
+            bool isCorrectBeginEvent = false, notDataAvailiable = false;
+
+            FindNearestBeginEventPosition(
+                ref isCorrectBeginEvent,
+                currentFilePath,
+                ref newStreamPosition,
+                ref notDataAvailiable);
+
+            if (!isCorrectBeginEvent && !notDataAvailiable)
+            {
+                newStreamPosition = sourceStreamPosition;
+                FindNearestBeginEventPosition(
+                    ref isCorrectBeginEvent,
+                    currentFilePath,
+                    ref newStreamPosition,
+                    ref notDataAvailiable,
+                    -1);
+            }
+
+            if (!isCorrectBeginEvent && !notDataAvailiable)
+                throw new ArgumentException("Wrong begin event stream position's");
+        }
+        private void FindNearestBeginEventPosition(ref bool isCorrectBeginEvent, string currentFilePath, ref long newStreamPosition,
+            ref bool notDataAvailiable, int stepSize = 1)
         {
             int attemptToFoundBeginEventLine = 0;
             while (!isCorrectBeginEvent && attemptToFoundBeginEventLine < 10)
             {
                 string beginEventLine;
-                using (FileStream fileStreamCheckPosition = new FileStream(currentFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                using (FileStream fileStreamCheckPosition =
+                    new FileStream(currentFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 {
                     fileStreamCheckPosition.Seek(newStreamPosition, SeekOrigin.Begin);
                     using (StreamReader fileStreamCheckReader = new StreamReader(fileStreamCheckPosition))
@@ -442,6 +445,7 @@ namespace YY.EventLogReaderAssistant
                 }
             }
         }
+
         #endregion
     }
 }
