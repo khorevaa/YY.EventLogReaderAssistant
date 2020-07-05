@@ -394,30 +394,27 @@ namespace YY.EventLogReaderAssistant
         }
         private void FixEventPosition(string currentFilePath, ref long newStreamPosition, long sourceStreamPosition)
         {
-            bool isCorrectBeginEvent = false, notDataAvailiable = false;
+            bool isCorrectBeginEvent = false;
 
             FindNearestBeginEventPosition(
                 ref isCorrectBeginEvent,
                 currentFilePath,
-                ref newStreamPosition,
-                ref notDataAvailiable);
+                ref newStreamPosition);
 
-            if (!isCorrectBeginEvent && !notDataAvailiable)
+            if (!isCorrectBeginEvent)
             {
                 newStreamPosition = sourceStreamPosition;
                 FindNearestBeginEventPosition(
                     ref isCorrectBeginEvent,
                     currentFilePath,
                     ref newStreamPosition,
-                    ref notDataAvailiable,
                     -1);
             }
 
-            if (!isCorrectBeginEvent && !notDataAvailiable)
+            if (!isCorrectBeginEvent)
                 throw new ArgumentException("Wrong begin event stream position's");
         }
-        private void FindNearestBeginEventPosition(ref bool isCorrectBeginEvent, string currentFilePath, ref long newStreamPosition,
-            ref bool notDataAvailiable, int stepSize = 1)
+        private void FindNearestBeginEventPosition(ref bool isCorrectBeginEvent, string currentFilePath, ref long newStreamPosition, int stepSize = 1)
         {
             int attemptToFoundBeginEventLine = 0;
             while (!isCorrectBeginEvent && attemptToFoundBeginEventLine < 10)
@@ -433,7 +430,7 @@ namespace YY.EventLogReaderAssistant
 
                 if (beginEventLine == null)
                 {
-                    notDataAvailiable = true;
+                    isCorrectBeginEvent = false;
                     break;
                 }
 
