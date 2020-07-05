@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using YY.EventLogReaderAssistant.Models;
 
 namespace YY.EventLogReaderAssistant
@@ -21,17 +20,15 @@ namespace YY.EventLogReaderAssistant
             _mapTypeAndReferenceTypeId.Add(typeof(SecondaryPorts), "8");
         }
 
-        private EventLogLGFReader _readerLGF;
-        private LogParserLGF _parserLGF;
-        private string[] _objectReferencesTexts;
+        private readonly LogParserLGF _parserLGF;
+        private readonly string[] _objectReferencesTexts;
 
         public LogParserReferencesLGF(EventLogLGFReader readerLGF, LogParserLGF parserLGF)
         {
-            _readerLGF = readerLGF;
             _parserLGF = parserLGF;
 
             string textReferencesData;
-            using (FileStream fs = new FileStream(_readerLGF.LogFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (FileStream fs = new FileStream(readerLGF.LogFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             using (StreamReader sr = new StreamReader(fs))
                 textReferencesData = sr.ReadToEnd();
 
