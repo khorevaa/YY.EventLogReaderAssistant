@@ -117,78 +117,102 @@ namespace YY.EventLogReaderAssistant
             string[] resultStrings = null;
             string preparedString = sourceString.Substring(1, (sourceString.EndsWith(",") ? sourceString.Length - 3 : sourceString.Length - 2)) + ",";
             string bufferString = string.Empty;
-
-            int delimIndex = preparedString.IndexOf(",", StringComparison.Ordinal);
-            int i = 0;
-            int partNumber = 0;
-            bool isSpecialString = false;
+            int i = 0, partNumber = 0, delimIndex = GetDelimeterIndex(preparedString);
 
             while (delimIndex > 0)
             {
-                bufferString += preparedString.Substring(0, delimIndex).Trim();
                 partNumber += 1;
+                bufferString += preparedString.Substring(0, delimIndex).Trim();
                 preparedString = preparedString.Substring(delimIndex + 1);
-                if (partNumber == 1 && !string.IsNullOrEmpty(bufferString) && bufferString[0] == '\"')
-                    isSpecialString = true;
+                var isSpecialString = IsSpeacialString(bufferString, partNumber);
 
-                int counter1, counter2;
-                if (isSpecialString)
-                {
-                    counter1 = 0;
-                    counter2 = 0;
-                }
-                else
-                {
-                    counter1 = CountSubstring(bufferString, "{");
-                    counter2 = CountSubstring(bufferString, "}");
-                }
+                AddResultString(ref resultStrings, ref i, ref bufferString, ref isSpecialString, ref partNumber);
 
-                int counter3 = CountSubstring(bufferString, "\"") % 2;
-                if (counter1 == counter2 & counter3 == 0)
-                {
-                    Array.Resize(ref resultStrings, i + 1);
-                    if (bufferString.StartsWith("\"") && bufferString.EndsWith("\""))
-                    {
-                        bufferString = bufferString.Substring(1, bufferString.Length - 2);
-                    }
-
-                    if (isSpecialString)
-                    {
-                        char[] denied = new[] { '\n', '\t', '\r' };
-                        StringBuilder newString = new StringBuilder();
-
-                        foreach (var ch in bufferString)
-                            if (!denied.Contains(ch))
-                                newString.Append(ch);
-
-                        bufferString = newString.ToString();
-                    }
-
-                    resultStrings[i] = bufferString;
-                    i += 1;
-                    bufferString = string.Empty;
-                    partNumber = 0;
-                    isSpecialString = false;
-                }
-                else
-                    bufferString += ",";
-
-                if (isSpecialString)
-                {
-                    delimIndex = preparedString.IndexOf("\",", StringComparison.Ordinal) + 1;
-                }
-                else
-                {
-                    delimIndex = preparedString.IndexOf(",", StringComparison.Ordinal);
-                }
+                delimIndex = GetDelimeterIndex(preparedString, isSpecialString);
             }
 
             return resultStrings;
         }
+
         #endregion
 
         #region Private Methods
 
+        private void AddResultString(ref string[] resultStrings, ref int i, ref string bufferString, ref bool isSpecialString, ref int partNumber)
+        {
+            CalculateCountSubstrings(bufferString, isSpecialString,
+                out var counterBeginCurlyBrace, out var counterEndCurlyBrace, out var counterSlash);
+
+            if (counterBeginCurlyBrace == counterEndCurlyBrace & counterSlash == 0)
+            {
+                Array.Resize(ref resultStrings, i + 1);
+                bufferString = RemoveDoubleQuotes(bufferString);
+                if (isSpecialString) bufferString = RemoveSpecialSymbols(bufferString);
+                resultStrings[i] = bufferString;
+
+                i += 1;
+                bufferString = string.Empty;
+                partNumber = 0;
+                isSpecialString = false;
+            }
+            else
+                bufferString += ",";
+        }
+        private bool IsSpeacialString(string sourceString, int partNumber)
+        {
+            bool isSpecialString = partNumber == 1 &&
+                                   !string.IsNullOrEmpty(sourceString)
+                                   && sourceString[0] == '\"';
+
+            return isSpecialString;
+        }
+        private void CalculateCountSubstrings(string sourceString, bool isSpecialString, out int counterBeginCurlyBrace, out int counterEndCurlyBrace, out int counterSlash)
+        {
+            if (isSpecialString)
+            {
+                counterBeginCurlyBrace = 0;
+                counterEndCurlyBrace = 0;
+            }
+            else
+            {
+                counterBeginCurlyBrace = CountSubstring(sourceString, "{");
+                counterEndCurlyBrace = CountSubstring(sourceString, "}");
+            }
+            counterSlash = CountSubstring(sourceString, "\"") % 2;
+        }
+        private string RemoveSpecialSymbols(string sourceString)
+        {
+            char[] denied = new[] { '\n', '\t', '\r' };
+            StringBuilder newString = new StringBuilder();
+
+            foreach (var ch in sourceString)
+                if (!denied.Contains(ch))
+                    newString.Append(ch);
+
+            return newString.ToString();
+        }
+        private string RemoveDoubleQuotes(string sourceString)
+        {
+            if (sourceString.StartsWith("\"") && sourceString.EndsWith("\""))
+                return sourceString.Substring(1, sourceString.Length - 2);
+            else
+                return sourceString;
+        }
+        private int GetDelimeterIndex(string sourceString, bool isSpecialString = false)
+        {
+            int delimIndex;
+
+            if (isSpecialString)
+            {
+                delimIndex = sourceString.IndexOf("\",", StringComparison.Ordinal) + 1;
+            }
+            else
+            {
+                delimIndex = sourceString.IndexOf(",", StringComparison.Ordinal);
+            }
+
+            return delimIndex;
+        }
         private string GetData(string sourceString)
         {
             string data = sourceString;
