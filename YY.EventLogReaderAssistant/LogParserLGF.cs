@@ -171,32 +171,26 @@ namespace YY.EventLogReaderAssistant
         }
         private bool IsCorrectLogPart(string sourceString, bool isSpecialString)
         {
-            int counterBeginCurlyBrace, counterEndCurlyBrace;
+            int counterBeginCurlyBrace = 0, counterEndCurlyBrace = 0;
+            int counterSlash = CountSubstring(sourceString, "\"") % 2;
 
-            if (isSpecialString)
-            {
-                counterBeginCurlyBrace = 0;
-                counterEndCurlyBrace = 0;
-            }
-            else
+            if (!isSpecialString)
             {
                 counterBeginCurlyBrace = CountSubstring(sourceString, "{");
                 counterEndCurlyBrace = CountSubstring(sourceString, "}");
             }
-            int counterSlash = CountSubstring(sourceString, "\"") % 2;
 
             return counterBeginCurlyBrace == counterEndCurlyBrace & counterSlash == 0;
         }
         private string RemoveSpecialSymbols(string sourceString)
         {
             char[] denied = new[] { '\n', '\t', '\r' };
-            StringBuilder newString = new StringBuilder();
+            
+            string newString = string.Join("", sourceString
+                .Where(s => !denied.Contains(s))
+                .ToArray());
 
-            foreach (var ch in sourceString)
-                if (!denied.Contains(ch))
-                    newString.Append(ch);
-
-            return newString.ToString();
+            return newString;
         }
         private string RemoveDoubleQuotes(string sourceString)
         {
@@ -207,18 +201,10 @@ namespace YY.EventLogReaderAssistant
         }
         private int GetDelimeterIndex(string sourceString, bool isSpecialString = false)
         {
-            int delimIndex;
-
             if (isSpecialString)
-            {
-                delimIndex = sourceString.IndexOf("\",", StringComparison.Ordinal) + 1;
-            }
+                return sourceString.IndexOf("\",", StringComparison.Ordinal) + 1;
             else
-            {
-                delimIndex = sourceString.IndexOf(",", StringComparison.Ordinal);
-            }
-
-            return delimIndex;
+                return sourceString.IndexOf(",", StringComparison.Ordinal);
         }
         private string GetData(string sourceString)
         {
@@ -226,18 +212,14 @@ namespace YY.EventLogReaderAssistant
 
             if (data == "{\"U\"}")
                 data = string.Empty;
+
             else if (data.StartsWith("{"))
             {
                 string[] parsedObjects = ParseEventLogString(data);
-                if (parsedObjects != null)
-                { 
-                    if (parsedObjects.Length == 2)
-                    {
-                        if (parsedObjects[0] == "\"S\"" || parsedObjects[0] == "\"R\"")
-                        {
-                            data = parsedObjects[1].RemoveQuotes();
-                        }
-                    }
+                if (parsedObjects != null && parsedObjects.Length == 2)
+                {
+                    if (parsedObjects[0] == "\"S\"" || parsedObjects[0] == "\"R\"")
+                        data = parsedObjects[1].RemoveQuotes();
                 }
             }
 
@@ -245,34 +227,25 @@ namespace YY.EventLogReaderAssistant
         }
         private string GetDataUuid(string sourceData)
         {
-            string dataUuid;
+            string dataUuid = string.Empty;
 
             MatchCollection matches = _regexDataUuid.Matches(sourceData);
             if (matches.Count > 0)
             {
                 string[] dataPartsUuid = sourceData.Split(':');
-                if (dataPartsUuid.Length == 2)
-                {
-                    dataUuid = dataPartsUuid[1].Replace("}", string.Empty);
-                } else
-                    dataUuid = string.Empty;
+                dataUuid = dataPartsUuid.Length == 2 ? dataPartsUuid[1].Replace("}", string.Empty) : string.Empty;
             }
-            else
-                dataUuid = string.Empty;
 
             return dataUuid;
         }
         private DateTime? GetTransactionDate(string sourceString)
         {
-            DateTime? transactionDate;
+            DateTime? transactionDate = null;
 
             long transDate = sourceString.Substring(0, sourceString.IndexOf(",", StringComparison.Ordinal)).From16To10();
             try
             {
-                if (!(transDate == 0))
-                    transactionDate = new DateTime().AddSeconds((double)transDate / 10000);
-                else
-                    transactionDate = null;
+                if (transDate != 0) transactionDate = new DateTime().AddSeconds((double)transDate / 10000);
             }
             catch
             {
