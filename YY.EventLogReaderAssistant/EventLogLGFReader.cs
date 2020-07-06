@@ -431,9 +431,6 @@ namespace YY.EventLogReaderAssistant
                     ref newStreamPosition,
                     -1);
             }
-
-            if (!isCorrectBeginEvent)
-                throw new ArgumentException("Wrong begin event stream position's");
         }
         private void FindNearestBeginEventPosition(ref bool isCorrectBeginEvent, string currentFilePath, ref long newStreamPosition, int stepSize = 1)
         {
