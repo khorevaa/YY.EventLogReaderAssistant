@@ -1,10 +1,8 @@
 ﻿using YY.EventLogReaderAssistant.Models;
 using System;
-using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Runtime.CompilerServices;
-using YY.EventLogReaderAssistant.Helpers;
 
 [assembly: InternalsVisibleTo("YY.EventLogReaderAssistant.Tests")]
 namespace YY.EventLogReaderAssistant
@@ -69,7 +67,7 @@ namespace YY.EventLogReaderAssistant
 
         public LogParserReferencesLGF GetEventLogReferences()
         {
-            LogParserReferencesLGF referencesInfo = new LogParserReferencesLGF(_reader, this);
+            LogParserReferencesLGF referencesInfo = new LogParserReferencesLGF(_reader);
 
             return referencesInfo;
         }

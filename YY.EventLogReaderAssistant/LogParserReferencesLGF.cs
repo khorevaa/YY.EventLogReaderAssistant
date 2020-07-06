@@ -20,13 +20,10 @@ namespace YY.EventLogReaderAssistant
             _mapTypeAndReferenceTypeId.Add(typeof(SecondaryPorts), "8");
         }
 
-        private readonly LogParserLGF _parserLGF;
         private readonly string[] _objectReferencesTexts;
 
-        public LogParserReferencesLGF(EventLogLGFReader readerLGF, LogParserLGF parserLGF)
+        public LogParserReferencesLGF(EventLogLGFReader readerLGF)
         {
-            _parserLGF = parserLGF;
-
             string textReferencesData;
             using (FileStream fs = new FileStream(readerLGF.LogFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             using (StreamReader sr = new StreamReader(fs))
