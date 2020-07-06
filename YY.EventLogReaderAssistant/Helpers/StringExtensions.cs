@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 
 [assembly: InternalsVisibleTo("YY.EventLogReaderAssistant.Tests")]
-namespace YY.EventLogReaderAssistant.Services
+namespace YY.EventLogReaderAssistant.Helpers
 {
     internal static class StringExtensions
     {

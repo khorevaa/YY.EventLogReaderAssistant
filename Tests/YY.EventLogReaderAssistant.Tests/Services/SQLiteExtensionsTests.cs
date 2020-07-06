@@ -3,7 +3,7 @@ using System.Data.SQLite;
 using System.IO;
 using System.Linq;
 using Xunit;
-using YY.EventLogReaderAssistant.Services;
+using YY.EventLogReaderAssistant.Helpers;
 
 namespace YY.EventLogReaderAssistant.Tests.Services
 {

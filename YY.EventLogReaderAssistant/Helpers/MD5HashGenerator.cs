@@ -1,9 +1,9 @@
-﻿using System.Text;
-using System.Security.Cryptography;
+﻿using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.IO;
+using System.Security.Cryptography;
+using System.Text;
 
-namespace YY.EventLogReaderAssistant.Services
+namespace YY.EventLogReaderAssistant.Helpers
 {
     internal static class MD5HashGenerator
     {

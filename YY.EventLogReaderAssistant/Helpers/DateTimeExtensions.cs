@@ -3,7 +3,7 @@ using System.Data.SqlTypes;
 using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("YY.EventLogReaderAssistant.Tests")]
-namespace YY.EventLogReaderAssistant.Services
+namespace YY.EventLogReaderAssistant.Helpers
 {
     internal static class DateTimeExtensions
     {

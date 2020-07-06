@@ -5,8 +5,8 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using YY.EventLogReaderAssistant.EventArguments;
+using YY.EventLogReaderAssistant.Helpers;
 using YY.EventLogReaderAssistant.Models;
-using YY.EventLogReaderAssistant.Services;
 
 [assembly: InternalsVisibleTo("YY.EventLogReaderAssistant.Tests")]
 namespace YY.EventLogReaderAssistant
@@ -70,58 +70,33 @@ namespace YY.EventLogReaderAssistant
 
         public override bool Read()
         {
+            bool output = false;
+
             try
             {
-                if (_stream == null)
-                {
-                    if (_logFilesWithData.Length <= _indexCurrentFile)
-                    {
-                        _currentRow = null;
-                        return false;
-                    }
-                    
-                    InitializeStream(DefaultBeginLineForLgf, _indexCurrentFile);
-                    _currentFileEventNumber = 0;
-                }
-                _eventSource.Clear();
+                if (!InitializeReadFileStream())
+                    return false;
 
-                BeforeReadFileEventArgs beforeReadFileArgs = new BeforeReadFileEventArgs(CurrentFile);
-                if (_currentFileEventNumber == 0)
-                    RaiseBeforeReadFile(beforeReadFileArgs);
-
-                if (beforeReadFileArgs.Cancel)
+                RaiseBeforeReadFileEvent(out bool cancelBeforeReadFile);
+                if (cancelBeforeReadFile)
                 {
                     NextFile();
                     return Read();
                 }
 
-                string sourceData;
-                bool newLine = true;
+                bool newLine = true, textBlockOpen = false;
                 int countBracket = 0;
-                bool textBlockOpen = false;
 
                 while (true)
                 {
-                    sourceData = _stream.ReadLine();
-
-                    if(sourceData == "," && NextLineIsBeginEvent())
-                        sourceData = _stream.ReadLine();
-
+                    string sourceData = ReadSourceDataFromStream();
                     if (sourceData == null)
                     {
                         NextFile();
-                        return Read();
+                        output = Read();
+                        break;
                     }
-
-                    if (newLine)
-                    {
-                        _eventSource.Append(sourceData);
-                    }
-                    else
-                    {
-                        _eventSource.AppendLine();
-                        _eventSource.Append(sourceData);
-                    }
+                    AddNewLineToSource(sourceData, newLine);
 
                     if (LogParserLGF.ItsEndOfEvent(sourceData, ref countBracket, ref textBlockOpen))
                     {
@@ -132,50 +107,40 @@ namespace YY.EventLogReaderAssistant
 
                         try
                         {
-                            RowData eventData = LogParser.Parse(prepearedSourceData);
-                            if (eventData != null)
-                            {
-                                if (eventData.Period >= ReferencesReadDate)
-                                {
-                                    ReadEventLogReferences();
-                                    eventData = LogParser.Parse(prepearedSourceData);
-                                }
-                            }
+                            RowData eventData = ReadRowData(prepearedSourceData);
 
-                            if (Math.Abs(_readDelayMilliseconds) > 0 && eventData != null)
+                            if (!EventAllowedByPeriod(eventData))
                             {
-                                DateTimeOffset stopPeriod = DateTimeOffset.Now.AddMilliseconds(-_readDelayMilliseconds);
-                                if (eventData.Period >= stopPeriod)
-                                {
-                                    _currentRow = null;
-                                    return false;
-                                }
+                                _currentRow = null;
+                                break;
                             }
 
                             _currentRow = eventData;
 
                             RaiseAfterRead(new AfterReadEventArgs(_currentRow, _currentFileEventNumber));
-                            return true;
+                            output = true;
+                            break;
                         }
                         catch (Exception ex)
                         {
                             RaiseOnError(new OnErrorEventArgs(ex, prepearedSourceData, false));
                             _currentRow = null;
-                            return true;
+                            output = true;
+                            break;
                         }
                     }
-                    else
-                    {
-                        newLine = false;
-                    }
+
+                    newLine = false;
                 }
             }
             catch (Exception ex)
             {
                 RaiseOnError(new OnErrorEventArgs(ex, null, true));
                 _currentRow = null;
-                return false;
+                output = false;
             }
+
+            return output;
         }
         public override bool GoToEvent(long eventNumber)
         {
@@ -237,95 +202,17 @@ namespace YY.EventLogReaderAssistant
         }
         public override void SetCurrentPosition(EventLogPosition newPosition)
         {
-            Reset();
-            if (newPosition == null)
+            if(ApplyEventLogPosition(newPosition) == false)
                 return;
-
-            if(newPosition.CurrentFileReferences != _logFilePath)
-                throw new Exception("Invalid data file with references");
-
-            int indexOfFileData = Array.IndexOf(_logFilesWithData, newPosition.CurrentFileData);
-            if (indexOfFileData < 0)
-                throw new Exception("Invalid data file");
-            _indexCurrentFile = indexOfFileData;
-
-            _currentFileEventNumber = newPosition.EventNumber;
-
+            
             InitializeStream(DefaultBeginLineForLgf, _indexCurrentFile);
             long beginReadPosition =_stream.GetPosition();
-
-            long newStreamPosition;
-            if (newPosition.StreamPosition == null)
-                newStreamPosition = 0;
-            else
-                newStreamPosition = (long)newPosition.StreamPosition;
-
-            if(newStreamPosition < beginReadPosition)            
-                newStreamPosition = beginReadPosition;
+            long newStreamPosition = Math.Max(beginReadPosition, newPosition.StreamPosition ?? 0);
 
             long sourceStreamPosition = newStreamPosition;
             string currentFilePath = _logFilesWithData[_indexCurrentFile];            
-            int attemptToFoundBeginEventLine = 0;
-            bool isCorrectBeginEvent = false;
-            bool notDataAvailiable = false;
-            while (!isCorrectBeginEvent && attemptToFoundBeginEventLine < 10)
-            {
-                string beginEventLine;
-                using (FileStream fileStreamCheckPosition = new FileStream(currentFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-                {
-                    fileStreamCheckPosition.Seek(newStreamPosition, SeekOrigin.Begin);                    
-                    using (StreamReader fileStreamCheckReader = new StreamReader(fileStreamCheckPosition))
-                        beginEventLine = fileStreamCheckReader.ReadLine();
-                }
-
-                if (beginEventLine == null)
-                {
-                    notDataAvailiable = true;
-                    break;
-                }
-
-                isCorrectBeginEvent = LogParserLGF.ItsBeginOfEvent(beginEventLine);
-                if (!isCorrectBeginEvent)
-                {
-                    newStreamPosition -= 1;
-                    attemptToFoundBeginEventLine += 1;
-                }
-            }
-                        
-            if (!isCorrectBeginEvent && !notDataAvailiable)
-            {
-                newStreamPosition = sourceStreamPosition;
-                attemptToFoundBeginEventLine = 0;
-                while (!isCorrectBeginEvent && attemptToFoundBeginEventLine < 10)
-                {
-                    string beginEventLine;
-                    using (FileStream fileStreamCheckPosition = new FileStream(currentFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-                    {
-                        fileStreamCheckPosition.Seek(newStreamPosition, SeekOrigin.Begin);
-                        using (StreamReader fileStreamCheckReader = new StreamReader(fileStreamCheckPosition))
-                            beginEventLine = fileStreamCheckReader.ReadLine();
-                    }
-
-                    if (beginEventLine == null)
-                    {
-                        notDataAvailiable = true;
-                        break;
-                    }
-
-                    isCorrectBeginEvent = LogParserLGF.ItsBeginOfEvent(beginEventLine);
-                    if (!isCorrectBeginEvent)
-                    {
-                        newStreamPosition += 1;
-                        attemptToFoundBeginEventLine += 1;
-                    }
-                }
-            }
             
-
-            if (!isCorrectBeginEvent && !notDataAvailiable)
-            {
-                throw new ArgumentException("Wrong begin event stream position's");
-            }
+            FixEventPosition(currentFilePath, ref newStreamPosition, sourceStreamPosition);
 
             if (newPosition.StreamPosition != null)
                 SetCurrentFileStreamPosition(newStreamPosition);
@@ -373,26 +260,17 @@ namespace YY.EventLogReaderAssistant
         }
         protected override void ReadEventLogReferences()
         {
-            _users.Clear();
-            _computers.Clear();
-            _events.Clear();
-            _metadata.Clear();
-            _applications.Clear();
-            _workServers.Clear();
-            _primaryPorts.Clear();
-            _secondaryPorts.Clear();
-
             DateTime beginReadReferences = DateTime.Now;
 
-            LogParser.ReadEventLogReferences(
-                   _users,
-                   _computers,
-                   _applications,
-                   _events,
-                   _metadata,
-                   _workServers,
-                   _primaryPorts,
-                   _secondaryPorts);
+            var referencesInfo = LogParser.GetEventLogReferences();
+            referencesInfo.ReadReferencesByType(_users);
+            referencesInfo.ReadReferencesByType(_computers);
+            referencesInfo.ReadReferencesByType(_applications);
+            referencesInfo.ReadReferencesByType(_events);
+            referencesInfo.ReadReferencesByType(_metadata);
+            referencesInfo.ReadReferencesByType(_workServers);
+            referencesInfo.ReadReferencesByType(_primaryPorts);
+            referencesInfo.ReadReferencesByType(_secondaryPorts);
 
             _referencesReadDate = beginReadReferences;
 
@@ -415,6 +293,81 @@ namespace YY.EventLogReaderAssistant
 
         #region Private Methods
 
+        private void AddNewLineToSource(string sourceData, bool newLine)
+        {
+            if (newLine)
+                _eventSource.Append(sourceData);
+            else
+            {
+                _eventSource.AppendLine();
+                _eventSource.Append(sourceData);
+            }
+        }
+        private string ReadSourceDataFromStream()
+        {
+            string sourceData = _stream.ReadLine();
+
+            if (sourceData == "," && NextLineIsBeginEvent())
+                sourceData = _stream.ReadLine();
+
+            return sourceData;
+        }
+        private void RaiseBeforeReadFileEvent(out bool cancel)
+        {
+            BeforeReadFileEventArgs beforeReadFileArgs = new BeforeReadFileEventArgs(CurrentFile);
+            if (_currentFileEventNumber == 0)
+                RaiseBeforeReadFile(beforeReadFileArgs);
+
+            cancel = beforeReadFileArgs.Cancel;
+        }
+        private bool InitializeReadFileStream()
+        {
+            if (_stream == null)
+            {
+                if (_logFilesWithData.Length <= _indexCurrentFile)
+                {
+                    _currentRow = null;
+                    return false;
+                }
+
+                InitializeStream(DefaultBeginLineForLgf, _indexCurrentFile);
+                _currentFileEventNumber = 0;
+            }
+            _eventSource.Clear();
+
+            return true;
+        }
+        private RowData ReadRowData(string sourceData)
+        {
+            RowData eventData = LogParser.Parse(sourceData);
+
+            if (eventData != null && eventData.Period >= ReferencesReadDate)
+            {
+                ReadEventLogReferences();
+                eventData = LogParser.Parse(sourceData);
+            }
+
+            return eventData;
+        }
+        private bool ApplyEventLogPosition(EventLogPosition position)
+        {
+            Reset();
+
+            if (position == null)
+                return false;
+
+            if (position.CurrentFileReferences != _logFilePath)
+                throw new Exception("Invalid data file with references");
+
+            int indexOfFileData = Array.IndexOf(_logFilesWithData, position.CurrentFileData);
+            if (indexOfFileData < 0)
+                throw new Exception("Invalid data file");
+
+            _indexCurrentFile = indexOfFileData;
+            _currentFileEventNumber = position.EventNumber;
+
+            return true;
+        }
         private void InitializeStream(long linesToSkip, int fileIndex = 0)
         {
             FileStream fs = new FileStream(_logFilesWithData[fileIndex], FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
@@ -459,6 +412,56 @@ namespace YY.EventLogReaderAssistant
             }            
 
             return nextIsBeginEvent;
+        }
+        private void FixEventPosition(string currentFilePath, ref long newStreamPosition, long sourceStreamPosition)
+        {
+            bool isCorrectBeginEvent = false;
+
+            FindNearestBeginEventPosition(
+                ref isCorrectBeginEvent,
+                currentFilePath,
+                ref newStreamPosition);
+
+            if (!isCorrectBeginEvent)
+            {
+                newStreamPosition = sourceStreamPosition;
+                FindNearestBeginEventPosition(
+                    ref isCorrectBeginEvent,
+                    currentFilePath,
+                    ref newStreamPosition,
+                    -1);
+            }
+
+            if (!isCorrectBeginEvent)
+                throw new ArgumentException("Wrong begin event stream position's");
+        }
+        private void FindNearestBeginEventPosition(ref bool isCorrectBeginEvent, string currentFilePath, ref long newStreamPosition, int stepSize = 1)
+        {
+            int attemptToFoundBeginEventLine = 0;
+            while (!isCorrectBeginEvent && attemptToFoundBeginEventLine < 10)
+            {
+                string beginEventLine;
+                using (FileStream fileStreamCheckPosition =
+                    new FileStream(currentFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                {
+                    fileStreamCheckPosition.Seek(newStreamPosition, SeekOrigin.Begin);
+                    using (StreamReader fileStreamCheckReader = new StreamReader(fileStreamCheckPosition))
+                        beginEventLine = fileStreamCheckReader.ReadLine();
+                }
+
+                if (beginEventLine == null)
+                {
+                    isCorrectBeginEvent = false;
+                    break;
+                }
+
+                isCorrectBeginEvent = LogParserLGF.ItsBeginOfEvent(beginEventLine);
+                if (!isCorrectBeginEvent)
+                {
+                    newStreamPosition -= stepSize;
+                    attemptToFoundBeginEventLine += 1;
+                }
+            }
         }
 
         #endregion

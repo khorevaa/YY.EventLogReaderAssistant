@@ -7,6 +7,10 @@
 |:-------:|:------:|
 | [![Build status](https://ci.appveyor.com/api/projects/status/github/ypermitin/yy.eventlogreaderassistant?branch=develop&svg=true)](https://ci.appveyor.com/project/YPermitin/yy-eventlogreaderassistant) | [![Build Status](https://travis-ci.org/YPermitin/YY.EventLogReaderAssistant.svg?branch=master)](https://travis-ci.org/YPermitin/YY.EventLogReaderAssistant) |
 
+### Code Climate
+
+[![Maintainability](https://api.codeclimate.com/v1/badges/554d3b25fd19b9225f26/maintainability)](https://codeclimate.com/github/YPermitin/YY.EventLogReaderAssistant/maintainability)
+
 ## Состав репозитория
 
 * **YY.EventLogReaderAssistant** - исходный код библиотеки

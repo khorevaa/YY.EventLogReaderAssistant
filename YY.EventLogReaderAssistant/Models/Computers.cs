@@ -3,14 +3,7 @@
 namespace YY.EventLogReaderAssistant.Models
 {
     [Serializable]
-    public class Computers
+    public class Computers : ReferenceObject
     {
-        public long Code { get; set; }
-        public string Name { get; set; }
-
-        public override string ToString()
-        {
-            return Name;
-        }
     }
 }
