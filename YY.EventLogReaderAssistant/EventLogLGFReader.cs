@@ -70,58 +70,33 @@ namespace YY.EventLogReaderAssistant
 
         public override bool Read()
         {
+            bool output = false;
+
             try
             {
-                if (_stream == null)
-                {
-                    if (_logFilesWithData.Length <= _indexCurrentFile)
-                    {
-                        _currentRow = null;
-                        return false;
-                    }
-                    
-                    InitializeStream(DefaultBeginLineForLgf, _indexCurrentFile);
-                    _currentFileEventNumber = 0;
-                }
-                _eventSource.Clear();
+                if (!InitializeReadFileStream())
+                    return false;
 
-                BeforeReadFileEventArgs beforeReadFileArgs = new BeforeReadFileEventArgs(CurrentFile);
-                if (_currentFileEventNumber == 0)
-                    RaiseBeforeReadFile(beforeReadFileArgs);
-
-                if (beforeReadFileArgs.Cancel)
+                RaiseBeforeReadFileEvent(out bool cancelBeforeReadFile);
+                if (cancelBeforeReadFile)
                 {
                     NextFile();
                     return Read();
                 }
 
-                string sourceData;
-                bool newLine = true;
+                bool newLine = true, textBlockOpen = false;
                 int countBracket = 0;
-                bool textBlockOpen = false;
 
                 while (true)
                 {
-                    sourceData = _stream.ReadLine();
-
-                    if(sourceData == "," && NextLineIsBeginEvent())
-                        sourceData = _stream.ReadLine();
-
+                    string sourceData = ReadSourceDataFromStream();
                     if (sourceData == null)
                     {
                         NextFile();
-                        return Read();
+                        output = Read();
+                        break;
                     }
-
-                    if (newLine)
-                    {
-                        _eventSource.Append(sourceData);
-                    }
-                    else
-                    {
-                        _eventSource.AppendLine();
-                        _eventSource.Append(sourceData);
-                    }
+                    AddNewLineToSource(sourceData, newLine);
 
                     if (LogParserLGF.ItsEndOfEvent(sourceData, ref countBracket, ref textBlockOpen))
                     {
@@ -132,50 +107,40 @@ namespace YY.EventLogReaderAssistant
 
                         try
                         {
-                            RowData eventData = LogParser.Parse(prepearedSourceData);
-                            if (eventData != null)
-                            {
-                                if (eventData.Period >= ReferencesReadDate)
-                                {
-                                    ReadEventLogReferences();
-                                    eventData = LogParser.Parse(prepearedSourceData);
-                                }
-                            }
+                            RowData eventData = ReadRowData(prepearedSourceData);
 
-                            if (Math.Abs(_readDelayMilliseconds) > 0 && eventData != null)
+                            if (!EventAllowedByPeriod(eventData))
                             {
-                                DateTimeOffset stopPeriod = DateTimeOffset.Now.AddMilliseconds(-_readDelayMilliseconds);
-                                if (eventData.Period >= stopPeriod)
-                                {
-                                    _currentRow = null;
-                                    return false;
-                                }
+                                _currentRow = null;
+                                break;
                             }
 
                             _currentRow = eventData;
 
                             RaiseAfterRead(new AfterReadEventArgs(_currentRow, _currentFileEventNumber));
-                            return true;
+                            output = true;
+                            break;
                         }
                         catch (Exception ex)
                         {
                             RaiseOnError(new OnErrorEventArgs(ex, prepearedSourceData, false));
                             _currentRow = null;
-                            return true;
+                            output = true;
+                            break;
                         }
                     }
-                    else
-                    {
-                        newLine = false;
-                    }
+
+                    newLine = false;
                 }
             }
             catch (Exception ex)
             {
                 RaiseOnError(new OnErrorEventArgs(ex, null, true));
                 _currentRow = null;
-                return false;
+                output = false;
             }
+
+            return output;
         }
         public override bool GoToEvent(long eventNumber)
         {
@@ -328,6 +293,73 @@ namespace YY.EventLogReaderAssistant
 
         #region Private Methods
 
+        private bool EventAllowedByPeriod(RowData eventData)
+        {
+            if (Math.Abs(_readDelayMilliseconds) > 0 && eventData != null)
+            {
+                DateTimeOffset stopPeriod = DateTimeOffset.Now.AddMilliseconds(-_readDelayMilliseconds);
+                if (eventData.Period >= stopPeriod)
+                    return false;
+            }
+
+            return true;
+        }
+        private void AddNewLineToSource(string sourceData, bool newLine)
+        {
+            if (newLine)
+                _eventSource.Append(sourceData);
+            else
+            {
+                _eventSource.AppendLine();
+                _eventSource.Append(sourceData);
+            }
+        }
+        private string ReadSourceDataFromStream()
+        {
+            string sourceData = _stream.ReadLine();
+
+            if (sourceData == "," && NextLineIsBeginEvent())
+                sourceData = _stream.ReadLine();
+
+            return sourceData;
+        }
+        private void RaiseBeforeReadFileEvent(out bool cancel)
+        {
+            BeforeReadFileEventArgs beforeReadFileArgs = new BeforeReadFileEventArgs(CurrentFile);
+            if (_currentFileEventNumber == 0)
+                RaiseBeforeReadFile(beforeReadFileArgs);
+
+            cancel = beforeReadFileArgs.Cancel;
+        }
+        private bool InitializeReadFileStream()
+        {
+            if (_stream == null)
+            {
+                if (_logFilesWithData.Length <= _indexCurrentFile)
+                {
+                    _currentRow = null;
+                    return false;
+                }
+
+                InitializeStream(DefaultBeginLineForLgf, _indexCurrentFile);
+                _currentFileEventNumber = 0;
+            }
+            _eventSource.Clear();
+
+            return true;
+        }
+        private RowData ReadRowData(string sourceData)
+        {
+            RowData eventData = LogParser.Parse(sourceData);
+
+            if (eventData != null && eventData.Period >= ReferencesReadDate)
+            {
+                ReadEventLogReferences();
+                eventData = LogParser.Parse(sourceData);
+            }
+
+            return eventData;
+        }
         private bool ApplyEventLogPosition(EventLogPosition position)
         {
             Reset();
