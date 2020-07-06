@@ -54,53 +54,12 @@ namespace YY.EventLogReaderAssistant
                     _currentRow = null;
                     return false;
                 }
-
-                #region bufferedRead
-
-                if (_lastRowNumberFromBuffer == 0
-                    || _lastRowNumberFromBuffer >= ReadBufferSize)
+                
+                if (NeedUpdateBuffer())
                 {
-                    _readBuffer.Clear();
-                    _lastRowNumberFromBuffer = 0;
-
-                    using (_connection = new SQLiteConnection(ConnectionString))
-                    {
-                        _connection.Open();
-                        using (SQLiteCommand cmd = new SQLiteCommand(GetQueryTextForLogData(), _connection))
-                        {
-                            using (SQLiteDataReader reader = cmd.ExecuteReader())
-                            {
-                                while (reader.Read())
-                                {
-                                    try
-                                    {
-                                        DateTime rowPeriod = reader.GetInt64OrDefault(1).ToDateTimeFormat();
-                                        if (rowPeriod >= ReferencesReadDate)
-                                            ReadEventLogReferences();
-
-                                        RowData row = new RowData();
-                                        row.FillBySqliteReader(this, reader);
-
-                                        if (!EventAllowedByPeriod(row))
-                                        {
-                                            _currentRow = null;
-                                            return false;
-                                        }
-
-                                        _readBuffer.Add(row);
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        RaiseOnError(new OnErrorEventArgs(ex, reader.GetRowAsString(), false));
-                                        _currentRow = null;
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    if (!UpdateBuffer())
+                        return false;
                 }
-
-                #endregion
 
                 if (_lastRowNumberFromBuffer >= _readBuffer.Count)
                 {
@@ -111,9 +70,7 @@ namespace YY.EventLogReaderAssistant
 
                 RaiseBeforeRead(new BeforeReadEventArgs(null, _eventCount));
 
-                _currentRow = _readBuffer
-                    .Where(bufRow => bufRow.RowId > _lastRowId)
-                    .First();
+                _currentRow = _readBuffer.First(bufRow => bufRow.RowId > _lastRowId);
                 _lastRowNumberFromBuffer += 1;
                 _lastRowId = _currentRow.RowId;
                 _currentFileEventNumber += 1;
@@ -209,10 +166,7 @@ namespace YY.EventLogReaderAssistant
         public override void Reset()
         {
             SQLiteConnection.ClearAllPools();
-            if (_connection != null)
-            {
-                _connection.Dispose();
-            }
+            _connection?.Dispose();
 
             _lastRowId = 0;
             _lastRowNumberFromBuffer = 0;
@@ -233,6 +187,62 @@ namespace YY.EventLogReaderAssistant
 
         #region Private Methods
 
+        private bool NeedUpdateBuffer()
+        {
+            return (_lastRowNumberFromBuffer == 0
+                || _lastRowNumberFromBuffer >= ReadBufferSize);
+        }
+        private bool UpdateBuffer()
+        {
+            _readBuffer.Clear();
+            _lastRowNumberFromBuffer = 0;
+
+            using (_connection = new SQLiteConnection(ConnectionString))
+            {
+                _connection.Open();
+                using (SQLiteCommand cmd = new SQLiteCommand(GetQueryTextForLogData(), _connection))
+                {
+                    using (SQLiteDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            try
+                            {
+                                if (AddLogRowToBuffer(reader)) continue;
+                                _currentRow = null;
+                                return false;
+                            }
+                            catch (Exception ex)
+                            {
+                                RaiseOnError(new OnErrorEventArgs(ex, reader.GetRowAsString(), false));
+                                _currentRow = null;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return true;
+        }
+        private bool AddLogRowToBuffer(SQLiteDataReader _reader)
+        {
+            DateTime rowPeriod = _reader.GetInt64OrDefault(1).ToDateTimeFormat();
+            if (rowPeriod >= ReferencesReadDate)
+                ReadEventLogReferences();
+
+            RowData row = new RowData();
+            row.FillBySqliteReader(this, _reader);
+
+            if (!EventAllowedByPeriod(row))
+            {
+                _currentRow = null;
+                return false;
+            }
+
+            _readBuffer.Add(row);
+
+            return true;
+        }
         private void RaiseBeforeReadFileEvent(out bool cancel)
         {
             BeforeReadFileEventArgs beforeReadFileArgs = new BeforeReadFileEventArgs(_logFilePath);
