@@ -7,7 +7,7 @@ namespace YY.EventLogReaderAssistant
 {
     internal class LogParserReferencesLGF
     {
-        private static Dictionary<Type, string> _mapTypeAndReferenceTypeId = new Dictionary<Type, string>();
+        private static readonly Dictionary<Type, string> _mapTypeAndReferenceTypeId = new Dictionary<Type, string>();
         static LogParserReferencesLGF()
         {
             _mapTypeAndReferenceTypeId.Add(typeof(Users), "1");
@@ -37,7 +37,7 @@ namespace YY.EventLogReaderAssistant
                 return;
 
             textReferencesData = textReferencesData.Substring(beginBlockIndex);
-            _objectReferencesTexts = _parserLGF.ParseEventLogString("{" + textReferencesData + "}");
+            _objectReferencesTexts = LogParserLGF.ParseEventLogString("{" + textReferencesData + "}");
         }
 
         public void ReadReferencesByType<T>(List<T> referenceCollection)
@@ -54,7 +54,7 @@ namespace YY.EventLogReaderAssistant
             
             foreach (string textObject in _objectReferencesTexts)
             {
-                string[] parsedEventData = _parserLGF.ParseEventLogString(textObject);
+                string[] parsedEventData = LogParserLGF.ParseEventLogString(textObject);
                 if (parsedEventData != null)
                 {
                     string referenceTypeId = parsedEventData[0];

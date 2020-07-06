@@ -53,7 +53,6 @@ namespace YY.EventLogReaderAssistant
         #region Private Member Variables
 
         private readonly EventLogLGFReader _reader;
-        private readonly Regex _regexDataUuid;
 
         #endregion
 
@@ -62,7 +61,6 @@ namespace YY.EventLogReaderAssistant
         public LogParserLGF(EventLogLGFReader reader)
         {
             _reader = reader;
-            _regexDataUuid = new Regex(@"[\d]+:[\dA-Za-zА-Яа-я]{32}}");
         }
 
         #endregion
@@ -82,36 +80,13 @@ namespace YY.EventLogReaderAssistant
 
             if (parseResult != null)
             {
-                string transactionSourceString = parseResult[2].RemoveBraces();
-
-                dataRow = new RowData()
-                {
-                    RowId = _reader.CurrentFileEventNumber,
-                    Period = DateTime.ParseExact(parseResult[0], "yyyyMMddHHmmss", CultureInfo.InvariantCulture),
-                    TransactionStatus = _reader.GetTransactionStatus(parseResult[1]),
-                    TransactionDate = GetTransactionDate(transactionSourceString),
-                    TransactionId = GetTransactionId(transactionSourceString),
-                    User = _reader.GetUserByCode(parseResult[3]),
-                    Computer = _reader.GetComputerByCode(parseResult[4]),
-                    Application = _reader.GetApplicationByCode(parseResult[5]),
-                    ConnectId = parseResult[6].ToInt32(),
-                    Event = _reader.GetEventByCode(parseResult[7]),
-                    Severity = _reader.GetSeverityByCode(parseResult[8]),
-                    Comment = parseResult[9].RemoveQuotes(),
-                    Metadata = _reader.GetMetadataByCode(parseResult[10]),
-                    Data = GetData(parseResult[11]),
-                    DataPresentation = parseResult[12].RemoveQuotes(),
-                    WorkServer = _reader.GetWorkServerByCode(parseResult[13]),
-                    PrimaryPort = _reader.GetPrimaryPortByCode(parseResult[14]),
-                    SecondaryPort = _reader.GetSecondaryPortByCode(parseResult[15]),
-                    Session = parseResult[16].ToInt64()
-                };
-                dataRow.DataUuid = GetDataUuid(dataRow.Data);
+                dataRow = new RowData();
+                dataRow.FillByStringParsedData(_reader, parseResult);
             }
 
             return dataRow;
         }
-        public string[] ParseEventLogString(string sourceString)
+        public static string[] ParseEventLogString(string sourceString)
         {
             string[] resultStrings = null;
             string preparedString = sourceString.Substring(1, (sourceString.EndsWith(",") ? sourceString.Length - 3 : sourceString.Length - 2)) + ",";
@@ -145,7 +120,7 @@ namespace YY.EventLogReaderAssistant
 
         #region Private Methods
 
-        private bool AddResultString(ref string[] resultStrings, ref int i, ref string bufferString, bool isSpecialString)
+        private static bool AddResultString(ref string[] resultStrings, ref int i, ref string bufferString, bool isSpecialString)
         {
             bool output = false;
 
@@ -160,7 +135,7 @@ namespace YY.EventLogReaderAssistant
 
             return output;
         }
-        private bool IsSpeacialString(string sourceString, int partNumber)
+        private static bool IsSpeacialString(string sourceString, int partNumber)
         {
             bool isSpecialString = partNumber == 1 &&
                                    !string.IsNullOrEmpty(sourceString)
@@ -168,7 +143,7 @@ namespace YY.EventLogReaderAssistant
 
             return isSpecialString;
         }
-        private bool IsCorrectLogPart(string sourceString, bool isSpecialString)
+        private static bool IsCorrectLogPart(string sourceString, bool isSpecialString)
         {
             int counterBeginCurlyBrace = 0, counterEndCurlyBrace = 0;
             int counterSlash = CountSubstring(sourceString, "\"") % 2;
@@ -181,7 +156,7 @@ namespace YY.EventLogReaderAssistant
 
             return counterBeginCurlyBrace == counterEndCurlyBrace & counterSlash == 0;
         }
-        private string RemoveSpecialSymbols(string sourceString)
+        private static string RemoveSpecialSymbols(string sourceString)
         {
             char[] denied = new[] { '\n', '\t', '\r' };
             
@@ -191,75 +166,21 @@ namespace YY.EventLogReaderAssistant
 
             return newString;
         }
-        private string RemoveDoubleQuotes(string sourceString)
+        private static string RemoveDoubleQuotes(string sourceString)
         {
             if (sourceString.StartsWith("\"") && sourceString.EndsWith("\""))
                 return sourceString.Substring(1, sourceString.Length - 2);
             else
                 return sourceString;
         }
-        private int GetDelimeterIndex(string sourceString, bool isSpecialString = false)
+        private static int GetDelimeterIndex(string sourceString, bool isSpecialString = false)
         {
             if (isSpecialString)
                 return sourceString.IndexOf("\",", StringComparison.Ordinal) + 1;
             else
                 return sourceString.IndexOf(",", StringComparison.Ordinal);
         }
-        private string GetData(string sourceString)
-        {
-            string data = sourceString;
-
-            if (data == "{\"U\"}")
-                data = string.Empty;
-
-            else if (data.StartsWith("{"))
-            {
-                string[] parsedObjects = ParseEventLogString(data);
-                if (parsedObjects != null && parsedObjects.Length == 2)
-                {
-                    if (parsedObjects[0] == "\"S\"" || parsedObjects[0] == "\"R\"")
-                        data = parsedObjects[1].RemoveQuotes();
-                }
-            }
-
-            return data;
-        }
-        private string GetDataUuid(string sourceData)
-        {
-            string dataUuid = string.Empty;
-
-            MatchCollection matches = _regexDataUuid.Matches(sourceData);
-            if (matches.Count > 0)
-            {
-                string[] dataPartsUuid = sourceData.Split(':');
-                dataUuid = dataPartsUuid.Length == 2 ? dataPartsUuid[1].Replace("}", string.Empty) : string.Empty;
-            }
-
-            return dataUuid;
-        }
-        private DateTime? GetTransactionDate(string sourceString)
-        {
-            DateTime? transactionDate = null;
-
-            long transDate = sourceString.Substring(0, sourceString.IndexOf(",", StringComparison.Ordinal)).From16To10();
-            try
-            {
-                if (transDate != 0) transactionDate = new DateTime().AddSeconds((double)transDate / 10000);
-            }
-            catch
-            {
-                transactionDate = null;
-            }
-
-            return transactionDate;
-        }
-        private long? GetTransactionId(string sourceString)
-        {
-            long? transactionId = sourceString.Substring(sourceString.IndexOf(",", StringComparison.Ordinal) + 1).From16To10();
-
-            return transactionId;
-        }
-        private int CountSubstring(string sourceString, string sourceSubstring)
+        private static int CountSubstring(string sourceString, string sourceSubstring)
         {
             int countSubstring = (sourceString.Length - sourceString.Replace(sourceSubstring, "").Length) / sourceSubstring.Length;
 
