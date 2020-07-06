@@ -46,6 +46,8 @@ namespace YY.EventLogReaderAssistant
 
         public override bool Read()
         {
+            bool output;
+
             try
             {
                 RaiseBeforeReadFileEvent(out bool cancelBeforeReadFile);
@@ -54,12 +56,9 @@ namespace YY.EventLogReaderAssistant
                     _currentRow = null;
                     return false;
                 }
-                
                 if (NeedUpdateBuffer())
-                {
                     if (!UpdateBuffer())
                         return false;
-                }
 
                 if (_lastRowNumberFromBuffer >= _readBuffer.Count)
                 {
@@ -77,14 +76,16 @@ namespace YY.EventLogReaderAssistant
 
                 RaiseAfterRead(new AfterReadEventArgs(_currentRow, _eventCount));
 
-                return true;
+                output = true;
             }
             catch(Exception ex)
             {
                 RaiseOnError(new OnErrorEventArgs(ex, null, true));
                 _currentRow = null;
-                return false;
+                output = false;
             }
+
+            return output;
         }
         public override bool GoToEvent(long eventNumber)
         {
