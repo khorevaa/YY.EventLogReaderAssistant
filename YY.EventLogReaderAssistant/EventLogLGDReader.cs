@@ -243,34 +243,19 @@ namespace YY.EventLogReaderAssistant
         }
         private string GetQueryTextForLogData()
         {
-            string queryText = string.Format(
-                "Select\n" +
-                "    el.RowId,\n" +
-                "    el.Date AS Date,\n" +
-                "    el.ConnectId,\n" +
-                "    el.Session,\n" +
-                "    el.TransactionStatus,\n" +
-                "    el.TransactionDate,\n" +
-                "    el.TransactionId,\n" +
-                "    el.UserCode AS UserCode,\n" +
-                "    el.ComputerCode AS ComputerCode,\n" +
-                "    el.appCode AS ApplicationCode,\n" +
-                "    el.eventCode AS EventCode,\n" +
-                "    el.primaryPortCode AS PrimaryPortCode,\n" +
-                "    el.secondaryPortCode AS SecondaryPortCode,\n" +
-                "    el.workServerCode AS WorkServerCode,\n" +
-                "    el.Severity AS SeverityCode,\n" +
-                "    el.Comment AS Comment,\n" +
-                "    el.Data AS Data,\n" +
-                "    el.DataPresentation AS DataPresentation,\n" +
-                "    elm.metadataCode AS MetadataCode\n" +
-                "From\n" +
-                "    EventLog el\n" +
-                "    left join EventLogMetadata elm on el.RowId = elm.eventLogID\n" +
-                "    left join MetadataCodes mc on elm.metadataCode = mc.code\n" +
-                "Where RowID > {0}\n" +
-                "Order By rowID\n" +
-                "Limit {1}\n", _lastRowId, ReadBufferSize);
+            string queryText = "Select\n" + " el.RowId,\n" + " el.Date AS Date,\n" + " el.ConnectId,\n" +
+                               " el.Session,\n" + " el.TransactionStatus,\n" + " el.TransactionDate,\n" +
+                               " el.TransactionId,\n" + " el.UserCode AS UserCode,\n" +
+                               " el.ComputerCode AS ComputerCode,\n" + " el.appCode AS ApplicationCode,\n" +
+                               " el.eventCode AS EventCode,\n" + " el.primaryPortCode AS PrimaryPortCode,\n" +
+                               " el.secondaryPortCode AS SecondaryPortCode,\n" +
+                               " el.workServerCode AS WorkServerCode,\n" + " el.Severity AS SeverityCode,\n" +
+                               " el.Comment AS Comment,\n" + " el.Data AS Data,\n" +
+                               " el.DataPresentation AS DataPresentation,\n" +
+                               " elm.metadataCode AS MetadataCode\n" + "From\n" + " EventLog el\n" +
+                               " left join EventLogMetadata elm on el.RowId = elm.eventLogID\n" +
+                               " left join MetadataCodes mc on elm.metadataCode = mc.code\n" +
+                               $"Where RowID > {_lastRowId}\n" + "Order By rowID\n" + $"Limit {ReadBufferSize}\n";
 
             return queryText;
         }
