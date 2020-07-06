@@ -127,21 +127,21 @@ namespace YY.EventLogReaderAssistant
                                             Period = rowPeriod,
                                             ConnectId = reader.GetInt64OrDefault(2),
                                             Session = reader.GetInt64OrDefault(3),
-                                            TransactionStatus = GetTransactionStatus(reader.GetInt64OrDefault(4)),
+                                            TransactionStatus = this.GetTransactionStatus(reader.GetInt64OrDefault(4)),
                                             TransactionDate = reader.GetInt64OrDefault(5).ToNullableDateTimeElFormat(),
                                             TransactionId = reader.GetInt64OrDefault(6),
-                                            User = GetUserByCode(reader.GetInt64OrDefault(7)),
-                                            Computer = GetComputerByCode(reader.GetInt64OrDefault(8)),
-                                            Application = GetApplicationByCode(reader.GetInt64OrDefault(9)),
-                                            Event = GetEventByCode(reader.GetInt64OrDefault(10)),
-                                            PrimaryPort = GetPrimaryPortByCode(reader.GetInt64OrDefault(11)),
-                                            SecondaryPort = GetSecondaryPortByCode(reader.GetInt64OrDefault(12)),
-                                            WorkServer = GetWorkServerByCode(reader.GetInt64OrDefault(13)),
-                                            Severity = GetSeverityByCode(reader.GetInt64OrDefault(14)),
+                                            User = this.GetUserByCode(reader.GetInt64OrDefault(7)),
+                                            Computer = this.GetComputerByCode(reader.GetInt64OrDefault(8)),
+                                            Application = this.GetApplicationByCode(reader.GetInt64OrDefault(9)),
+                                            Event = this.GetEventByCode(reader.GetInt64OrDefault(10)),
+                                            PrimaryPort = this.GetPrimaryPortByCode(reader.GetInt64OrDefault(11)),
+                                            SecondaryPort = this.GetSecondaryPortByCode(reader.GetInt64OrDefault(12)),
+                                            WorkServer = this.GetWorkServerByCode(reader.GetInt64OrDefault(13)),
+                                            Severity = this.GetSeverityByCode(reader.GetInt64OrDefault(14)),
                                             Comment = reader.GetStringOrDefault(15),
                                             Data = reader.GetStringOrDefault(16).FromWin1251ToUtf8(),
                                             DataPresentation = reader.GetStringOrDefault(17),
-                                            Metadata = GetMetadataByCode(reader.GetInt64OrDefault(18))
+                                            Metadata = this.GetMetadataByCode(reader.GetInt64OrDefault(18))
                                         });                                        
                                     }
                                     catch (Exception ex)
@@ -296,7 +296,7 @@ namespace YY.EventLogReaderAssistant
             {
                 _connection.Open();
 
-                string queryText = String.Format(
+                string queryText = string.Format(
                      "Select\n" +
                      "    el.RowId\n" +
                      "From\n" +
@@ -306,15 +306,9 @@ namespace YY.EventLogReaderAssistant
                      "Limit 1 OFFSET {1}\n", _lastRowId, eventNumberToSkip);
 
                 using (SQLiteCommand cmd = new SQLiteCommand(queryText, _connection))
-                {
                     using (SQLiteDataReader reader = cmd.ExecuteReader())
-                    {
                         if (reader.Read())
-                        {
                             valueLastRowId = reader.GetInt64OrDefault(0);
-                        }
-                    }
-                }
             }
 
             return valueLastRowId;

@@ -124,9 +124,17 @@ namespace YY.EventLogReaderAssistant
                 partNumber += 1;
                 bufferString += preparedString.Substring(0, delimIndex).Trim();
                 preparedString = preparedString.Substring(delimIndex + 1);
-                var isSpecialString = IsSpeacialString(bufferString, partNumber);
+                bool isSpecialString = IsSpeacialString(bufferString, partNumber);
 
-                AddResultString(ref resultStrings, ref i, ref bufferString, ref isSpecialString, ref partNumber);
+                if (AddResultString(ref resultStrings, ref i, ref bufferString, isSpecialString))
+                {
+                    i += 1;
+                    bufferString = string.Empty;
+                    partNumber = 0;
+                    isSpecialString = false;
+                }
+                else
+                    bufferString += ",";
 
                 delimIndex = GetDelimeterIndex(preparedString, isSpecialString);
             }
@@ -138,25 +146,20 @@ namespace YY.EventLogReaderAssistant
 
         #region Private Methods
 
-        private void AddResultString(ref string[] resultStrings, ref int i, ref string bufferString, ref bool isSpecialString, ref int partNumber)
+        private bool AddResultString(ref string[] resultStrings, ref int i, ref string bufferString, bool isSpecialString)
         {
-            CalculateCountSubstrings(bufferString, isSpecialString,
-                out var counterBeginCurlyBrace, out var counterEndCurlyBrace, out var counterSlash);
+            bool output = false;
 
-            if (counterBeginCurlyBrace == counterEndCurlyBrace & counterSlash == 0)
+            if (IsCorrectLogPart(bufferString, isSpecialString))
             {
                 Array.Resize(ref resultStrings, i + 1);
                 bufferString = RemoveDoubleQuotes(bufferString);
                 if (isSpecialString) bufferString = RemoveSpecialSymbols(bufferString);
                 resultStrings[i] = bufferString;
-
-                i += 1;
-                bufferString = string.Empty;
-                partNumber = 0;
-                isSpecialString = false;
+                output = true;
             }
-            else
-                bufferString += ",";
+
+            return output;
         }
         private bool IsSpeacialString(string sourceString, int partNumber)
         {
@@ -166,8 +169,10 @@ namespace YY.EventLogReaderAssistant
 
             return isSpecialString;
         }
-        private void CalculateCountSubstrings(string sourceString, bool isSpecialString, out int counterBeginCurlyBrace, out int counterEndCurlyBrace, out int counterSlash)
+        private bool IsCorrectLogPart(string sourceString, bool isSpecialString)
         {
+            int counterBeginCurlyBrace, counterEndCurlyBrace;
+
             if (isSpecialString)
             {
                 counterBeginCurlyBrace = 0;
@@ -178,7 +183,9 @@ namespace YY.EventLogReaderAssistant
                 counterBeginCurlyBrace = CountSubstring(sourceString, "{");
                 counterEndCurlyBrace = CountSubstring(sourceString, "}");
             }
-            counterSlash = CountSubstring(sourceString, "\"") % 2;
+            int counterSlash = CountSubstring(sourceString, "\"") % 2;
+
+            return counterBeginCurlyBrace == counterEndCurlyBrace & counterSlash == 0;
         }
         private string RemoveSpecialSymbols(string sourceString)
         {

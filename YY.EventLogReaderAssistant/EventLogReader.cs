@@ -177,132 +177,6 @@ namespace YY.EventLogReaderAssistant
             _workServers.Clear();
             _currentRow = null;
         }
-        public Users GetUserByCode(string code)
-        {
-            return GetUserByCode(code.ToInt64());
-        }
-        public Users GetUserByCode(long code)
-        {
-            return _users.Where(i => i.Code == code).FirstOrDefault();
-        }
-        public Computers GetComputerByCode(string code)
-        {
-            return GetComputerByCode(code.ToInt64());
-        }
-        public Computers GetComputerByCode(long code)
-        {
-            return _computers.Where(i => i.Code == code).FirstOrDefault();
-        }
-        public Applications GetApplicationByCode(string code)
-        {
-            return GetApplicationByCode(code.ToInt64());
-        }
-        public Applications GetApplicationByCode(long code)
-        {
-            return _applications.Where(i => i.Code == code).FirstOrDefault();
-        }
-        public Events GetEventByCode(string code)
-        {
-            return GetEventByCode(code.ToInt64());
-        }
-        public Events GetEventByCode(long code)
-        {
-            return _events.Where(i => i.Code == code).FirstOrDefault();
-        }
-        public Severity GetSeverityByCode(string code)
-        {
-            Severity severity;
-
-            switch (code.Trim())
-            {
-                case "I":
-                    severity = Severity.Information;
-                    break;
-                case "W":
-                    severity = Severity.Warning;
-                    break;
-                case "E":
-                    severity = Severity.Error;
-                    break;
-                case "N":
-                    severity = Severity.Note;
-                    break;
-                default:
-                    severity = Severity.Unknown;
-                    break;
-            }
-
-            return severity;
-        }
-        public Severity GetSeverityByCode(long code)
-        {
-            try
-            {
-                return (Severity)code;
-            } catch
-            {
-                return Severity.Unknown;
-            }
-        }
-        public TransactionStatus GetTransactionStatus(string code)
-        {
-            TransactionStatus transactionStatus;
-
-            if (code == "R")
-                transactionStatus = TransactionStatus.Unfinished;
-            else if (code == "N")
-                transactionStatus = TransactionStatus.NotApplicable;
-            else if (code == "U")
-                transactionStatus = TransactionStatus.Committed;
-            else if (code == "C")
-                transactionStatus = TransactionStatus.RolledBack;
-            else
-                transactionStatus = TransactionStatus.Unknown;
-
-            return transactionStatus;
-        }
-        public TransactionStatus GetTransactionStatus(long code)
-        {
-            try
-            {
-                return (TransactionStatus)code;
-            } catch
-            {
-                return TransactionStatus.Unknown;
-            }
-        }
-        public Metadata GetMetadataByCode(string code)
-        {
-            return GetMetadataByCode(code.ToInt64());
-        }
-        public Metadata GetMetadataByCode(long code)
-        {
-            return _metadata.Where(i => i.Code == code).FirstOrDefault();
-        }
-        public WorkServers GetWorkServerByCode(string code)
-        {
-            return GetWorkServerByCode(code.ToInt64());
-        }
-        public WorkServers GetWorkServerByCode(long code)
-        {
-            return _workServers.Where(i => i.Code == code).FirstOrDefault();
-        }
-        public PrimaryPorts GetPrimaryPortByCode(string code)
-        {
-            return GetPrimaryPortByCode(code.ToInt64());
-        }
-        public PrimaryPorts GetPrimaryPortByCode(long code)
-        {
-            return _primaryPorts.Where(i => i.Code == code).FirstOrDefault();
-        }
-        public SecondaryPorts GetSecondaryPortByCode(string code)
-        {
-            return GetSecondaryPortByCode(code.ToInt64());
-        }
-        public SecondaryPorts GetSecondaryPortByCode(long code)
-        {
-            return _secondaryPorts.Where(i => i.Code == code).FirstOrDefault();
-        }
 
         #endregion
 
@@ -362,24 +236,6 @@ namespace YY.EventLogReaderAssistant
 
             public static ReferencesDataHash CreateFromReader(EventLogReader reader)
             {
-                List<Severity> severities = new List<Severity>
-                {
-                    Severity.Error,
-                    Severity.Information,
-                    Severity.Note,
-                    Severity.Unknown,
-                    Severity.Warning
-                };
-
-                List<TransactionStatus> transactionStatuses = new List<TransactionStatus>
-                {
-                    TransactionStatus.Committed,
-                    TransactionStatus.NotApplicable,
-                    TransactionStatus.RolledBack,
-                    TransactionStatus.Unfinished,
-                    TransactionStatus.Unknown
-                };
-
                 var referenceData = new ReferencesDataHash()
                 {
                     Applications = reader.Applications.ToList().AsReadOnly(),
@@ -389,12 +245,35 @@ namespace YY.EventLogReaderAssistant
                     PrimaryPorts = reader.PrimaryPorts.ToList().AsReadOnly(),
                     SecondaryPorts = reader.SecondaryPorts.ToList().AsReadOnly(),
                     Users = reader.Users.ToList().AsReadOnly(),
-                    WorkServers = reader.WorkServers.ToList().AsReadOnly(),
-                    Severities = severities.ToList().AsReadOnly(),
-                    TransactionStatuses = transactionStatuses.ToList().AsReadOnly()
+                    WorkServers = reader.WorkServers.ToList().AsReadOnly()
                 };
 
                 return referenceData;
+            }
+
+            #endregion
+
+            #region Constructor
+
+            public ReferencesDataHash()
+            {
+                Severities = new List<Severity>
+                {
+                    Severity.Error,
+                    Severity.Information,
+                    Severity.Note,
+                    Severity.Unknown,
+                    Severity.Warning
+                }.AsReadOnly();
+
+                TransactionStatuses = new List<TransactionStatus>
+                {
+                    TransactionStatus.Committed,
+                    TransactionStatus.NotApplicable,
+                    TransactionStatus.RolledBack,
+                    TransactionStatus.Unfinished,
+                    TransactionStatus.Unknown
+                }.AsReadOnly();
             }
 
             #endregion
