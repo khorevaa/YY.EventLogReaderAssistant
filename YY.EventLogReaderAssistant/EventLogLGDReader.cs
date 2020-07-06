@@ -48,11 +48,8 @@ namespace YY.EventLogReaderAssistant
         {
             try
             {
-                BeforeReadFileEventArgs beforeReadFileArgs = new BeforeReadFileEventArgs(_logFilePath);
-                if (_eventCount < 0)
-                    RaiseBeforeReadFile(beforeReadFileArgs);
-
-                if (beforeReadFileArgs.Cancel)
+                RaiseBeforeReadFileEvent(out bool cancelBeforeReadFile);
+                if (cancelBeforeReadFile)
                 {
                     _currentRow = null;
                     return false;
@@ -69,37 +66,7 @@ namespace YY.EventLogReaderAssistant
                     using (_connection = new SQLiteConnection(ConnectionString))
                     {
                         _connection.Open();
-
-                        string queryText = String.Format(
-                         "Select\n" +
-                         "    el.RowId,\n" +
-                         "    el.Date AS Date,\n" +
-                         "    el.ConnectId,\n" +
-                         "    el.Session,\n" +
-                         "    el.TransactionStatus,\n" +
-                         "    el.TransactionDate,\n" +
-                         "    el.TransactionId,\n" +
-                         "    el.UserCode AS UserCode,\n" +
-                         "    el.ComputerCode AS ComputerCode,\n" +
-                         "    el.appCode AS ApplicationCode,\n" +
-                         "    el.eventCode AS EventCode,\n" +
-                         "    el.primaryPortCode AS PrimaryPortCode,\n" +
-                         "    el.secondaryPortCode AS SecondaryPortCode,\n" +
-                         "    el.workServerCode AS WorkServerCode,\n" +
-                         "    el.Severity AS SeverityCode,\n" +
-                         "    el.Comment AS Comment,\n" +
-                         "    el.Data AS Data,\n" +
-                         "    el.DataPresentation AS DataPresentation,\n" +
-                         "    elm.metadataCode AS MetadataCode\n" +
-                         "From\n" +
-                         "    EventLog el\n" +
-                         "    left join EventLogMetadata elm on el.RowId = elm.eventLogID\n" +
-                         "    left join MetadataCodes mc on elm.metadataCode = mc.code\n" +
-                         "Where RowID > {0}\n" +
-                         "Order By rowID\n" +
-                         "Limit {1}\n", _lastRowId, ReadBufferSize);
-
-                        using (SQLiteCommand cmd = new SQLiteCommand(queryText, _connection))
+                        using (SQLiteCommand cmd = new SQLiteCommand(GetQueryTextForLogData(), _connection))
                         {
                             using (SQLiteDataReader reader = cmd.ExecuteReader())
                             {
@@ -111,38 +78,16 @@ namespace YY.EventLogReaderAssistant
                                         if (rowPeriod >= ReferencesReadDate)
                                             ReadEventLogReferences();
 
-                                        if (Math.Abs(_readDelayMilliseconds) > 0)
+                                        RowData row = new RowData();
+                                        row.FillBySqliteReader(this, reader);
+
+                                        if (!EventAllowedByPeriod(row))
                                         {
-                                            DateTimeOffset stopPeriod = DateTimeOffset.Now.AddMilliseconds(-_readDelayMilliseconds);
-                                            if (rowPeriod >= stopPeriod)
-                                            {
-                                                _currentRow = null;
-                                                return false;
-                                            }
+                                            _currentRow = null;
+                                            return false;
                                         }
 
-                                        _readBuffer.Add(new RowData
-                                        {
-                                            RowId = reader.GetInt64OrDefault(0),
-                                            Period = rowPeriod,
-                                            ConnectId = reader.GetInt64OrDefault(2),
-                                            Session = reader.GetInt64OrDefault(3),
-                                            TransactionStatus = this.GetTransactionStatus(reader.GetInt64OrDefault(4)),
-                                            TransactionDate = reader.GetInt64OrDefault(5).ToNullableDateTimeElFormat(),
-                                            TransactionId = reader.GetInt64OrDefault(6),
-                                            User = this.GetUserByCode(reader.GetInt64OrDefault(7)),
-                                            Computer = this.GetComputerByCode(reader.GetInt64OrDefault(8)),
-                                            Application = this.GetApplicationByCode(reader.GetInt64OrDefault(9)),
-                                            Event = this.GetEventByCode(reader.GetInt64OrDefault(10)),
-                                            PrimaryPort = this.GetPrimaryPortByCode(reader.GetInt64OrDefault(11)),
-                                            SecondaryPort = this.GetSecondaryPortByCode(reader.GetInt64OrDefault(12)),
-                                            WorkServer = this.GetWorkServerByCode(reader.GetInt64OrDefault(13)),
-                                            Severity = this.GetSeverityByCode(reader.GetInt64OrDefault(14)),
-                                            Comment = reader.GetStringOrDefault(15),
-                                            Data = reader.GetStringOrDefault(16).FromWin1251ToUtf8(),
-                                            DataPresentation = reader.GetStringOrDefault(17),
-                                            Metadata = this.GetMetadataByCode(reader.GetInt64OrDefault(18))
-                                        });                                        
+                                        _readBuffer.Add(row);
                                     }
                                     catch (Exception ex)
                                     {
@@ -288,6 +233,58 @@ namespace YY.EventLogReaderAssistant
 
         #region Private Methods
 
+        private void RaiseBeforeReadFileEvent(out bool cancel)
+        {
+            BeforeReadFileEventArgs beforeReadFileArgs = new BeforeReadFileEventArgs(_logFilePath);
+            if (_eventCount < 0)
+                RaiseBeforeReadFile(beforeReadFileArgs);
+
+            cancel = beforeReadFileArgs.Cancel;
+        }
+        private string GetQueryTextForLogData()
+        {
+            string queryText = string.Format(
+                "Select\n" +
+                "    el.RowId,\n" +
+                "    el.Date AS Date,\n" +
+                "    el.ConnectId,\n" +
+                "    el.Session,\n" +
+                "    el.TransactionStatus,\n" +
+                "    el.TransactionDate,\n" +
+                "    el.TransactionId,\n" +
+                "    el.UserCode AS UserCode,\n" +
+                "    el.ComputerCode AS ComputerCode,\n" +
+                "    el.appCode AS ApplicationCode,\n" +
+                "    el.eventCode AS EventCode,\n" +
+                "    el.primaryPortCode AS PrimaryPortCode,\n" +
+                "    el.secondaryPortCode AS SecondaryPortCode,\n" +
+                "    el.workServerCode AS WorkServerCode,\n" +
+                "    el.Severity AS SeverityCode,\n" +
+                "    el.Comment AS Comment,\n" +
+                "    el.Data AS Data,\n" +
+                "    el.DataPresentation AS DataPresentation,\n" +
+                "    elm.metadataCode AS MetadataCode\n" +
+                "From\n" +
+                "    EventLog el\n" +
+                "    left join EventLogMetadata elm on el.RowId = elm.eventLogID\n" +
+                "    left join MetadataCodes mc on elm.metadataCode = mc.code\n" +
+                "Where RowID > {0}\n" +
+                "Order By rowID\n" +
+                "Limit {1}\n", _lastRowId, ReadBufferSize);
+
+            return queryText;
+        }
+        private bool EventAllowedByPeriod(RowData eventData)
+        {
+            if (Math.Abs(_readDelayMilliseconds) > 0 && eventData != null)
+            {
+                DateTimeOffset stopPeriod = DateTimeOffset.Now.AddMilliseconds(-_readDelayMilliseconds);
+                if (eventData.Period >= stopPeriod)
+                    return false;
+            }
+
+            return true;
+        }
         private long GetLastRowId(long eventNumberToSkip)
         {
             long valueLastRowId = 0;
@@ -335,11 +332,6 @@ namespace YY.EventLogReaderAssistant
 
             base.ReadEventLogReferences();
         }
-
-        #endregion
-
-        #region Private Methods
-
         private void ReadReferencesByType<T>(List<T> referenceCollection, string cmdSqliteText) where T: IReferenceObject, new()
         {
             referenceCollection.Clear();

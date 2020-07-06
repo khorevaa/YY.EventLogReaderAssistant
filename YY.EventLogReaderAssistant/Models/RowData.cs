@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data.SQLite;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using YY.EventLogReaderAssistant.Helpers;
@@ -41,6 +42,30 @@ namespace YY.EventLogReaderAssistant.Models
         #endregion
 
         #region Public Methods
+
+        internal void FillBySqliteReader(EventLogLGDReader reader, SQLiteDataReader sqlReader)
+        {
+            DateTime rowPeriod = sqlReader.GetInt64OrDefault(1).ToDateTimeFormat();
+            RowId = sqlReader.GetInt64OrDefault(0);
+            Period = rowPeriod;
+            ConnectId = sqlReader.GetInt64OrDefault(2);
+            Session = sqlReader.GetInt64OrDefault(3);
+            TransactionStatus = reader.GetTransactionStatus(sqlReader.GetInt64OrDefault(4));
+            TransactionDate = sqlReader.GetInt64OrDefault(5).ToNullableDateTimeElFormat();
+            TransactionId = sqlReader.GetInt64OrDefault(6);
+            User = reader.GetUserByCode(sqlReader.GetInt64OrDefault(7));
+            Computer = reader.GetComputerByCode(sqlReader.GetInt64OrDefault(8));
+            Application = reader.GetApplicationByCode(sqlReader.GetInt64OrDefault(9));
+            Event = reader.GetEventByCode(sqlReader.GetInt64OrDefault(10));
+            PrimaryPort = reader.GetPrimaryPortByCode(sqlReader.GetInt64OrDefault(11));
+            SecondaryPort = reader.GetSecondaryPortByCode(sqlReader.GetInt64OrDefault(12));
+            WorkServer = reader.GetWorkServerByCode(sqlReader.GetInt64OrDefault(13));
+            Severity = reader.GetSeverityByCode(sqlReader.GetInt64OrDefault(14));
+            Comment = sqlReader.GetStringOrDefault(15);
+            Data = sqlReader.GetStringOrDefault(16).FromWin1251ToUtf8();
+            DataPresentation = sqlReader.GetStringOrDefault(17);
+            Metadata = reader.GetMetadataByCode(sqlReader.GetInt64OrDefault(18));
+        }
 
         internal void FillByStringParsedData(EventLogLGFReader reader, string[] parseResult)
         {
