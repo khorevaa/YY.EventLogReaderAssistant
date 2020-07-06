@@ -293,17 +293,6 @@ namespace YY.EventLogReaderAssistant
 
         #region Private Methods
 
-        private bool EventAllowedByPeriod(RowData eventData)
-        {
-            if (Math.Abs(_readDelayMilliseconds) > 0 && eventData != null)
-            {
-                DateTimeOffset stopPeriod = DateTimeOffset.Now.AddMilliseconds(-_readDelayMilliseconds);
-                if (eventData.Period >= stopPeriod)
-                    return false;
-            }
-
-            return true;
-        }
         private void AddNewLineToSource(string sourceData, bool newLine)
         {
             if (newLine)

@@ -187,6 +187,17 @@ namespace YY.EventLogReaderAssistant
             ReferencesDataHash data = ReferencesDataHash.CreateFromReader(this);
             _referencesHash = MD5HashGenerator.GetMd5Hash(data);
         }
+        protected bool EventAllowedByPeriod(RowData eventData)
+        {
+            if (Math.Abs(_readDelayMilliseconds) > 0 && eventData != null)
+            {
+                DateTimeOffset stopPeriod = DateTimeOffset.Now.AddMilliseconds(-_readDelayMilliseconds);
+                if (eventData.Period >= stopPeriod)
+                    return false;
+            }
+
+            return true;
+        }
 
         #endregion
 

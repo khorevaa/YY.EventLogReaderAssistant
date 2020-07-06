@@ -274,17 +274,6 @@ namespace YY.EventLogReaderAssistant
 
             return queryText;
         }
-        private bool EventAllowedByPeriod(RowData eventData)
-        {
-            if (Math.Abs(_readDelayMilliseconds) > 0 && eventData != null)
-            {
-                DateTimeOffset stopPeriod = DateTimeOffset.Now.AddMilliseconds(-_readDelayMilliseconds);
-                if (eventData.Period >= stopPeriod)
-                    return false;
-            }
-
-            return true;
-        }
         private long GetLastRowId(long eventNumberToSkip)
         {
             long valueLastRowId = 0;

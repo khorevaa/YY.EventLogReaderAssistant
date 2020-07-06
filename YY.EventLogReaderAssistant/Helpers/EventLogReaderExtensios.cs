@@ -13,7 +13,6 @@ namespace YY.EventLogReaderAssistant.Helpers
         {
             return reader.Users.FirstOrDefault(i => i.Code == code);
         }
-
         public static Computers GetComputerByCode(this EventLogReader reader, string code)
         {
             return reader.GetComputerByCode(code.ToInt64());
