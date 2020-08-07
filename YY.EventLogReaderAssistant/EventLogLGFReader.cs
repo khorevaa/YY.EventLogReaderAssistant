@@ -17,23 +17,14 @@ namespace YY.EventLogReaderAssistant
 
         private const long DefaultBeginLineForLgf = 3;
         private int _indexCurrentFile;
-        private readonly string[] _logFilesWithData;
+        private string[] _logFilesWithData;
         private long _eventCount = -1;
 
         StreamReader _stream;
         readonly StringBuilder _eventSource;
 
         private LogParserLGF _logParser;
-        private LogParserLGF LogParser
-        {
-            get
-            {
-                if (_logParser == null)
-                    _logParser = new LogParserLGF(this);
-
-                return _logParser;
-            }
-        }
+        private LogParserLGF LogParser => _logParser ?? (_logParser = new LogParserLGF(this));
 
         #endregion
 
@@ -57,10 +48,7 @@ namespace YY.EventLogReaderAssistant
         internal EventLogLGFReader(string logFilePath) : base(logFilePath)
         {
             _indexCurrentFile = 0;
-            _logFilesWithData = Directory
-                .GetFiles(_logFileDirectoryPath, "*.lgp")
-                .OrderBy(i => i)
-                .ToArray();
+            UpdateEventLogFilesList();
             _eventSource = new StringBuilder();            
         }
 
@@ -233,6 +221,7 @@ namespace YY.EventLogReaderAssistant
             }
 
             _indexCurrentFile = 0;
+            UpdateEventLogFilesList();
             _currentFileEventNumber = 0;
             _currentRow = null;
         }
@@ -261,16 +250,17 @@ namespace YY.EventLogReaderAssistant
         protected override void ReadEventLogReferences()
         {
             DateTime beginReadReferences = DateTime.Now;
+            _referencesData = new ReferencesData();
 
             var referencesInfo = LogParser.GetEventLogReferences();
-            referencesInfo.ReadReferencesByType(_users);
-            referencesInfo.ReadReferencesByType(_computers);
-            referencesInfo.ReadReferencesByType(_applications);
-            referencesInfo.ReadReferencesByType(_events);
-            referencesInfo.ReadReferencesByType(_metadata);
-            referencesInfo.ReadReferencesByType(_workServers);
-            referencesInfo.ReadReferencesByType(_primaryPorts);
-            referencesInfo.ReadReferencesByType(_secondaryPorts);
+            referencesInfo.ReadReferencesByType(_referencesData._users);
+            referencesInfo.ReadReferencesByType(_referencesData._computers);
+            referencesInfo.ReadReferencesByType(_referencesData._applications);
+            referencesInfo.ReadReferencesByType(_referencesData._events);
+            referencesInfo.ReadReferencesByType(_referencesData._metadata);
+            referencesInfo.ReadReferencesByType(_referencesData._workServers);
+            referencesInfo.ReadReferencesByType(_referencesData._primaryPorts);
+            referencesInfo.ReadReferencesByType(_referencesData._secondaryPorts);
 
             _referencesReadDate = beginReadReferences;
 
@@ -278,21 +268,24 @@ namespace YY.EventLogReaderAssistant
         }
         public long GetCurrentFileStreamPosition()
         {
-            if (_stream != null)
-                return _stream.GetPosition();
-            else
-                return 0;
+            return _stream?.GetPosition() ?? 0;
         }
         public void SetCurrentFileStreamPosition(long position)
         {
-            if (_stream != null)
-                _stream.SetPosition(position);
+            _stream?.SetPosition(position);
         }
 
         #endregion
 
         #region Private Methods
 
+        private void UpdateEventLogFilesList()
+        {
+            _logFilesWithData = Directory
+                .GetFiles(_logFileDirectoryPath, "*.lgp")
+                .OrderBy(i => i)
+                .ToArray();
+        }
         private void AddNewLineToSource(string sourceData, bool newLine)
         {
             if (newLine)
