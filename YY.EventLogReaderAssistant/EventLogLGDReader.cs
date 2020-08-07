@@ -302,16 +302,17 @@ namespace YY.EventLogReaderAssistant
             using (_connection = new SQLiteConnection(ConnectionString))
             {
                 _connection.Open();
+                _referencesData = new ReferencesData();
 
-                ReadReferencesByType(_users, "Select Code, Name, UUID From UserCodes");
-                ReadReferencesByType(_computers, "Select Code, Name From ComputerCodes");
-                ReadReferencesByType(_events, "Select Code, Name From EventCodes");
-                ReadReferencesByType(_metadata, "Select Code, Name, UUID From MetadataCodes");
-                ReadReferencesByType(_applications, "Select Code, Name From AppCodes");
-                ReadReferencesByType(_workServers, "Select Code, Name From WorkServerCodes");
-                ReadReferencesByType(_primaryPorts, "Select Code, Name From PrimaryPortCodes");
-                ReadReferencesByType(_secondaryPorts, "Select Code, Name From SecondaryPortCodes");
-                
+                ReadReferencesByType(_referencesData._users, "Select Code, Name, UUID From UserCodes");
+                ReadReferencesByType(_referencesData._computers, "Select Code, Name From ComputerCodes");
+                ReadReferencesByType(_referencesData._events, "Select Code, Name From EventCodes");
+                ReadReferencesByType(_referencesData._metadata, "Select Code, Name, UUID From MetadataCodes");
+                ReadReferencesByType(_referencesData._applications, "Select Code, Name From AppCodes");
+                ReadReferencesByType(_referencesData._workServers, "Select Code, Name From WorkServerCodes");
+                ReadReferencesByType(_referencesData._primaryPorts, "Select Code, Name From PrimaryPortCodes");
+                ReadReferencesByType(_referencesData._secondaryPorts, "Select Code, Name From SecondaryPortCodes");
+
                 _referencesReadDate = beginReadReferences;
             }
 

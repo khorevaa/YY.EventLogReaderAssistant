@@ -4,7 +4,6 @@ using System.IO;
 using YY.EventLogReaderAssistant.Models;
 using System.Runtime.CompilerServices;
 using YY.EventLogReaderAssistant.EventArguments;
-using YY.EventLogReaderAssistant.Helpers;
 
 [assembly: InternalsVisibleTo("YY.EventLogReaderAssistant.Tests")]
 namespace YY.EventLogReaderAssistant
@@ -58,19 +57,11 @@ namespace YY.EventLogReaderAssistant
         #region Private Member Variables
 
         protected readonly string _logFilePath;
-        protected string _logFileDirectoryPath;
+        protected readonly string _logFileDirectoryPath;
         protected long _currentFileEventNumber;
 
         protected DateTime _referencesReadDate;
-        protected string _referencesHash;
-        protected List<Applications> _applications;
-        protected List<Computers> _computers;
-        protected List<Metadata> _metadata;
-        protected List<Events> _events;
-        protected List<PrimaryPorts> _primaryPorts;
-        protected List<SecondaryPorts> _secondaryPorts;
-        protected List<Users> _users;
-        protected List<WorkServers> _workServers;
+        protected ReferencesData _referencesData;
         protected RowData _currentRow;
 
         protected double _readDelayMilliseconds;
@@ -86,15 +77,6 @@ namespace YY.EventLogReaderAssistant
             _logFilePath = logFilePath;
             _logFileDirectoryPath = new FileInfo(_logFilePath).Directory?.FullName;
 
-            _applications = new List<Applications>();
-            _computers = new List<Computers>();
-            _metadata = new List<Metadata>();
-            _events = new List<Events>();
-            _primaryPorts = new List<PrimaryPorts>();
-            _secondaryPorts = new List<SecondaryPorts>();
-            _users = new List<Users>();
-            _workServers = new List<WorkServers>();
-
             _referencesReadDate = DateTime.MinValue;
             ReadEventLogReferences();
 
@@ -106,15 +88,15 @@ namespace YY.EventLogReaderAssistant
         #region Public Properties
 
         public DateTime ReferencesReadDate => _referencesReadDate;
-        public string ReferencesHash => _referencesHash;
-        public IReadOnlyList<Applications> Applications => _applications;
-        public IReadOnlyList<Computers> Computers => _computers;
-        public IReadOnlyList<Metadata> Metadata => _metadata;
-        public IReadOnlyList<Events> Events => _events;
-        public IReadOnlyList<PrimaryPorts> PrimaryPorts => _primaryPorts;
-        public IReadOnlyList<SecondaryPorts> SecondaryPorts => _secondaryPorts;
-        public IReadOnlyList<Users> Users => _users;
-        public IReadOnlyList<WorkServers> WorkServers => _workServers;
+        public string ReferencesHash => _referencesData?.GetReferencesHash();
+        public IReadOnlyList<Applications> Applications => _referencesData?.Applications;
+        public IReadOnlyList<Computers> Computers => _referencesData?.Computers;
+        public IReadOnlyList<Metadata> Metadata => _referencesData?.Metadata;
+        public IReadOnlyList<Events> Events => _referencesData?.Events;
+        public IReadOnlyList<PrimaryPorts> PrimaryPorts => _referencesData?.PrimaryPorts;
+        public IReadOnlyList<SecondaryPorts> SecondaryPorts => _referencesData?.SecondaryPorts;
+        public IReadOnlyList<Users> Users => _referencesData?.Users;
+        public IReadOnlyList<WorkServers> WorkServers => _referencesData?.WorkServers;
         public RowData CurrentRow => _currentRow;
         public long CurrentFileEventNumber => _currentFileEventNumber;
         public string LogFilePath => _logFilePath;
@@ -166,14 +148,7 @@ namespace YY.EventLogReaderAssistant
         }
         public virtual void Dispose()
         {
-            _applications.Clear();
-            _computers.Clear();
-            _metadata.Clear();
-            _events.Clear();
-            _primaryPorts.Clear();
-            _secondaryPorts.Clear();
-            _users.Clear();
-            _workServers.Clear();
+            _referencesData = null;
             _currentRow = null;
         }
 
@@ -183,8 +158,6 @@ namespace YY.EventLogReaderAssistant
 
         protected virtual void ReadEventLogReferences()
         {
-            ReferencesDataHash data = ReferencesDataHash.CreateFromReader(this);
-            _referencesHash = MD5HashGenerator.GetMd5Hash(data);
         }
         protected bool EventAllowedByPeriod(RowData eventData)
         {

@@ -261,16 +261,17 @@ namespace YY.EventLogReaderAssistant
         protected override void ReadEventLogReferences()
         {
             DateTime beginReadReferences = DateTime.Now;
+            _referencesData = new ReferencesData();
 
             var referencesInfo = LogParser.GetEventLogReferences();
-            referencesInfo.ReadReferencesByType(_users);
-            referencesInfo.ReadReferencesByType(_computers);
-            referencesInfo.ReadReferencesByType(_applications);
-            referencesInfo.ReadReferencesByType(_events);
-            referencesInfo.ReadReferencesByType(_metadata);
-            referencesInfo.ReadReferencesByType(_workServers);
-            referencesInfo.ReadReferencesByType(_primaryPorts);
-            referencesInfo.ReadReferencesByType(_secondaryPorts);
+            referencesInfo.ReadReferencesByType(_referencesData._users);
+            referencesInfo.ReadReferencesByType(_referencesData._computers);
+            referencesInfo.ReadReferencesByType(_referencesData._applications);
+            referencesInfo.ReadReferencesByType(_referencesData._events);
+            referencesInfo.ReadReferencesByType(_referencesData._metadata);
+            referencesInfo.ReadReferencesByType(_referencesData._workServers);
+            referencesInfo.ReadReferencesByType(_referencesData._primaryPorts);
+            referencesInfo.ReadReferencesByType(_referencesData._secondaryPorts);
 
             _referencesReadDate = beginReadReferences;
 
@@ -278,15 +279,11 @@ namespace YY.EventLogReaderAssistant
         }
         public long GetCurrentFileStreamPosition()
         {
-            if (_stream != null)
-                return _stream.GetPosition();
-            else
-                return 0;
+            return _stream?.GetPosition() ?? 0;
         }
         public void SetCurrentFileStreamPosition(long position)
         {
-            if (_stream != null)
-                _stream.SetPosition(position);
+            _stream?.SetPosition(position);
         }
 
         #endregion
