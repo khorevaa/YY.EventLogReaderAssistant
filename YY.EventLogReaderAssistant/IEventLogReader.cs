@@ -3,7 +3,7 @@
 [assembly: InternalsVisibleTo("YY.EventLogReaderAssistant.Tests")]
 namespace YY.EventLogReaderAssistant
 {
-    internal interface IEventLogReader
+    public interface IEventLogReader
     {
         bool Read();
         bool GoToEvent(long eventNumber);
