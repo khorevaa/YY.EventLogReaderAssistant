@@ -329,6 +329,8 @@ namespace YY.EventLogReaderAssistant
                     {
                         IReferenceObject referenceObject = new T();
                         referenceObject.FillBySqliteReader(readerReferences);
+                        if (referenceCollection.ContainsKey(referenceObject.GetKeyValue()))
+                            referenceCollection.Remove(referenceObject.GetKeyValue());
                         referenceCollection.Add(referenceObject.GetKeyValue(), (T)referenceObject);
                     }
             }

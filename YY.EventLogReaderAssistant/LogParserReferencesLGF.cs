@@ -60,6 +60,8 @@ namespace YY.EventLogReaderAssistant
 
                     IReferenceObject referenceObject = new T();
                     referenceObject.FillByStringParsedData(parsedEventData);
+                    if (referenceCollection.ContainsKey(referenceObject.GetKeyValue()))
+                        referenceCollection.Remove(referenceObject.GetKeyValue());
                     referenceCollection.Add(referenceObject.GetKeyValue(), (T)referenceObject);
                 }
             }
