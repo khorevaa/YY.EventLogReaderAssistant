@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using YY.EventLogReaderAssistant.Helpers;
 using YY.EventLogReaderAssistant.Models;
 
@@ -39,12 +40,31 @@ namespace YY.EventLogReaderAssistant
         internal List<Users> _users;
         internal List<WorkServers> _workServers;
 
+        private Dictionary<long, Applications> _applicationsDictionary;
+        private Dictionary<long, Computers> _computersDictionary;
+        private Dictionary<long, Events> _eventsDictionary;
+        private Dictionary<long, Metadata> _metadataDictionary;
+        private Dictionary<long, PrimaryPorts> _primaryPortsDictionary;
+        private Dictionary<long, SecondaryPorts> _secondaryPortsDictionary;
+        private Dictionary<long, Users> _usersDictionary;
+        private Dictionary<long, WorkServers> _workServersDictionary;
+
         #endregion
 
         #region Public Members
 
+        public IReadOnlyDictionary<long, Applications> ApplicationsDictionary =>  _applicationsDictionary ?? (_applicationsDictionary = ConvertListToDictionary(_applications));
+        public IReadOnlyDictionary<long, Computers> ComputersDictionary => _computersDictionary ?? (_computersDictionary = ConvertListToDictionary(_computers));
+        public IReadOnlyDictionary<long, Events> EventsDictionary => _eventsDictionary ?? (_eventsDictionary = ConvertListToDictionary(_events));
+        public IReadOnlyDictionary<long, Metadata> MetadataDictionary => _metadataDictionary ?? (_metadataDictionary = ConvertListToDictionary(_metadata));
+        public IReadOnlyDictionary<long, PrimaryPorts> PrimaryPortsDictionary => _primaryPortsDictionary ?? (_primaryPortsDictionary = ConvertListToDictionary(_primaryPorts));
+        public IReadOnlyDictionary<long, SecondaryPorts> SecondaryPortsDictionary => _secondaryPortsDictionary ?? (_secondaryPortsDictionary = ConvertListToDictionary(_secondaryPorts));
+        public IReadOnlyDictionary<long, Users> UsersDictionary => _usersDictionary ?? (_usersDictionary = ConvertListToDictionary(_users));
+        public IReadOnlyDictionary<long, WorkServers> WorkServersDictionary => _workServersDictionary ?? (_workServersDictionary = ConvertListToDictionary(_workServers));
+
         public IReadOnlyList<Severity> Severities => _severitiesData;
         public IReadOnlyList<TransactionStatus> TransactionStatuses => _transactionStatusesData;
+        
         public IReadOnlyList<Applications> Applications => _applications;
         public IReadOnlyList<Computers> Computers => _computers;
         public IReadOnlyList<Events> Events => _events;
@@ -85,6 +105,13 @@ namespace YY.EventLogReaderAssistant
                 TransactionStatus.Unfinished,
                 TransactionStatus.Unknown
             };
+        }
+        private Dictionary<long, T> ConvertListToDictionary<T>(List<T> sourceList) where T : ReferenceObject, new()
+        {
+            Dictionary<long, T> resultDictionary = new Dictionary<long, T>();
+            if (sourceList != null)
+                resultDictionary = sourceList.ToDictionary(x => x.Code, x => x);
+            return resultDictionary;
         }
 
         #endregion

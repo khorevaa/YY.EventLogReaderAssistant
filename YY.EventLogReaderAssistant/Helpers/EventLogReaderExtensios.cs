@@ -1,42 +1,9 @@
-﻿using System.Linq;
-using YY.EventLogReaderAssistant.Models;
+﻿using YY.EventLogReaderAssistant.Models;
 
 namespace YY.EventLogReaderAssistant.Helpers
 {
     public static class EventLogReaderExtensions
     {
-        public static Users GetUserByCode(this EventLogReader reader, string code)
-        {
-            return reader.GetUserByCode(code.ToInt64());
-        }
-        public static Users GetUserByCode(this EventLogReader reader, long code)
-        {
-            return reader.Users.FirstOrDefault(i => i.Code == code);
-        }
-        public static Computers GetComputerByCode(this EventLogReader reader, string code)
-        {
-            return reader.GetComputerByCode(code.ToInt64());
-        }
-        public static Computers GetComputerByCode(this EventLogReader reader, long code)
-        {
-            return reader.Computers.FirstOrDefault(i => i.Code == code);
-        }
-        public static Applications GetApplicationByCode(this EventLogReader reader, string code)
-        {
-            return reader.GetApplicationByCode(code.ToInt64());
-        }
-        public static Applications GetApplicationByCode(this EventLogReader reader, long code)
-        {
-            return reader.Applications.FirstOrDefault(i => i.Code == code);
-        }
-        public static Events GetEventByCode(this EventLogReader reader, string code)
-        {
-            return reader.GetEventByCode(code.ToInt64());
-        }
-        public static Events GetEventByCode(this EventLogReader reader, long code)
-        {
-            return reader.Events.FirstOrDefault(i => i.Code == code);
-        }
         public static Severity GetSeverityByCode(this EventLogReader reader, string code)
         {
             Severity severity;
@@ -101,37 +68,77 @@ namespace YY.EventLogReaderAssistant.Helpers
                 return TransactionStatus.Unknown;
             }
         }
+        public static Users GetUserByCode(this EventLogReader reader, string code)
+        {
+            return GetUserByCode(reader, code.ToInt64());
+        }
+        public static Users GetUserByCode(this EventLogReader reader, long code)
+        {
+            reader.References.UsersDictionary.TryGetValue(code, out var output);
+            return output;
+        }
+        public static Computers GetComputerByCode(this EventLogReader reader, string code)
+        {
+            return GetComputerByCode(reader, code.ToInt64());
+        }
+        public static Computers GetComputerByCode(this EventLogReader reader, long code)
+        {
+            reader.References.ComputersDictionary.TryGetValue(code, out var output);
+            return output;
+        }
+        public static Applications GetApplicationByCode(this EventLogReader reader, string code)
+        {
+            return GetApplicationByCode(reader, code.ToInt64());
+        }
+        public static Applications GetApplicationByCode(this EventLogReader reader, long code)
+        {
+            reader.References.ApplicationsDictionary.TryGetValue(code, out var output);
+            return output;
+        }
+        public static Events GetEventByCode(this EventLogReader reader, string code)
+        {
+            return GetEventByCode(reader, code.ToInt64());
+        }
+        public static Events GetEventByCode(this EventLogReader reader, long code)
+        {
+            reader.References.EventsDictionary.TryGetValue(code, out var output);
+            return output;
+        }
         public static Metadata GetMetadataByCode(this EventLogReader reader, string code)
         {
-            return reader.GetMetadataByCode(code.ToInt64());
+            return GetMetadataByCode(reader, code.ToInt64());
         }
         public static Metadata GetMetadataByCode(this EventLogReader reader, long code)
         {
-            return reader.Metadata.FirstOrDefault(i => i.Code == code);
+            reader.References.MetadataDictionary.TryGetValue(code, out var output);
+            return output;
         }
         public static WorkServers GetWorkServerByCode(this EventLogReader reader, string code)
         {
-            return reader.GetWorkServerByCode(code.ToInt64());
+            return GetWorkServerByCode(reader, code.ToInt64());
         }
         public static WorkServers GetWorkServerByCode(this EventLogReader reader, long code)
         {
-            return reader.WorkServers.FirstOrDefault(i => i.Code == code);
+            reader.References.WorkServersDictionary.TryGetValue(code, out var output);
+            return output;
         }
         public static PrimaryPorts GetPrimaryPortByCode(this EventLogReader reader, string code)
         {
-            return reader.GetPrimaryPortByCode(code.ToInt64());
+            return GetPrimaryPortByCode(reader, code.ToInt64());
         }
         public static PrimaryPorts GetPrimaryPortByCode(this EventLogReader reader, long code)
         {
-            return reader.PrimaryPorts.FirstOrDefault(i => i.Code == code);
+            reader.References.PrimaryPortsDictionary.TryGetValue(code, out var output);
+            return output;
         }
         public static SecondaryPorts GetSecondaryPortByCode(this EventLogReader reader, string code)
         {
-            return reader.GetSecondaryPortByCode(code.ToInt64());
+            return GetSecondaryPortByCode(reader, code.ToInt64());
         }
         public static SecondaryPorts GetSecondaryPortByCode(this EventLogReader reader, long code)
         {
-            return reader.SecondaryPorts.FirstOrDefault(i => i.Code == code);
+            reader.References.SecondaryPortsDictionary.TryGetValue(code, out var output);
+            return output;
         }
     }
 }

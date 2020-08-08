@@ -90,14 +90,14 @@ namespace YY.EventLogReaderAssistant.Tests.Services
 
                 var referenceData = new ReferencesData()
                 {
-                    Applications = reader.Applications.ToList().AsReadOnly(),
-                    Computers = reader.Computers.ToList().AsReadOnly(),
-                    Events = reader.Events.ToList().AsReadOnly(),
-                    Metadata = reader.Metadata.ToList().AsReadOnly(),
-                    PrimaryPorts = reader.PrimaryPorts.ToList().AsReadOnly(),
-                    SecondaryPorts = reader.SecondaryPorts.ToList().AsReadOnly(),
-                    Users = reader.Users.ToList().AsReadOnly(),
-                    WorkServers = reader.WorkServers.ToList().AsReadOnly(),
+                    Applications = reader.References.Applications.ToList().AsReadOnly(),
+                    Computers = reader.References.Computers.ToList().AsReadOnly(),
+                    Events = reader.References.Events.ToList().AsReadOnly(),
+                    Metadata = reader.References.Metadata.ToList().AsReadOnly(),
+                    PrimaryPorts = reader.References.PrimaryPorts.ToList().AsReadOnly(),
+                    SecondaryPorts = reader.References.SecondaryPorts.ToList().AsReadOnly(),
+                    Users = reader.References.Users.ToList().AsReadOnly(),
+                    WorkServers = reader.References.WorkServers.ToList().AsReadOnly(),
                     Severities = severities.ToList().AsReadOnly(),
                     TransactionStatuses = transactionStatuses.ToList().AsReadOnly()
                 };
@@ -119,6 +119,12 @@ namespace YY.EventLogReaderAssistant.Tests.Services
             public IReadOnlyList<TransactionStatus> TransactionStatuses { get; set; }
             public IReadOnlyList<Users> Users { get; set; }
             public IReadOnlyList<WorkServers> WorkServers { get; set; }
+
+            #endregion
+
+            #region Private Methods
+
+            
 
             #endregion
         }

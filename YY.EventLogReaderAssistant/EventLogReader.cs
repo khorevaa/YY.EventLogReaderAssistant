@@ -18,14 +18,12 @@ namespace YY.EventLogReaderAssistant
             if (File.Exists(logFileWithReferences))
             {
                 FileInfo logFileInfo = new FileInfo(logFileWithReferences);
-
                 string logFileExtension = logFileInfo.Extension.ToUpper();
                 if (logFileExtension.EndsWith("LGF"))
                     return new EventLogLGFReader(logFileInfo.FullName);
                 if (logFileExtension.EndsWith("LGD"))
                     return new EventLogLGDReader(logFileInfo.FullName);
             }
-
             throw new ArgumentException("Invalid log file path");
         }
 
@@ -36,7 +34,6 @@ namespace YY.EventLogReaderAssistant
         private static string GetEventLogFileWithReferences(string pathLogFile)
         {
             FileAttributes attr = File.GetAttributes(pathLogFile);
-
             string logFileWithReferences;
             if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
                 logFileWithReferences = $"{pathLogFile}{Path.DirectorySeparatorChar}{@"1Cv8.lgf"}";
@@ -45,7 +42,6 @@ namespace YY.EventLogReaderAssistant
                 var logFileInfo = new FileInfo(pathLogFile);
                 logFileWithReferences = logFileInfo.FullName;
             }
-
             if (!File.Exists(logFileWithReferences))
                 logFileWithReferences = $"{pathLogFile}{Path.DirectorySeparatorChar}{@"1Cv8.lgd"}";
 
@@ -89,14 +85,7 @@ namespace YY.EventLogReaderAssistant
 
         public DateTime ReferencesReadDate => _referencesReadDate;
         public string ReferencesHash => _referencesData?.GetReferencesHash();
-        public IReadOnlyList<Applications> Applications => _referencesData?.Applications;
-        public IReadOnlyList<Computers> Computers => _referencesData?.Computers;
-        public IReadOnlyList<Metadata> Metadata => _referencesData?.Metadata;
-        public IReadOnlyList<Events> Events => _referencesData?.Events;
-        public IReadOnlyList<PrimaryPorts> PrimaryPorts => _referencesData?.PrimaryPorts;
-        public IReadOnlyList<SecondaryPorts> SecondaryPorts => _referencesData?.SecondaryPorts;
-        public IReadOnlyList<Users> Users => _referencesData?.Users;
-        public IReadOnlyList<WorkServers> WorkServers => _referencesData?.WorkServers;
+        public ReferencesData References => _referencesData;
         public RowData CurrentRow => _currentRow;
         public long CurrentFileEventNumber => _currentFileEventNumber;
         public string LogFilePath => _logFilePath;
