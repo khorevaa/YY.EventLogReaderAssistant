@@ -13,8 +13,6 @@ namespace YY.EventLogReaderAssistant
 
         public ReferencesData()
         {
-            FillDefaultReferences();
-
             _applications = new List<Applications>();
             _computers = new List<Computers>();
             _metadata = new List<Metadata>();
@@ -29,8 +27,6 @@ namespace YY.EventLogReaderAssistant
 
         #region Private Members
 
-        internal List<Severity> _severitiesData;
-        internal List<TransactionStatus> _transactionStatusesData;
         internal List<Applications> _applications;
         internal List<Computers> _computers;
         internal List<Events> _events;
@@ -79,25 +75,6 @@ namespace YY.EventLogReaderAssistant
 
         #region Private Methods
 
-        private void FillDefaultReferences()
-        {
-            _severitiesData = new List<Severity>
-            {
-                Severity.Error,
-                Severity.Information,
-                Severity.Note,
-                Severity.Unknown,
-                Severity.Warning
-            };
-            _transactionStatusesData = new List<TransactionStatus>
-            {
-                TransactionStatus.Committed,
-                TransactionStatus.NotApplicable,
-                TransactionStatus.RolledBack,
-                TransactionStatus.Unfinished,
-                TransactionStatus.Unknown
-            };
-        }
         private Dictionary<long, T> ConvertListToDictionary<T>(List<T> sourceList) where T : ReferenceObject, new()
         {
             Dictionary<long, T> resultDictionary = new Dictionary<long, T>();
