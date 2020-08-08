@@ -90,14 +90,14 @@ namespace YY.EventLogReaderAssistant.Tests.Services
 
                 var referenceData = new ReferencesData()
                 {
-                    Applications = reader.References.Applications.ToList().AsReadOnly(),
-                    Computers = reader.References.Computers.ToList().AsReadOnly(),
-                    Events = reader.References.Events.ToList().AsReadOnly(),
-                    Metadata = reader.References.Metadata.ToList().AsReadOnly(),
-                    PrimaryPorts = reader.References.PrimaryPorts.ToList().AsReadOnly(),
-                    SecondaryPorts = reader.References.SecondaryPorts.ToList().AsReadOnly(),
-                    Users = reader.References.Users.ToList().AsReadOnly(),
-                    WorkServers = reader.References.WorkServers.ToList().AsReadOnly(),
+                    Applications = reader.References.ApplicationsDictionary.Select(e => e.Value).ToList().AsReadOnly(),
+                    Computers = reader.References.ComputersDictionary.Select(e => e.Value).ToList().AsReadOnly(),
+                    Events = reader.References.EventsDictionary.Select(e => e.Value).ToList().AsReadOnly(),
+                    Metadata = reader.References.MetadataDictionary.Select(e => e.Value).ToList().AsReadOnly(),
+                    PrimaryPorts = reader.References.PrimaryPortsDictionary.Select(e => e.Value).ToList().AsReadOnly(),
+                    SecondaryPorts = reader.References.SecondaryPortsDictionary.Select(e => e.Value).ToList().AsReadOnly(),
+                    Users = reader.References.UsersDictionary.Select(e => e.Value).ToList().AsReadOnly(),
+                    WorkServers = reader.References.WorkServersDictionary.Select(e => e.Value).ToList().AsReadOnly(),
                     Severities = severities.ToList().AsReadOnly(),
                     TransactionStatuses = transactionStatuses.ToList().AsReadOnly()
                 };

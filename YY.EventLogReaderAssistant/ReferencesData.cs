@@ -48,6 +48,8 @@ namespace YY.EventLogReaderAssistant
         private Dictionary<long, SecondaryPorts> _secondaryPortsDictionary;
         private Dictionary<long, Users> _usersDictionary;
         private Dictionary<long, WorkServers> _workServersDictionary;
+        private Dictionary<long, Severity> _severityDictionary;
+        private Dictionary<long, TransactionStatus> _transactionStatusDictionary;
 
         #endregion
 
@@ -61,18 +63,8 @@ namespace YY.EventLogReaderAssistant
         public IReadOnlyDictionary<long, SecondaryPorts> SecondaryPortsDictionary => _secondaryPortsDictionary ?? (_secondaryPortsDictionary = ConvertListToDictionary(_secondaryPorts));
         public IReadOnlyDictionary<long, Users> UsersDictionary => _usersDictionary ?? (_usersDictionary = ConvertListToDictionary(_users));
         public IReadOnlyDictionary<long, WorkServers> WorkServersDictionary => _workServersDictionary ?? (_workServersDictionary = ConvertListToDictionary(_workServers));
-
-        public IReadOnlyList<Severity> Severities => _severitiesData;
-        public IReadOnlyList<TransactionStatus> TransactionStatuses => _transactionStatusesData;
-        
-        public IReadOnlyList<Applications> Applications => _applications;
-        public IReadOnlyList<Computers> Computers => _computers;
-        public IReadOnlyList<Events> Events => _events;
-        public IReadOnlyList<Metadata> Metadata => _metadata;
-        public IReadOnlyList<PrimaryPorts> PrimaryPorts => _primaryPorts;
-        public IReadOnlyList<SecondaryPorts> SecondaryPorts => _secondaryPorts;
-        public IReadOnlyList<Users> Users => _users;
-        public IReadOnlyList<WorkServers> WorkServers => _workServers;
+        public IReadOnlyDictionary<long, Severity> Severities => _severityDictionary ?? ( _severityDictionary = EnumToDictionary<Severity>());
+        public IReadOnlyDictionary<long, TransactionStatus> TransactionStatuses => _transactionStatusDictionary ?? (_transactionStatusDictionary = EnumToDictionary<TransactionStatus>());
 
         #endregion
 
@@ -112,6 +104,12 @@ namespace YY.EventLogReaderAssistant
             if (sourceList != null)
                 resultDictionary = sourceList.ToDictionary(x => x.Code, x => x);
             return resultDictionary;
+        }
+        private Dictionary<long, T> EnumToDictionary<T>() where T : Enum
+        {
+            return Enum.GetValues(typeof(T))
+                .Cast<T>()
+                .ToDictionary(t => (long)(object)t, t => t);
         }
 
         #endregion
