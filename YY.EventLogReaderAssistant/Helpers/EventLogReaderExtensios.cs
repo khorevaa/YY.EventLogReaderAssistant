@@ -3,7 +3,7 @@ using YY.EventLogReaderAssistant.Models;
 
 namespace YY.EventLogReaderAssistant.Helpers
 {
-    public static class EventLogReaderExtensios
+    public static class EventLogReaderExtensions
     {
         public static Users GetUserByCode(this EventLogReader reader, string code)
         {
