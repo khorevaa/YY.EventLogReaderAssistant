@@ -37,7 +37,7 @@ namespace YY.EventLogReaderAssistant
             _objectReferencesTexts = LogParserLGF.ParseEventLogString("{" + textReferencesData + "}");
         }
 
-        public void ReadReferencesByType<T>(List<T> referenceCollection)
+        public void ReadReferencesByType<T>(Dictionary<long, T> referenceCollection)
             where T : IReferenceObject, new()
         {
             referenceCollection.Clear();
@@ -60,7 +60,7 @@ namespace YY.EventLogReaderAssistant
 
                     IReferenceObject referenceObject = new T();
                     referenceObject.FillByStringParsedData(parsedEventData);
-                    referenceCollection.Add((T) referenceObject);
+                    referenceCollection.Add(referenceObject.GetKeyValue(), (T)referenceObject);
                 }
             }
         }

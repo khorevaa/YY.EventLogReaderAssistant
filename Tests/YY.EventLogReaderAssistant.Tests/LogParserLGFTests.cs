@@ -73,9 +73,9 @@ namespace YY.EventLogReaderAssistant.Tests
             using (EventLogReader reader = EventLogReader.CreateReader(_sampleDatabaseFile))
             {
                 dataExists =
-                    reader.References.ApplicationsDictionary.Count > 0
-                    && reader.References.EventsDictionary.Count > 0
-                    && reader.References.WorkServersDictionary.Count > 0;
+                    reader.References.Applications.Count > 0
+                    && reader.References.Events.Count > 0
+                    && reader.References.WorkServers.Count > 0;
             }
 
             Assert.True(dataExists);

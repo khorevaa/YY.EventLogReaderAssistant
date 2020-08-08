@@ -26,6 +26,10 @@ namespace YY.EventLogReaderAssistant.Models
             Code = parsedEventData[2].ToInt64();
             Name = parsedEventData[1];
         }
+        public long GetKeyValue()
+        {
+            return Code;
+        }
         public override string ToString()
         {
             return Name;

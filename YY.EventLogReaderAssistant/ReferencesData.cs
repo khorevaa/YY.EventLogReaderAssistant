@@ -13,54 +13,47 @@ namespace YY.EventLogReaderAssistant
 
         public ReferencesData()
         {
-            _applications = new List<Applications>();
-            _computers = new List<Computers>();
-            _metadata = new List<Metadata>();
-            _events = new List<Events>();
-            _primaryPorts = new List<PrimaryPorts>();
-            _secondaryPorts = new List<SecondaryPorts>();
-            _users = new List<Users>();
-            _workServers = new List<WorkServers>();
+            _applications = new Dictionary<long, Applications>();
+            _computers = new Dictionary<long, Computers>();
+            _events = new Dictionary<long, Events>();
+            _metadata = new Dictionary<long, Metadata>();
+            _primaryPorts = new Dictionary<long, PrimaryPorts>();
+            _secondaryPorts = new Dictionary<long, SecondaryPorts>();
+            _users = new Dictionary<long, Users>();
+            _workServers = new Dictionary<long, WorkServers>();
+            _severity = new Dictionary<long, Severity>();
+            _transactionStatus = new Dictionary<long, TransactionStatus>();
         }
 
         #endregion
 
         #region Private Members
-
-        internal List<Applications> _applications;
-        internal List<Computers> _computers;
-        internal List<Events> _events;
-        internal List<Metadata> _metadata;
-        internal List<PrimaryPorts> _primaryPorts;
-        internal List<SecondaryPorts> _secondaryPorts;
-        internal List<Users> _users;
-        internal List<WorkServers> _workServers;
-
-        private Dictionary<long, Applications> _applicationsDictionary;
-        private Dictionary<long, Computers> _computersDictionary;
-        private Dictionary<long, Events> _eventsDictionary;
-        private Dictionary<long, Metadata> _metadataDictionary;
-        private Dictionary<long, PrimaryPorts> _primaryPortsDictionary;
-        private Dictionary<long, SecondaryPorts> _secondaryPortsDictionary;
-        private Dictionary<long, Users> _usersDictionary;
-        private Dictionary<long, WorkServers> _workServersDictionary;
-        private Dictionary<long, Severity> _severityDictionary;
-        private Dictionary<long, TransactionStatus> _transactionStatusDictionary;
+        
+        internal Dictionary<long, Applications> _applications;
+        internal Dictionary<long, Computers> _computers;
+        internal Dictionary<long, Events> _events;
+        internal Dictionary<long, Metadata> _metadata;
+        internal Dictionary<long, PrimaryPorts> _primaryPorts;
+        internal Dictionary<long, SecondaryPorts> _secondaryPorts;
+        internal Dictionary<long, Users> _users;
+        internal Dictionary<long, WorkServers> _workServers;
+        internal Dictionary<long, Severity> _severity;
+        internal Dictionary<long, TransactionStatus> _transactionStatus;
 
         #endregion
 
         #region Public Members
 
-        public IReadOnlyDictionary<long, Applications> ApplicationsDictionary =>  _applicationsDictionary ?? (_applicationsDictionary = ConvertListToDictionary(_applications));
-        public IReadOnlyDictionary<long, Computers> ComputersDictionary => _computersDictionary ?? (_computersDictionary = ConvertListToDictionary(_computers));
-        public IReadOnlyDictionary<long, Events> EventsDictionary => _eventsDictionary ?? (_eventsDictionary = ConvertListToDictionary(_events));
-        public IReadOnlyDictionary<long, Metadata> MetadataDictionary => _metadataDictionary ?? (_metadataDictionary = ConvertListToDictionary(_metadata));
-        public IReadOnlyDictionary<long, PrimaryPorts> PrimaryPortsDictionary => _primaryPortsDictionary ?? (_primaryPortsDictionary = ConvertListToDictionary(_primaryPorts));
-        public IReadOnlyDictionary<long, SecondaryPorts> SecondaryPortsDictionary => _secondaryPortsDictionary ?? (_secondaryPortsDictionary = ConvertListToDictionary(_secondaryPorts));
-        public IReadOnlyDictionary<long, Users> UsersDictionary => _usersDictionary ?? (_usersDictionary = ConvertListToDictionary(_users));
-        public IReadOnlyDictionary<long, WorkServers> WorkServersDictionary => _workServersDictionary ?? (_workServersDictionary = ConvertListToDictionary(_workServers));
-        public IReadOnlyDictionary<long, Severity> Severities => _severityDictionary ?? ( _severityDictionary = EnumToDictionary<Severity>());
-        public IReadOnlyDictionary<long, TransactionStatus> TransactionStatuses => _transactionStatusDictionary ?? (_transactionStatusDictionary = EnumToDictionary<TransactionStatus>());
+        public IReadOnlyDictionary<long, Applications> Applications =>  _applications;
+        public IReadOnlyDictionary<long, Computers> Computers => _computers;
+        public IReadOnlyDictionary<long, Events> Events => _events;
+        public IReadOnlyDictionary<long, Metadata> Metadata => _metadata;
+        public IReadOnlyDictionary<long, PrimaryPorts> PrimaryPorts => _primaryPorts;
+        public IReadOnlyDictionary<long, SecondaryPorts> SecondaryPorts => _secondaryPorts;
+        public IReadOnlyDictionary<long, Users> Users => _users;
+        public IReadOnlyDictionary<long, WorkServers> WorkServers => _workServers;
+        public IReadOnlyDictionary<long, Severity> Severities => _severity;
+        public IReadOnlyDictionary<long, TransactionStatus> TransactionStatuses => _transactionStatus;
 
         #endregion
 
@@ -75,7 +68,7 @@ namespace YY.EventLogReaderAssistant
 
         #region Private Methods
 
-        private Dictionary<long, T> ConvertListToDictionary<T>(List<T> sourceList) where T : ReferenceObject, new()
+        private Dictionary<long, T> ListToDictionary<T>(IReadOnlyCollection<T> sourceList) where T : ReferenceObject, new()
         {
             Dictionary<long, T> resultDictionary = new Dictionary<long, T>();
             if (sourceList != null)

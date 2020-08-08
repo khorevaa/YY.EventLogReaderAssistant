@@ -74,7 +74,7 @@ namespace YY.EventLogReaderAssistant.Helpers
         }
         public static Users GetUserByCode(this EventLogReader reader, long code)
         {
-            reader.References.UsersDictionary.TryGetValue(code, out var output);
+            reader.References.Users.TryGetValue(code, out var output);
             return output;
         }
         public static Computers GetComputerByCode(this EventLogReader reader, string code)
@@ -83,7 +83,7 @@ namespace YY.EventLogReaderAssistant.Helpers
         }
         public static Computers GetComputerByCode(this EventLogReader reader, long code)
         {
-            reader.References.ComputersDictionary.TryGetValue(code, out var output);
+            reader.References.Computers.TryGetValue(code, out var output);
             return output;
         }
         public static Applications GetApplicationByCode(this EventLogReader reader, string code)
@@ -92,7 +92,7 @@ namespace YY.EventLogReaderAssistant.Helpers
         }
         public static Applications GetApplicationByCode(this EventLogReader reader, long code)
         {
-            reader.References.ApplicationsDictionary.TryGetValue(code, out var output);
+            reader.References.Applications.TryGetValue(code, out var output);
             return output;
         }
         public static Events GetEventByCode(this EventLogReader reader, string code)
@@ -101,7 +101,7 @@ namespace YY.EventLogReaderAssistant.Helpers
         }
         public static Events GetEventByCode(this EventLogReader reader, long code)
         {
-            reader.References.EventsDictionary.TryGetValue(code, out var output);
+            reader.References.Events.TryGetValue(code, out var output);
             return output;
         }
         public static Metadata GetMetadataByCode(this EventLogReader reader, string code)
@@ -110,7 +110,7 @@ namespace YY.EventLogReaderAssistant.Helpers
         }
         public static Metadata GetMetadataByCode(this EventLogReader reader, long code)
         {
-            reader.References.MetadataDictionary.TryGetValue(code, out var output);
+            reader.References.Metadata.TryGetValue(code, out var output);
             return output;
         }
         public static WorkServers GetWorkServerByCode(this EventLogReader reader, string code)
@@ -119,7 +119,7 @@ namespace YY.EventLogReaderAssistant.Helpers
         }
         public static WorkServers GetWorkServerByCode(this EventLogReader reader, long code)
         {
-            reader.References.WorkServersDictionary.TryGetValue(code, out var output);
+            reader.References.WorkServers.TryGetValue(code, out var output);
             return output;
         }
         public static PrimaryPorts GetPrimaryPortByCode(this EventLogReader reader, string code)
@@ -128,7 +128,7 @@ namespace YY.EventLogReaderAssistant.Helpers
         }
         public static PrimaryPorts GetPrimaryPortByCode(this EventLogReader reader, long code)
         {
-            reader.References.PrimaryPortsDictionary.TryGetValue(code, out var output);
+            reader.References.PrimaryPorts.TryGetValue(code, out var output);
             return output;
         }
         public static SecondaryPorts GetSecondaryPortByCode(this EventLogReader reader, string code)
@@ -137,7 +137,7 @@ namespace YY.EventLogReaderAssistant.Helpers
         }
         public static SecondaryPorts GetSecondaryPortByCode(this EventLogReader reader, long code)
         {
-            reader.References.SecondaryPortsDictionary.TryGetValue(code, out var output);
+            reader.References.SecondaryPorts.TryGetValue(code, out var output);
             return output;
         }
     }
