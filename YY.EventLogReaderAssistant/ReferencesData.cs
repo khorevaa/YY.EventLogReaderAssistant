@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using YY.EventLogReaderAssistant.Helpers;
 using YY.EventLogReaderAssistant.Models;
 
@@ -12,47 +13,47 @@ namespace YY.EventLogReaderAssistant
 
         public ReferencesData()
         {
-            FillDefaultReferences();
-
-            _applications = new List<Applications>();
-            _computers = new List<Computers>();
-            _metadata = new List<Metadata>();
-            _events = new List<Events>();
-            _primaryPorts = new List<PrimaryPorts>();
-            _secondaryPorts = new List<SecondaryPorts>();
-            _users = new List<Users>();
-            _workServers = new List<WorkServers>();
+            _applications = new Dictionary<long, Applications>();
+            _computers = new Dictionary<long, Computers>();
+            _events = new Dictionary<long, Events>();
+            _metadata = new Dictionary<long, Metadata>();
+            _primaryPorts = new Dictionary<long, PrimaryPorts>();
+            _secondaryPorts = new Dictionary<long, SecondaryPorts>();
+            _users = new Dictionary<long, Users>();
+            _workServers = new Dictionary<long, WorkServers>();
+            _severity = new Dictionary<long, Severity>();
+            _transactionStatus = new Dictionary<long, TransactionStatus>();
         }
 
         #endregion
 
         #region Private Members
-
-        internal List<Severity> _severitiesData;
-        internal List<TransactionStatus> _transactionStatusesData;
-        internal List<Applications> _applications;
-        internal List<Computers> _computers;
-        internal List<Events> _events;
-        internal List<Metadata> _metadata;
-        internal List<PrimaryPorts> _primaryPorts;
-        internal List<SecondaryPorts> _secondaryPorts;
-        internal List<Users> _users;
-        internal List<WorkServers> _workServers;
+        
+        internal Dictionary<long, Applications> _applications;
+        internal Dictionary<long, Computers> _computers;
+        internal Dictionary<long, Events> _events;
+        internal Dictionary<long, Metadata> _metadata;
+        internal Dictionary<long, PrimaryPorts> _primaryPorts;
+        internal Dictionary<long, SecondaryPorts> _secondaryPorts;
+        internal Dictionary<long, Users> _users;
+        internal Dictionary<long, WorkServers> _workServers;
+        internal Dictionary<long, Severity> _severity;
+        internal Dictionary<long, TransactionStatus> _transactionStatus;
 
         #endregion
 
         #region Public Members
 
-        public IReadOnlyList<Severity> Severities => _severitiesData;
-        public IReadOnlyList<TransactionStatus> TransactionStatuses => _transactionStatusesData;
-        public IReadOnlyList<Applications> Applications => _applications;
-        public IReadOnlyList<Computers> Computers => _computers;
-        public IReadOnlyList<Events> Events => _events;
-        public IReadOnlyList<Metadata> Metadata => _metadata;
-        public IReadOnlyList<PrimaryPorts> PrimaryPorts => _primaryPorts;
-        public IReadOnlyList<SecondaryPorts> SecondaryPorts => _secondaryPorts;
-        public IReadOnlyList<Users> Users => _users;
-        public IReadOnlyList<WorkServers> WorkServers => _workServers;
+        public IReadOnlyDictionary<long, Applications> Applications =>  _applications;
+        public IReadOnlyDictionary<long, Computers> Computers => _computers;
+        public IReadOnlyDictionary<long, Events> Events => _events;
+        public IReadOnlyDictionary<long, Metadata> Metadata => _metadata;
+        public IReadOnlyDictionary<long, PrimaryPorts> PrimaryPorts => _primaryPorts;
+        public IReadOnlyDictionary<long, SecondaryPorts> SecondaryPorts => _secondaryPorts;
+        public IReadOnlyDictionary<long, Users> Users => _users;
+        public IReadOnlyDictionary<long, WorkServers> WorkServers => _workServers;
+        public IReadOnlyDictionary<long, Severity> Severities => _severity;
+        public IReadOnlyDictionary<long, TransactionStatus> TransactionStatuses => _transactionStatus;
 
         #endregion
 
@@ -67,24 +68,18 @@ namespace YY.EventLogReaderAssistant
 
         #region Private Methods
 
-        private void FillDefaultReferences()
+        private Dictionary<long, T> ListToDictionary<T>(IReadOnlyCollection<T> sourceList) where T : ReferenceObject, new()
         {
-            _severitiesData = new List<Severity>
-            {
-                Severity.Error,
-                Severity.Information,
-                Severity.Note,
-                Severity.Unknown,
-                Severity.Warning
-            };
-            _transactionStatusesData = new List<TransactionStatus>
-            {
-                TransactionStatus.Committed,
-                TransactionStatus.NotApplicable,
-                TransactionStatus.RolledBack,
-                TransactionStatus.Unfinished,
-                TransactionStatus.Unknown
-            };
+            Dictionary<long, T> resultDictionary = new Dictionary<long, T>();
+            if (sourceList != null)
+                resultDictionary = sourceList.ToDictionary(x => x.Code, x => x);
+            return resultDictionary;
+        }
+        private Dictionary<long, T> EnumToDictionary<T>() where T : Enum
+        {
+            return Enum.GetValues(typeof(T))
+                .Cast<T>()
+                .ToDictionary(t => (long)(object)t, t => t);
         }
 
         #endregion

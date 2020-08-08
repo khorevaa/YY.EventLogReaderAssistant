@@ -89,13 +89,13 @@ namespace YY.EventLogReaderAssistant
                     if (LogParserLGF.ItsEndOfEvent(sourceData, ref countBracket, ref textBlockOpen))
                     {
                         _currentFileEventNumber += 1;
-                        string prepearedSourceData = _eventSource.ToString();
+                        string preparedSourceData = _eventSource.ToString();
 
-                        RaiseBeforeRead(new BeforeReadEventArgs(prepearedSourceData, _currentFileEventNumber));
+                        RaiseBeforeRead(new BeforeReadEventArgs(preparedSourceData, _currentFileEventNumber));
 
                         try
                         {
-                            RowData eventData = ReadRowData(prepearedSourceData);
+                            RowData eventData = ReadRowData(preparedSourceData);
 
                             if (!EventAllowedByPeriod(eventData))
                             {
@@ -111,7 +111,7 @@ namespace YY.EventLogReaderAssistant
                         }
                         catch (Exception ex)
                         {
-                            RaiseOnError(new OnErrorEventArgs(ex, prepearedSourceData, false));
+                            RaiseOnError(new OnErrorEventArgs(ex, preparedSourceData, false));
                             _currentRow = null;
                             output = true;
                             break;

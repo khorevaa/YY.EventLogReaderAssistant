@@ -318,7 +318,7 @@ namespace YY.EventLogReaderAssistant
 
             base.ReadEventLogReferences();
         }
-        private void ReadReferencesByType<T>(List<T> referenceCollection, string cmdSqliteText) where T: IReferenceObject, new()
+        private void ReadReferencesByType<T>(Dictionary<long, T> referenceCollection, string cmdSqliteText) where T : IReferenceObject, new()
         {
             referenceCollection.Clear();
 
@@ -329,7 +329,7 @@ namespace YY.EventLogReaderAssistant
                     {
                         IReferenceObject referenceObject = new T();
                         referenceObject.FillBySqliteReader(readerReferences);
-                        referenceCollection.Add((T)referenceObject);
+                        referenceCollection.Add(referenceObject.GetKeyValue(), (T)referenceObject);
                     }
             }
         }
