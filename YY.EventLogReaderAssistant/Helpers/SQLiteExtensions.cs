@@ -14,14 +14,13 @@ namespace YY.EventLogReaderAssistant.Helpers
         {
             try
             {
-                return reader.GetString(valueIndex);
+                return reader.GetString(valueIndex).Trim('\"');
             }
             catch
             {
                 return string.Empty;
             }
         }
-
         public static long GetInt64OrDefault(this SQLiteDataReader reader, int valueIndex)
         {
             try
@@ -33,7 +32,6 @@ namespace YY.EventLogReaderAssistant.Helpers
                 return 0;
             }
         }
-
         public static string GetRowAsString(this SQLiteDataReader reader)
         {
             StringBuilder builder = new StringBuilder();
@@ -48,11 +46,10 @@ namespace YY.EventLogReaderAssistant.Helpers
 
             return builder.ToString();
         }
-
         public static string GetConnectionString(string dbFile, bool readOnly = true)
         {
             string readOnlyMode = readOnly ? "True" : "False";
-            return string.Format("Data Source={0};Version=3;Read Only={1};", dbFile, readOnlyMode);
+            return $"Data Source={dbFile};Version=3;Read Only={readOnlyMode};";
         }
 
         #endregion
