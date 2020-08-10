@@ -13,7 +13,7 @@ namespace YY.EventLogReaderAssistant.Models
 
         static RowData()
         {
-            _regexDataUuid = new Regex(@"[\d]+:[\dA-Za-zА-Яа-я]{32}}");
+            _regexDataUuid = new Regex(@"[\d]+:[\dA-Za-zА-Яа-я]{32}");
         }
 
         #region Public Members
@@ -63,6 +63,7 @@ namespace YY.EventLogReaderAssistant.Models
             Severity = reader.GetSeverityByCode(sqlReader.GetInt64OrDefault(14));
             Comment = sqlReader.GetStringOrDefault(15);
             Data = sqlReader.GetStringOrDefault(16).FromWin1251ToUtf8();
+            DataUuid = GetDataUuid(Data);
             DataPresentation = sqlReader.GetStringOrDefault(17);
             Metadata = reader.GetMetadataByCode(sqlReader.GetInt64OrDefault(18));
         }

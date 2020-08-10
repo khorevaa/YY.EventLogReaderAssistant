@@ -19,7 +19,7 @@ namespace YY.EventLogReaderAssistant.Models
         public virtual void FillBySqliteReader(SQLiteDataReader reader)
         {
             Code = reader.GetInt64(0);
-            Name = reader.GetString(1);
+            Name = reader.GetString(1).Trim('\"');
         }
         public virtual void FillByStringParsedData(string[] parsedEventData)
         {

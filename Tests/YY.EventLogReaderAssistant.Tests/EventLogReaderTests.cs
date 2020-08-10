@@ -19,7 +19,7 @@ namespace YY.EventLogReaderAssistant.Tests
 
         private readonly string _sampleDatabaseFileLGF;
         private readonly string _sampleDatabaseFileLgd;
-        private readonly string _sampleDatabaseFileLgdReadRefferencesIfChanged;
+        private readonly string _sampleDatabaseFileLgdReadReferencesIfChanged;
         private readonly string _sampleDatabaseFileLgdReadWithDelay;
         private readonly string _sampleDatabaseFileLGFBrokenFile;
         private readonly string _sampleDatabaseFileLGFOnChanging;
@@ -41,7 +41,7 @@ namespace YY.EventLogReaderAssistant.Tests
             var sampleDataDirectory = Path.Combine(currentDirectory, "SampleData");
             _sampleDatabaseFileLGF = Path.Combine(sampleDataDirectory, "LGFFormatEventLog", "1Cv8.lgf");
             _sampleDatabaseFileLgd = Path.Combine(sampleDataDirectory, "SQLiteFormatEventLog", "1Cv8.lgd");
-            _sampleDatabaseFileLgdReadRefferencesIfChanged = Path.Combine(
+            _sampleDatabaseFileLgdReadReferencesIfChanged = Path.Combine(
                 sampleDataDirectory, "SQLiteFormatEventLog", "1Cv8_ReadRefferences_IfChanged_Test.lgd");
             _sampleDatabaseFileLgdReadWithDelay = Path.Combine(sampleDataDirectory, "SQLiteFormatEventLogReadWithDelay", "1Cv8.lgd");
             _sampleDatabaseFileLGFBrokenFile = Path.Combine(sampleDataDirectory, "LGFFormatEventLogBrokenFile", "1Cv8.lgf");
@@ -132,14 +132,14 @@ namespace YY.EventLogReaderAssistant.Tests
             GoToEvent_Test(_sampleDatabaseFileLGF);
         }
         [Fact]
-        public void ReadRefferences_IfChanged_OldFormat_LGF_Test()
+        public void ReadReferences_IfChanged_OldFormat_LGF_Test()
         {
             ReadRefferences_IfChanged_Test(_sampleDatabaseFileLGF);
         }
         [Fact]
-        public void ReadRefferences_IfChanged_NewFormat_LGD_Test()
+        public void ReadReferences_IfChanged_NewFormat_LGD_Test()
         {
-            ReadRefferences_IfChanged_Test(_sampleDatabaseFileLgdReadRefferencesIfChanged);
+            ReadRefferences_IfChanged_Test(_sampleDatabaseFileLgdReadReferencesIfChanged);
         }
         [Fact]
         public void CheckIdAfterSetPosition_OldFormat_LGF_Test()
