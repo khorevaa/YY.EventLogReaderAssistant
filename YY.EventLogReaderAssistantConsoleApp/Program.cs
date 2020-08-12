@@ -4,7 +4,7 @@ using YY.EventLogReaderAssistant.EventArguments;
 
 namespace YY.EventLogReaderAssistantConsoleApp
 {
-    class Program
+    static class Program
     {
         private static int _eventNumber;
 
