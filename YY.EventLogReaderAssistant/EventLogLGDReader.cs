@@ -69,9 +69,15 @@ namespace YY.EventLogReaderAssistant
 
                 RaiseBeforeRead(new BeforeReadEventArgs(null, _eventCount));
 
-                _currentRow = _readBuffer.First(bufRow => bufRow.RowId > _lastRowId);
-                _lastRowNumberFromBuffer += 1;
+                _currentRow = _readBuffer.FirstOrDefault(bufRow => bufRow.RowId > _lastRowId);
+                if (_currentRow == null)
+                {
+                    return false;
+                }
+
+
                 _lastRowId = _currentRow.RowId;
+                _lastRowNumberFromBuffer += 1;
                 _currentFileEventNumber += 1;
 
                 RaiseAfterRead(new AfterReadEventArgs(_currentRow, _eventCount));
