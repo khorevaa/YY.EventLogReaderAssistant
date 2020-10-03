@@ -1,6 +1,8 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text;
 
 [assembly: InternalsVisibleTo("YY.EventLogReaderAssistant.Tests")]
 namespace YY.EventLogReaderAssistant.Helpers
@@ -9,7 +11,7 @@ namespace YY.EventLogReaderAssistant.Helpers
     {
         #region Private Member Variables
 
-        readonly static FieldInfo CharPosField = typeof(StreamReader).GetField("_charPos", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+        private static readonly FieldInfo CharPosField = typeof(StreamReader).GetField("_charPos", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly);
         static readonly FieldInfo ByteLenField = typeof(StreamReader).GetField("_byteLen", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly);
         static readonly FieldInfo CharBufferField = typeof(StreamReader).GetField("_charBuffer", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly);
 
@@ -17,6 +19,22 @@ namespace YY.EventLogReaderAssistant.Helpers
 
         #region Public Methods
 
+        public static string ReadLineWithoutNull(this StreamReader reader)
+        {
+            StringBuilder sb = new StringBuilder();
+            while (!reader.EndOfStream)
+            {
+                Char c = (char)reader.Read();
+                if (c == '\0') 
+                    continue;
+                sb.Append(c);
+                if (c == '\n')
+                    break;
+            }
+
+            var lineString = sb.Length > 0 ? sb.ToString().Trim() : null;
+            return lineString;
+        }
         public static long GetPosition(this StreamReader reader)
         {
             int byteLen = (int)ByteLenField.GetValue(reader);
@@ -33,13 +51,11 @@ namespace YY.EventLogReaderAssistant.Helpers
 
             return position;
         }
-
         public static void SetPosition(this StreamReader reader, long position)
         {
             reader.DiscardBufferedData();
             reader.BaseStream.Seek(position, SeekOrigin.Begin);
         }
-
         public static void SkipLine(this StreamReader stream, long numberToSkip)
         {
             for (int i = 0; i < numberToSkip; i++)
