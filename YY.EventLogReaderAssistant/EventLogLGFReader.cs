@@ -298,10 +298,10 @@ namespace YY.EventLogReaderAssistant
         }
         private string ReadSourceDataFromStream()
         {
-            string sourceData = _stream.ReadLine();
+            string sourceData = _stream.ReadLineWithoutNull();
 
             if (sourceData == "," && NextLineIsBeginEvent())
-                sourceData = _stream.ReadLine();
+                sourceData = _stream.ReadLineWithoutNull();
 
             return sourceData;
         }
@@ -375,10 +375,11 @@ namespace YY.EventLogReaderAssistant
             {
                 using (StreamReader logFileStream = new StreamReader(File.Open(logFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
                 {
+                    
                     do
                     {
-                        string logFileCurrentString = logFileStream.ReadLine();
-                        if(LogParserLGF.ItsBeginOfEvent(logFileCurrentString))
+                        string logFileCurrentString = logFileStream.ReadLineWithoutNull();
+                        if (LogParserLGF.ItsBeginOfEvent(logFileCurrentString))
                             eventCount++;
                     } while (!logFileStream.EndOfStream);
                 }
@@ -399,7 +400,7 @@ namespace YY.EventLogReaderAssistant
                 using (StreamReader checkReader = new StreamReader(fileStreamCheckReader))
                 {
                     checkReader.SetPosition(currentStreamPosition);
-                    string lineContent = checkReader.ReadLine();
+                    string lineContent = checkReader.ReadLineWithoutNull();
                     nextIsBeginEvent = LogParserLGF.ItsBeginOfEvent(lineContent);
                 }
             }            
@@ -436,7 +437,7 @@ namespace YY.EventLogReaderAssistant
                 {
                     fileStreamCheckPosition.Seek(newStreamPosition, SeekOrigin.Begin);
                     using (StreamReader fileStreamCheckReader = new StreamReader(fileStreamCheckPosition))
-                        beginEventLine = fileStreamCheckReader.ReadLine();
+                        beginEventLine = fileStreamCheckReader.ReadLineWithoutNull();
                 }
 
                 if (beginEventLine == null)
