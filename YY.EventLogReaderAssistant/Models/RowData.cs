@@ -18,7 +18,7 @@ namespace YY.EventLogReaderAssistant.Models
 
         #region Public Members
 
-        public DateTimeOffset Period { get; set; }
+        public DateTime Period { get; set; }
         public long RowId { get; set; }
         public Severity Severity { get; set; }
         public long? ConnectId { get; set; }
