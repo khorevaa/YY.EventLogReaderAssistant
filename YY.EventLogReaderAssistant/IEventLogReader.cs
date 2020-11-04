@@ -12,6 +12,5 @@ namespace YY.EventLogReaderAssistant
         long Count();
         void Reset();
         void NextFile();
-        void SetReadDelay(double milliseconds);
     }
 }

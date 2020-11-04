@@ -20,10 +20,8 @@ namespace YY.EventLogReaderAssistant.Tests
         private readonly string _sampleDatabaseFileLGF;
         private readonly string _sampleDatabaseFileLgd;
         private readonly string _sampleDatabaseFileLgdReadReferencesIfChanged;
-        private readonly string _sampleDatabaseFileLgdReadWithDelay;
         private readonly string _sampleDatabaseFileLGFBrokenFile;
         private readonly string _sampleDatabaseFileLGFOnChanging;
-        private readonly string _sampleDatabaseFileLGFReadWithDelay;
 
         private OnErrorEventArgs _lastErrorData;
         private long _eventCountSuccess;
@@ -43,10 +41,8 @@ namespace YY.EventLogReaderAssistant.Tests
             _sampleDatabaseFileLgd = Path.Combine(sampleDataDirectory, "SQLiteFormatEventLog", "1Cv8.lgd");
             _sampleDatabaseFileLgdReadReferencesIfChanged = Path.Combine(
                 sampleDataDirectory, "SQLiteFormatEventLog", "1Cv8_ReadRefferences_IfChanged_Test.lgd");
-            _sampleDatabaseFileLgdReadWithDelay = Path.Combine(sampleDataDirectory, "SQLiteFormatEventLogReadWithDelay", "1Cv8.lgd");
             _sampleDatabaseFileLGFBrokenFile = Path.Combine(sampleDataDirectory, "LGFFormatEventLogBrokenFile", "1Cv8.lgf");
             _sampleDatabaseFileLGFOnChanging = Path.Combine(sampleDataDirectory, "LGFFormatEventLogOnChanging", "1Cv8.lgf");
-            _sampleDatabaseFileLGFReadWithDelay = Path.Combine(sampleDataDirectory, "LGFFormatEventLogReadWithDelay", "1Cv8.lgf");
 
             _eventCountSuccess = 0;
             _eventCountError = 0;
@@ -169,7 +165,6 @@ namespace YY.EventLogReaderAssistant.Tests
 
             using (EventLogReader reader = EventLogReader.CreateReader(_sampleDatabaseFileLGFOnChanging))
             {
-                reader.SetReadDelay(0);
                 long totalEvents = reader.Count();
                 long currentEventNumber = 0;
                 
@@ -208,188 +203,6 @@ namespace YY.EventLogReaderAssistant.Tests
             Assert.Equal(newLogRecordPeriod.Minute, lastRowData.Period.Minute);
             Assert.Equal(newLogRecordPeriod.Second, lastRowData.Period.Second);
         }
-        [Fact]
-        public void ReadOnChanging_WithReadDelay_OldFormat_LFG_Test()
-        {
-            DateTime newLogRecordPeriod = DateTime.Now.AddHours(1);
-            RowData lastRowData;
-
-            using (EventLogReader reader = EventLogReader.CreateReader(_sampleDatabaseFileLGFReadWithDelay))
-            {
-                long totalEvents = reader.Count();
-                long currentEventNumber = 0;
-
-                reader.SetReadDelay(1000);
-                bool dataExist;
-                do
-                {
-                    dataExist = reader.Read();
-                    lastRowData = reader.CurrentRow;
-                    currentEventNumber += 1;
-
-                    if (totalEvents == currentEventNumber)
-                    {
-                        string descriptionNewEvent = "Новое событие в процессе чтения!";
-                        string newLogRecordPeriodAsString = newLogRecordPeriod.ToString("yyyyMMddHHmmss");
-
-                        using (StreamWriter sw = File.AppendText(reader.CurrentFile))
-                        {
-                            sw.WriteLine(",");
-                            sw.WriteLine($"{{{newLogRecordPeriodAsString},N,");
-                            sw.WriteLine($"{{0,0}},1,1,2,2,3,N,\"{descriptionNewEvent}\",3,");
-                            sw.WriteLine($"{{\"S\",\"{descriptionNewEvent}\"}},\"\",1,1,0,2,0,");
-                            sw.WriteLine("{0}");
-                            sw.WriteLine("}");
-                        }
-
-                        reader.Read();
-                        lastRowData = reader.CurrentRow;
-                        break;
-                    }
-                } while (dataExist);
-            }
-                        
-            Assert.Null(lastRowData);
-        }
-        [Fact]
-        public void ReadOnChanging_WithReadDelay_NewFormat_LGD_Test()
-        {
-            DateTime newLogRecordPeriod = DateTime.Now.AddHours(1);
-            RowData lastRowData = null;
-
-            #region addNewRecord
-
-            string lgdConnectionString = SQLiteExtensions.GetConnectionString(_sampleDatabaseFileLgdReadWithDelay, false);
-            using (SQLiteConnection connection = new SQLiteConnection(lgdConnectionString))
-            {
-                connection.Open();
-                string queryText = String.Format(
-                    "Select\n" +
-                    "    el.RowId,\n" +
-                    "    el.Date AS Date,\n" +
-                    "    el.ConnectId,\n" +
-                    "    el.Session,\n" +
-                    "    el.TransactionStatus,\n" +
-                    "    el.TransactionDate,\n" +
-                    "    el.TransactionId,\n" +
-                    "    el.UserCode AS UserCode,\n" +
-                    "    el.ComputerCode AS ComputerCode,\n" +
-                    "    el.appCode AS ApplicationCode,\n" +
-                    "    el.eventCode AS EventCode,\n" +
-                    "    el.primaryPortCode AS PrimaryPortCode,\n" +
-                    "    el.secondaryPortCode AS SecondaryPortCode,\n" +
-                    "    el.workServerCode AS WorkServerCode,\n" +
-                    "    el.Severity AS SeverityCode,\n" +
-                    "    el.Comment AS Comment,\n" +
-                    "    el.Data AS Data,\n" +
-                    "    el.DataPresentation AS DataPresentation,\n" +
-                    "    elm.metadataCode AS MetadataCode\n" +
-                    "From\n" +
-                    "    EventLog el\n" +
-                    "    left join EventLogMetadata elm on el.RowId = elm.eventLogID\n" +
-                    "    left join MetadataCodes mc on elm.metadataCode = mc.code\n" +
-                    "Where RowID = (SELECT MAX(RowID) from EventLog)\n");
-
-                long rowId = 0, connectId = 0, session = 0,
-                        transactionStatus = 0, transactionDate = 0, transactionId = 0,
-                        user = 0, computer = 0, application = 0, @event = 0, primaryPort = 0,
-                        secondaryPort = 0, workServer = 0, severity = 0;
-                string comment = string.Empty, data = string.Empty, dataPresentation = string.Empty;
-
-                using (SQLiteCommand sqliteCmd = new SQLiteCommand(queryText, connection))
-                {
-                    using (SQLiteDataReader sqliteReader = sqliteCmd.ExecuteReader())
-                    {
-                        while (sqliteReader.Read())
-                        {
-                            rowId = sqliteReader.GetInt64OrDefault(0);
-                            connectId = sqliteReader.GetInt64OrDefault(2);
-                            session = sqliteReader.GetInt64OrDefault(3);
-                            transactionStatus = sqliteReader.GetInt64OrDefault(4);
-                            transactionDate = sqliteReader.GetInt64OrDefault(5);
-                            transactionId = sqliteReader.GetInt64OrDefault(6);
-                            user = sqliteReader.GetInt64OrDefault(7);
-                            computer = sqliteReader.GetInt64OrDefault(8);
-                            application = sqliteReader.GetInt64OrDefault(9);
-                            @event = sqliteReader.GetInt64OrDefault(10);
-                            primaryPort = sqliteReader.GetInt64OrDefault(11);
-                            secondaryPort = sqliteReader.GetInt64OrDefault(12);
-                            workServer = sqliteReader.GetInt64OrDefault(13);
-                            severity = sqliteReader.GetInt64OrDefault(14);
-                            comment = sqliteReader.GetStringOrDefault(15);
-                            data = sqliteReader.GetStringOrDefault(16);
-                            dataPresentation = sqliteReader.GetStringOrDefault(17);
-                        }
-                    }
-                }
-
-                string queryInsertLog =
-                    "INSERT INTO EventLog " +
-                    "(" +
-                    "   RowId, " +
-                    "   Date, " +
-                    "   ConnectId, " +
-                    "   Session, " +
-                    "   TransactionStatus, " +
-                    "   TransactionDate, " +
-                    "   TransactionId, " +
-                    "   UserCode, " +
-                    "   ComputerCode, " +
-                    "   appCode, " +
-                    "   eventCode, " +
-                    "   primaryPortCode, " +
-                    "   secondaryPortCode, " +
-                    "   workServerCode, " +
-                    "   Severity, " +
-                    "   Comment, " +
-                    "   Data, " +
-                    "   DataPresentation " +
-                    ") " +
-                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-
-                using (SQLiteCommand insertSql = new SQLiteCommand(queryInsertLog, connection))
-                {
-                    long newRowId = rowId + 1;
-                    long newPeriod = newLogRecordPeriod.ToLongDateTimeFormat();
-
-                    insertSql.Parameters.Add(new SQLiteParameter(DbType.Int64, newRowId));
-                    insertSql.Parameters.Add(new SQLiteParameter(DbType.Int64, newPeriod));
-                    insertSql.Parameters.Add(new SQLiteParameter(DbType.Int64, connectId));
-                    insertSql.Parameters.Add(new SQLiteParameter(DbType.Int64, session));
-                    insertSql.Parameters.Add(new SQLiteParameter(DbType.Int64, transactionStatus));
-                    insertSql.Parameters.Add(new SQLiteParameter(DbType.Int64, transactionDate));
-                    insertSql.Parameters.Add(new SQLiteParameter(DbType.Int64, transactionId));
-                    insertSql.Parameters.Add(new SQLiteParameter(DbType.Int64, user));
-                    insertSql.Parameters.Add(new SQLiteParameter(DbType.Int64, computer));
-                    insertSql.Parameters.Add(new SQLiteParameter(DbType.Int64, application));
-                    insertSql.Parameters.Add(new SQLiteParameter(DbType.Int64, @event));
-                    insertSql.Parameters.Add(new SQLiteParameter(DbType.Int64, primaryPort));
-                    insertSql.Parameters.Add(new SQLiteParameter(DbType.Int64, secondaryPort));
-                    insertSql.Parameters.Add(new SQLiteParameter(DbType.Int64, workServer));
-                    insertSql.Parameters.Add(new SQLiteParameter(DbType.Int64, severity));
-                    insertSql.Parameters.Add(new SQLiteParameter(DbType.String, comment));
-                    insertSql.Parameters.Add(new SQLiteParameter(DbType.String, data));
-                    insertSql.Parameters.Add(new SQLiteParameter(DbType.String, dataPresentation));
-                    insertSql.ExecuteNonQuery();
-                }
-            }
-
-            #endregion
-
-            using (EventLogReader reader = EventLogReader.CreateReader(_sampleDatabaseFileLgdReadWithDelay))
-            {
-                bool dataExist;
-                do
-                {
-                    dataExist = reader.Read();
-                    if(dataExist)
-                        lastRowData = reader.CurrentRow;
-                } while (dataExist);
-            }
-
-            Assert.NotNull(lastRowData);
-            Assert.NotEqual(newLogRecordPeriod, lastRowData.Period);
-        }
 
         #endregion
 
@@ -399,7 +212,6 @@ namespace YY.EventLogReaderAssistant.Tests
         {
             int checkIdSteps = 5;
             RowData rowAfterSteps;
-            EventLogPosition positionAfterSteps;
             RowData rowAfterSetPosition = null;
 
             using (EventLogReader reader = EventLogReader.CreateReader(eventLogPath))
@@ -407,7 +219,7 @@ namespace YY.EventLogReaderAssistant.Tests
                 for (int i = 0; i < checkIdSteps; i++)                
                     reader.Read();
                 rowAfterSteps = reader.CurrentRow;
-                positionAfterSteps = reader.GetCurrentPosition();
+                var positionAfterSteps = reader.GetCurrentPosition();
 
                 reader.Reset();
                 reader.SetCurrentPosition(positionAfterSteps);

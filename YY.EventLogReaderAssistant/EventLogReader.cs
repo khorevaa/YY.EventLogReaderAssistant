@@ -59,8 +59,6 @@ namespace YY.EventLogReaderAssistant
         protected ReferencesData _referencesData;
         protected RowData _currentRow;
 
-        protected double _readDelayMilliseconds;
-
         #endregion
 
         #region Constructor
@@ -74,8 +72,6 @@ namespace YY.EventLogReaderAssistant
 
             _referencesReadDate = DateTime.MinValue;
             ReadEventLogReferences();
-
-            _readDelayMilliseconds = 1000;
         }
 
         #endregion
@@ -90,13 +86,6 @@ namespace YY.EventLogReaderAssistant
         public string LogFilePath => _logFilePath;
         public string LogFileDirectoryPath => _logFileDirectoryPath;
         public virtual string CurrentFile => null;
-        public double ReadDelayMilliseconds
-        {
-            get
-            {
-                return _readDelayMilliseconds;
-            }
-        }
 
         #endregion
 
@@ -130,10 +119,6 @@ namespace YY.EventLogReaderAssistant
         {
             throw new NotImplementedException();
         }
-        public virtual void SetReadDelay(double milliseconds)
-        {
-            _readDelayMilliseconds = milliseconds;
-        }
         public virtual void Dispose()
         {
             _referencesData = null;
@@ -146,17 +131,6 @@ namespace YY.EventLogReaderAssistant
 
         protected virtual void ReadEventLogReferences()
         {
-        }
-        protected bool EventAllowedByPeriod(RowData eventData)
-        {
-            if (Math.Abs(_readDelayMilliseconds) > 0 && eventData != null)
-            {
-                DateTimeOffset stopPeriod = DateTimeOffset.Now.AddMilliseconds(-_readDelayMilliseconds);
-                if (eventData.Period >= stopPeriod)
-                    return false;
-            }
-
-            return true;
         }
 
         #endregion

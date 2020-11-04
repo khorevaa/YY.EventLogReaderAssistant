@@ -7,6 +7,7 @@ namespace YY.EventLogReaderAssistantConsoleApp
     static class Program
     {
         private static int _eventNumber;
+        private static DateTime _lastPeriodEvent = DateTime.MinValue;
 
         static void Main(string[] args)
         {
@@ -43,6 +44,7 @@ namespace YY.EventLogReaderAssistantConsoleApp
         {
             Console.WriteLine($"{DateTime.Now}: Начало чтения файла \"{args.FileName}\"");
             Console.WriteLine($"{DateTime.Now}: {_eventNumber}");
+            Console.WriteLine($"{DateTime.Now}: {_lastPeriodEvent}");
         }
 
         private static void Reader_AfterReadFile(EventLogReader sender, AfterReadFileEventArgs args)
@@ -52,14 +54,19 @@ namespace YY.EventLogReaderAssistantConsoleApp
 
         private static void Reader_BeforeReadEvent(EventLogReader sender, BeforeReadEventArgs args)
         {
-            Console.SetCursorPosition(0, Console.CursorTop - 1);
+            Console.SetCursorPosition(0, Console.CursorTop - 2);
             Console.WriteLine($"{DateTime.Now}: (+){_eventNumber}");
+            Console.WriteLine($"{DateTime.Now}: {_lastPeriodEvent}");
         }
 
         private static void Reader_AfterReadEvent(EventLogReader sender, AfterReadEventArgs args)
         {
-            Console.SetCursorPosition(0, Console.CursorTop - 1);
+            if(args.RowData != null)
+                _lastPeriodEvent = args.RowData.Period;
+
+            Console.SetCursorPosition(0, Console.CursorTop - 2);
             Console.WriteLine($"{DateTime.Now}: [+]{_eventNumber}");
+            Console.WriteLine($"{DateTime.Now}: {_lastPeriodEvent}");
         }
 
         private static void Reader_OnErrorEvent(EventLogReader sender, OnErrorEventArgs args)
