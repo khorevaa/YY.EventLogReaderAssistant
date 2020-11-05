@@ -20,10 +20,8 @@ namespace YY.EventLogReaderAssistant.Tests
         private readonly string _sampleDatabaseFileLGF;
         private readonly string _sampleDatabaseFileLgd;
         private readonly string _sampleDatabaseFileLgdReadReferencesIfChanged;
-        private readonly string _sampleDatabaseFileLgdReadWithDelay;
         private readonly string _sampleDatabaseFileLGFBrokenFile;
         private readonly string _sampleDatabaseFileLGFOnChanging;
-        private readonly string _sampleDatabaseFileLGFReadWithDelay;
 
         private OnErrorEventArgs _lastErrorData;
         private long _eventCountSuccess;
@@ -43,10 +41,8 @@ namespace YY.EventLogReaderAssistant.Tests
             _sampleDatabaseFileLgd = Path.Combine(sampleDataDirectory, "SQLiteFormatEventLog", "1Cv8.lgd");
             _sampleDatabaseFileLgdReadReferencesIfChanged = Path.Combine(
                 sampleDataDirectory, "SQLiteFormatEventLog", "1Cv8_ReadRefferences_IfChanged_Test.lgd");
-            _sampleDatabaseFileLgdReadWithDelay = Path.Combine(sampleDataDirectory, "SQLiteFormatEventLogReadWithDelay", "1Cv8.lgd");
             _sampleDatabaseFileLGFBrokenFile = Path.Combine(sampleDataDirectory, "LGFFormatEventLogBrokenFile", "1Cv8.lgf");
             _sampleDatabaseFileLGFOnChanging = Path.Combine(sampleDataDirectory, "LGFFormatEventLogOnChanging", "1Cv8.lgf");
-            _sampleDatabaseFileLGFReadWithDelay = Path.Combine(sampleDataDirectory, "LGFFormatEventLogReadWithDelay", "1Cv8.lgf");
 
             _eventCountSuccess = 0;
             _eventCountError = 0;
@@ -216,7 +212,6 @@ namespace YY.EventLogReaderAssistant.Tests
         {
             int checkIdSteps = 5;
             RowData rowAfterSteps;
-            EventLogPosition positionAfterSteps;
             RowData rowAfterSetPosition = null;
 
             using (EventLogReader reader = EventLogReader.CreateReader(eventLogPath))
@@ -224,7 +219,7 @@ namespace YY.EventLogReaderAssistant.Tests
                 for (int i = 0; i < checkIdSteps; i++)                
                     reader.Read();
                 rowAfterSteps = reader.CurrentRow;
-                positionAfterSteps = reader.GetCurrentPosition();
+                var positionAfterSteps = reader.GetCurrentPosition();
 
                 reader.Reset();
                 reader.SetCurrentPosition(positionAfterSteps);

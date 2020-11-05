@@ -24,7 +24,7 @@ namespace YY.EventLogReaderAssistant
         readonly StringBuilder _eventSource;
 
         private LogParserLGF _logParser;
-        private LogParserLGF LogParser => _logParser ?? (_logParser = new LogParserLGF(this));
+        private LogParserLGF LogParser => _logParser ??= new LogParserLGF(this);
 
         #endregion
 
@@ -58,7 +58,7 @@ namespace YY.EventLogReaderAssistant
 
         public override bool Read()
         {
-            bool output = false;
+            bool output;
 
             try
             {
@@ -97,7 +97,6 @@ namespace YY.EventLogReaderAssistant
                         {
                             RowData eventData = ReadRowData(preparedSourceData);
                             _currentRow = eventData;
-
                             RaiseAfterRead(new AfterReadEventArgs(_currentRow, _currentFileEventNumber));
                             output = true;
                             break;
