@@ -96,7 +96,6 @@ namespace YY.EventLogReaderAssistant
                         try
                         {
                             RowData eventData = ReadRowData(preparedSourceData);
-                            
                             _currentRow = eventData;
                             RaiseAfterRead(new AfterReadEventArgs(_currentRow, _currentFileEventNumber));
                             output = true;
