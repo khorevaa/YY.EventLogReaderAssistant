@@ -239,13 +239,6 @@ namespace YY.EventLogReaderAssistant
 
             RowData row = new RowData();
             row.FillBySqliteReader(this, _reader);
-
-            if (!EventAllowedByPeriod(row))
-            {
-                _currentRow = null;
-                return false;
-            }
-
             _readBuffer.Add(row);
 
             return true;
