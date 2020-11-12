@@ -11,6 +11,12 @@
 
 [![Maintainability](https://api.codeclimate.com/v1/badges/554d3b25fd19b9225f26/maintainability)](https://codeclimate.com/github/YPermitin/YY.EventLogReaderAssistant/maintainability)
 
+## Благодарности
+
+Выражаю большую благодарность **[Алексею Бочкову](https://github.com/alekseybochkov)** как идейному вдохновителю. 
+
+Именно его разработка была первой реализацией чтения и экспорта журнала регистрации 1С - **[EventLogLoader](https://github.com/alekseybochkov/EventLogLoader)**. Основную идею и некоторые примеры реализации взял именно из нее, но с полной переработкой архитектуры библиотеки.
+
 ## Состав репозитория
 
 * **YY.EventLogReaderAssistant** - исходный код библиотеки
