@@ -18,7 +18,6 @@ namespace YY.EventLogReaderAssistant
 
             return Regex.IsMatch(sourceString, @"^{\d{4}\d{2}\d{2}\d+,");
         }
-
         public static bool ItsEndOfEvent(string sourceString, ref int count, ref bool textBlockOpen)
         {
             if (sourceString == null)
@@ -89,7 +88,7 @@ namespace YY.EventLogReaderAssistant
             string[] resultStrings = null;
             string preparedString = sourceString.Substring(1, (sourceString.EndsWith(",") ? sourceString.Length - 3 : sourceString.Length - 2)) + ",";
             string bufferString = string.Empty;
-            int i = 0, partNumber = 0, delimIndex = GetDelimeterIndex(preparedString);
+            int i = 0, partNumber = 0, delimIndex = GetDelimiterIndex(preparedString);
 
             while (delimIndex > 0)
             {
@@ -108,7 +107,7 @@ namespace YY.EventLogReaderAssistant
                 else
                     bufferString += ",";
 
-                delimIndex = GetDelimeterIndex(preparedString, isSpecialString);
+                delimIndex = GetDelimiterIndex(preparedString, isSpecialString);
             }
 
             return resultStrings;
@@ -156,10 +155,12 @@ namespace YY.EventLogReaderAssistant
         }
         private static string RemoveSpecialSymbols(string sourceString)
         {
-            char[] denied = new[] { '\n', '\t', '\r' };
-            
+            char[] denied_nullChar = new[] { '\t', '\r' };
+            char[] denied_whitespaceChar = new[] { '\n' };
+
             string newString = string.Join("", sourceString
-                .Where(s => !denied.Contains(s))
+                .Select(c => denied_whitespaceChar.Contains(c) ? ' ' : c)
+                .Where(c => !denied_nullChar.Contains(c))
                 .ToArray());
 
             return newString;
@@ -171,7 +172,7 @@ namespace YY.EventLogReaderAssistant
             else
                 return sourceString;
         }
-        private static int GetDelimeterIndex(string sourceString, bool isSpecialString = false)
+        private static int GetDelimiterIndex(string sourceString, bool isSpecialString = false)
         {
             if (isSpecialString)
                 return sourceString.IndexOf("\",", StringComparison.Ordinal) + 1;
