@@ -17,7 +17,7 @@
     <PackageTags>event, log, 1C, enterprise</PackageTags>
     <FileVersion>1.0.0.40</FileVersion>
     <AssemblyVersion>1.0.0.40</AssemblyVersion>
-    <PackageVersion>1.0.0.37</PackageVersion>
+    <PackageVersion>1.0.0.40</PackageVersion>
   </PropertyGroup>
 
   <ItemGroup>
